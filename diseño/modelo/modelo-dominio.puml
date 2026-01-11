@@ -1,0 +1,179 @@
+@startuml modelo-dominio
+
+' Configuración
+skinparam classAttributeIconSize 0
+skinparam classFontStyle bold
+
+' ===== CONTROLADOR =====
+
+class SpkrApp <<Controlador>> {
+    - Usuario usuarioActual
+    + iniciar()
+    + login(String nombre, String password)
+    + logout()
+}
+
+' ===== CATÁLOGOS =====
+
+class CatalogoUsuarios {
+    + Usuario getUsuario(String nombre)
+    + void addUsuario(Usuario u)
+    + boolean existeUsuario(String nombre)
+    + boolean validarCredenciales(String nombre, String password)
+}
+
+class CatalogoCursos {
+    + Curso getCurso(String titulo)
+    + void addCurso(Curso c)
+    + List<Curso> getCursosBiblioteca(Usuario u)
+}
+
+' ===== CARGADORES DE CURSOS =====
+
+interface CargadorCursos {
+    + Curso cargarCurso(String ruta)
+    + void exportarCurso(Curso c, String ruta)
+}
+
+class CargadorCursosJSON {
+    + Curso cargarCurso(String ruta)
+    + void exportarCurso(Curso c, String ruta)
+}
+
+class CargadorCursosYAML {
+    + Curso cargarCurso(String ruta)
+    + void exportarCurso(Curso c, String ruta)
+}
+
+' ===== CLASES PRINCIPALES =====
+
+class Usuario {
+    - Long id
+    - String nombreUsuario
+    - String email
+    - String password
+    - Date fechaRegistro
+}
+
+class Biblioteca {
+    + void addCurso(Curso c)
+    + void removeCurso(Curso c)
+    + List<Curso> getCursos()
+}
+
+class Curso {
+    - Long id
+    - String titulo
+    - String descripcion
+    - String idioma
+    - Date fechaCreacion
+}
+
+class Leccion {
+    - Long id
+    - String nombre
+    - String descripcion
+    - int orden
+}
+
+' ===== JERARQUÍA DE PREGUNTAS =====
+
+abstract class Pregunta {
+    - Long id
+    - String enunciado
+    - int orden
+    + {abstract} boolean validarRespuesta(String respuesta)
+}
+
+class PreguntaTest {
+    - String opcionCorrecta
+    - String opcionIncorrecta1
+    - String opcionIncorrecta2
+    + boolean validarRespuesta(String respuesta)
+}
+
+class PreguntaTraduccion {
+    - String respuestaCorrecta
+    + boolean validarRespuesta(String respuesta)
+}
+
+class PreguntaHuecos {
+    - String fraseCompleta
+    - String palabraOculta
+    + boolean validarRespuesta(String respuesta)
+}
+
+' ===== PROGRESO Y ESTADÍSTICAS =====
+
+class Progreso {
+    - Long id
+    - int preguntaActual
+    - int aciertos
+    - int errores
+    - Date fechaUltimoAcceso
+    + void guardar()
+    + void reanudar()
+}
+
+class Estadisticas {
+    - Long id
+    - int tiempoTotalUso
+    - int rachaActual
+    - int mejorRacha
+    - int ejerciciosCompletados
+    - Date ultimoAcceso
+    + void actualizarRacha()
+    + void incrementarTiempo(int minutos)
+    + void incrementarEjercicios()
+}
+
+class ErrorFrecuente {
+    - Long id
+    - int vecesFallada
+    - Date fechaUltimoError
+    + void incrementarErrores()
+    + void reducirErrores()
+    + boolean estaDominada()
+}
+
+' ===== RELACIONES =====
+
+' Controlador con Catálogos
+SpkrApp "1" -- "1" CatalogoUsuarios : usa >
+SpkrApp "1" -- "1" CatalogoCursos : usa >
+
+' Cargadores
+CatalogoCursos ..> CargadorCursos : usa >
+CargadorCursos <|.. CargadorCursosJSON
+CargadorCursos <|.. CargadorCursosYAML
+
+' Catálogos y entidades
+CatalogoUsuarios "1" -- "0..*" Usuario : gestiona >
+CatalogoCursos "1" -- "0..*" Curso : gestiona >
+
+' Usuario y Biblioteca
+Usuario "1" *-- "1" Biblioteca : tiene >
+Usuario "1" *-- "1" Estadisticas : tiene >
+Biblioteca "1" -- "0..*" Curso : contiene >
+
+' Usuario crea Cursos
+Usuario "1" -- "0..*" Curso : crea >
+
+' Progreso (relaciona Usuario con Curso)
+Usuario "1" -- "0..*" Progreso : tiene >
+Progreso "0..*" -- "1" Curso : de >
+
+' Errores frecuentes
+Usuario "1" -- "0..*" ErrorFrecuente : tiene >
+ErrorFrecuente "0..*" -- "1" Pregunta : referencia >
+
+' Curso y Lecciones
+Curso "1" *-- "1..*" Leccion : contiene >
+Leccion "1" *-- "1..*" Pregunta : contiene >
+
+' Herencia de Preguntas
+Pregunta <|-- PreguntaTest
+Pregunta <|-- PreguntaTraduccion
+Pregunta <|-- PreguntaHuecos
+
+@enduml
