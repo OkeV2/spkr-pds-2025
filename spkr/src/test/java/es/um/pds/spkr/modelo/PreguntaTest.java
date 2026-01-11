@@ -48,3 +48,4 @@ public class PreguntaTest extends Pregunta {
     public void setOpcionIncorrecta2(String opcionIncorrecta2) {
         this.opcionIncorrecta2 = opcionIncorrecta2;
     }
+}
