@@ -14,15 +14,11 @@ Spkr es una aplicación educativa que permite aprender idiomas mediante ejercici
 
 ## Estructura del proyecto
 ```
-+ requisitos/
-    + casos-de-uso/
-    + pantallas/
 + diseño/
     + modelo/
 + documentacion/
     + manual/
-    + dev/
-+ java/
++ spkr/  (proyecto Maven)
 ```
 
 ## Autor
