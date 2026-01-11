@@ -1,0 +1,94 @@
+package es.um.pds.spkr.modelo;
+
+import java.util.Date;
+
+public class Estadisticas {
+    
+    private Long id;
+    private int tiempoTotalUso;
+    private int rachaActual;
+    private int mejorRacha;
+    private int ejerciciosCompletados;
+    private Date ultimoAcceso;
+    
+    public Estadisticas() {
+        this.tiempoTotalUso = 0;
+        this.rachaActual = 0;
+        this.mejorRacha = 0;
+        this.ejerciciosCompletados = 0;
+        this.ultimoAcceso = new Date();
+    }
+    
+    public void actualizarRacha() {
+        Date hoy = new Date();
+        long diffDias = (hoy.getTime() - ultimoAcceso.getTime()) / (1000 * 60 * 60 * 24);
+        
+        if (diffDias <= 1) {
+            rachaActual++;
+            if (rachaActual > mejorRacha) {
+                mejorRacha = rachaActual;
+            }
+        } else {
+            rachaActual = 1;
+        }
+        ultimoAcceso = hoy;
+    }
+    
+    public void incrementarTiempo(int minutos) {
+        this.tiempoTotalUso += minutos;
+    }
+    
+    public void incrementarEjercicios() {
+        this.ejerciciosCompletados++;
+    }
+    
+    // Getters y Setters
+    
+    public Long getId() {
+        return id;
+    }
+    
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
+    public int getTiempoTotalUso() {
+        return tiempoTotalUso;
+    }
+    
+    public void setTiempoTotalUso(int tiempoTotalUso) {
+        this.tiempoTotalUso = tiempoTotalUso;
+    }
+    
+    public int getRachaActual() {
+        return rachaActual;
+    }
+    
+    public void setRachaActual(int rachaActual) {
+        this.rachaActual = rachaActual;
+    }
+    
+    public int getMejorRacha() {
+        return mejorRacha;
+    }
+    
+    public void setMejorRacha(int mejorRacha) {
+        this.mejorRacha = mejorRacha;
+    }
+    
+    public int getEjerciciosCompletados() {
+        return ejerciciosCompletados;
+    }
+    
+    public void setEjerciciosCompletados(int ejerciciosCompletados) {
+        this.ejerciciosCompletados = ejerciciosCompletados;
+    }
+    
+    public Date getUltimoAcceso() {
+        return ultimoAcceso;
+    }
+    
+    public void setUltimoAcceso(Date ultimoAcceso) {
+        this.ultimoAcceso = ultimoAcceso;
+    }
+}
