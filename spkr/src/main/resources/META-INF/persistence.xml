@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="3.0" xmlns="https://jakarta.ee/xml/ns/persistence"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xsi:schemaLocation="https://jakarta.ee/xml/ns/persistence https://jakarta.ee/xml/ns/persistence/persistence_3_0.xsd">
+    
+    <persistence-unit name="spkrPU" transaction-type="RESOURCE_LOCAL">
+        <provider>org.eclipse.persistence.jpa.PersistenceProvider</provider>
+        
+        <!-- Clases a persistir -->
+        <class>es.um.pds.spkr.modelo.Usuario</class>
+        <class>es.um.pds.spkr.modelo.Estadisticas</class>
+        <class>es.um.pds.spkr.modelo.Biblioteca</class>
+        <class>es.um.pds.spkr.modelo.Curso</class>
+        <class>es.um.pds.spkr.modelo.Leccion</class>
+        <class>es.um.pds.spkr.modelo.Pregunta</class>
+        <class>es.um.pds.spkr.modelo.PreguntaTest</class>
+        <class>es.um.pds.spkr.modelo.PreguntaTraduccion</class>
+        <class>es.um.pds.spkr.modelo.PreguntaHuecos</class>
+        <class>es.um.pds.spkr.modelo.Progreso</class>
+        <class>es.um.pds.spkr.modelo.ErrorFrecuente</class>
+        
+        <properties>
+            <!-- Conexión a base de datos H2 -->
+            <property name="jakarta.persistence.jdbc.driver" value="org.h2.Driver"/>
+            <property name="jakarta.persistence.jdbc.url" value="jdbc:h2:./spkr_db"/>
+            <property name="jakarta.persistence.jdbc.user" value="sa"/>
+            <property name="jakarta.persistence.jdbc.password" value=""/>
+            
+            <!-- EclipseLink settings -->
+            <property name="eclipselink.ddl-generation" value="create-or-extend-tables"/>
+            <property name="eclipselink.ddl-generation.output-mode" value="database"/>
+            <property name="eclipselink.logging.level" value="WARNING"/>
+        </properties>
+    </persistence-unit>
+</persistence>
