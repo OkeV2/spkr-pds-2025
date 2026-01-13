@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import es.um.pds.spkr.SpkrApp;
+import es.um.pds.spkr.util.EstilosApp;
 
 public class VentanaRegistro extends JFrame {
     
@@ -27,88 +28,108 @@ public class VentanaRegistro extends JFrame {
     
     private void inicializarComponentes() {
         setTitle("Spkr - Registro");
-        setSize(400, 350);
+        setSize(450, 720);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
+        EstilosApp.aplicarEstiloVentana(this);
         
+        // Panel principal
         JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 50, 40, 50));
+        EstilosApp.aplicarEstiloPanel(panel);
+        
+        // Logo
+        JLabel lblLogo = new JLabel();
+        ImageIcon logo = EstilosApp.getLogo(200, 200);
+        if (logo != null) {
+            lblLogo.setIcon(logo);
+        }
+        lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblLogo);
+        panel.add(Box.createRigidArea(new Dimension(0, 20)));
         
         // Título
-        JLabel lblTitulo = new JLabel("Registro");
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 24));
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        panel.add(lblTitulo, gbc);
+        JLabel lblTitulo = EstilosApp.crearSubtitulo("Crear cuenta");
+        lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblTitulo);
+        panel.add(Box.createRigidArea(new Dimension(0, 20)));
         
-        // Usuario
-        JLabel lblUsuario = new JLabel("Usuario:");
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        panel.add(lblUsuario, gbc);
+        // Campo Usuario
+        JLabel lblUsuario = EstilosApp.crearEtiqueta("Usuario");
+        lblUsuario.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblUsuario);
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
         
-        txtUsuario = new JTextField(15);
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        panel.add(txtUsuario, gbc);
+        txtUsuario = new JTextField();
+        EstilosApp.aplicarEstiloCampoTexto(txtUsuario);
+        txtUsuario.setMaximumSize(new Dimension(250, 35));
+        txtUsuario.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(txtUsuario);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
         
-        // Email
-        JLabel lblEmail = new JLabel("Email:");
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        panel.add(lblEmail, gbc);
+        // Campo Email
+        JLabel lblEmail = EstilosApp.crearEtiqueta("Email");
+        lblEmail.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblEmail);
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
         
-        txtEmail = new JTextField(15);
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        panel.add(txtEmail, gbc);
+        txtEmail = new JTextField();
+        EstilosApp.aplicarEstiloCampoTexto(txtEmail);
+        txtEmail.setMaximumSize(new Dimension(250, 35));
+        txtEmail.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(txtEmail);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
         
-        // Contraseña
-        JLabel lblPassword = new JLabel("Contraseña:");
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        panel.add(lblPassword, gbc);
+        // Campo Contraseña
+        JLabel lblPassword = EstilosApp.crearEtiqueta("Contraseña");
+        lblPassword.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblPassword);
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
         
-        txtPassword = new JPasswordField(15);
-        gbc.gridx = 1;
-        gbc.gridy = 3;
-        panel.add(txtPassword, gbc);
+        txtPassword = new JPasswordField();
+        EstilosApp.aplicarEstiloCampoTexto(txtPassword);
+        txtPassword.setMaximumSize(new Dimension(250, 35));
+        txtPassword.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(txtPassword);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
         
-        // Confirmar contraseña
-        JLabel lblConfirmar = new JLabel("Confirmar contraseña:");
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        panel.add(lblConfirmar, gbc);
+        // Campo Confirmar Contraseña
+        JLabel lblConfirmar = EstilosApp.crearEtiqueta("Confirmar contraseña");
+        lblConfirmar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblConfirmar);
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
         
-        txtConfirmarPassword = new JPasswordField(15);
-        gbc.gridx = 1;
-        gbc.gridy = 4;
-        panel.add(txtConfirmarPassword, gbc);
+        txtConfirmarPassword = new JPasswordField();
+        EstilosApp.aplicarEstiloCampoTexto(txtConfirmarPassword);
+        txtConfirmarPassword.setMaximumSize(new Dimension(250, 35));
+        txtConfirmarPassword.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(txtConfirmarPassword);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
         
-        // Mensaje
-        lblMensaje = new JLabel("");
-        lblMensaje.setForeground(Color.RED);
-        gbc.gridx = 0;
-        gbc.gridy = 5;
-        gbc.gridwidth = 2;
-        panel.add(lblMensaje, gbc);
+        // Mensaje de error
+        lblMensaje = new JLabel(" ");
+        lblMensaje.setFont(EstilosApp.FUENTE_NORMAL);
+        lblMensaje.setForeground(EstilosApp.COLOR_ERROR);
+        lblMensaje.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblMensaje);
+        panel.add(Box.createRigidArea(new Dimension(0, 15)));
         
-        // Botones
-        JPanel panelBotones = new JPanel();
+        // Botón Registrar
         btnRegistrar = new JButton("Registrar");
-        btnCancelar = new JButton("Cancelar");
-        panelBotones.add(btnRegistrar);
-        panelBotones.add(btnCancelar);
+        EstilosApp.aplicarEstiloBoton(btnRegistrar);
+        btnRegistrar.setMaximumSize(new Dimension(250, 40));
+        btnRegistrar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(btnRegistrar);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
         
-        gbc.gridx = 0;
-        gbc.gridy = 6;
-        gbc.gridwidth = 2;
-        panel.add(panelBotones, gbc);
+        // Botón Cancelar
+        btnCancelar = new JButton("Cancelar");
+        EstilosApp.aplicarEstiloBotonSecundario(btnCancelar);
+        btnCancelar.setMaximumSize(new Dimension(250, 40));
+        btnCancelar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(btnCancelar);
         
         add(panel);
         

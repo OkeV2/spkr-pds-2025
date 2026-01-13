@@ -6,6 +6,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import es.um.pds.spkr.SpkrApp;
+import es.um.pds.spkr.util.EstilosApp;
 
 public class VentanaLogin extends JFrame {
     
@@ -23,67 +24,76 @@ public class VentanaLogin extends JFrame {
     
     private void inicializarComponentes() {
         setTitle("Spkr - Iniciar Sesión");
-        setSize(400, 300);
+        setSize(450, 580);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
+        EstilosApp.aplicarEstiloVentana(this);
         
         // Panel principal
         JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 50, 40, 50));
+        EstilosApp.aplicarEstiloPanel(panel);
         
-        // Título
-        JLabel lblTitulo = new JLabel("SPKR");
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 32));
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        gbc.gridwidth = 2;
-        panel.add(lblTitulo, gbc);
+        // Logo
+        JLabel lblLogo = new JLabel();
+        ImageIcon logo = EstilosApp.getLogo(200, 200);
+        if (logo != null) {
+            lblLogo.setIcon(logo);
+        }
+        lblLogo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblLogo);
+        panel.add(Box.createRigidArea(new Dimension(0, 25)));
         
-        // Usuario
-        JLabel lblUsuario = new JLabel("Usuario:");
-        gbc.gridx = 0;
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        panel.add(lblUsuario, gbc);
+        // Campo Usuario
+        JLabel lblUsuario = EstilosApp.crearEtiqueta("Usuario");
+        lblUsuario.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblUsuario);
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
         
-        txtUsuario = new JTextField(15);
-        gbc.gridx = 1;
-        gbc.gridy = 1;
-        panel.add(txtUsuario, gbc);
+        txtUsuario = new JTextField();
+        EstilosApp.aplicarEstiloCampoTexto(txtUsuario);
+        txtUsuario.setMaximumSize(new Dimension(250, 35));
+        txtUsuario.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(txtUsuario);
+        panel.add(Box.createRigidArea(new Dimension(0, 15)));
         
-        // Contraseña
-        JLabel lblPassword = new JLabel("Contraseña:");
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        panel.add(lblPassword, gbc);
+        // Campo Contraseña
+        JLabel lblPassword = EstilosApp.crearEtiqueta("Contraseña");
+        lblPassword.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblPassword);
+        panel.add(Box.createRigidArea(new Dimension(0, 5)));
         
-        txtPassword = new JPasswordField(15);
-        gbc.gridx = 1;
-        gbc.gridy = 2;
-        panel.add(txtPassword, gbc);
+        txtPassword = new JPasswordField();
+        EstilosApp.aplicarEstiloCampoTexto(txtPassword);
+        txtPassword.setMaximumSize(new Dimension(250, 35));
+        txtPassword.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(txtPassword);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
         
         // Mensaje de error
-        lblMensaje = new JLabel("");
-        lblMensaje.setForeground(Color.RED);
-        gbc.gridx = 0;
-        gbc.gridy = 3;
-        gbc.gridwidth = 2;
-        panel.add(lblMensaje, gbc);
+        lblMensaje = new JLabel(" ");
+        lblMensaje.setFont(EstilosApp.FUENTE_NORMAL);
+        lblMensaje.setForeground(EstilosApp.COLOR_ERROR);
+        lblMensaje.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblMensaje);
+        panel.add(Box.createRigidArea(new Dimension(0, 20)));
         
-        // Botones
-        JPanel panelBotones = new JPanel();
+        // Botón Login
         btnLogin = new JButton("Iniciar Sesión");
-        btnRegistro = new JButton("Registrarse");
-        panelBotones.add(btnLogin);
-        panelBotones.add(btnRegistro);
+        EstilosApp.aplicarEstiloBoton(btnLogin);
+        btnLogin.setMaximumSize(new Dimension(250, 40));
+        btnLogin.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(btnLogin);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
         
-        gbc.gridx = 0;
-        gbc.gridy = 4;
-        gbc.gridwidth = 2;
-        panel.add(panelBotones, gbc);
+        // Botón Registro
+        btnRegistro = new JButton("Registrarse");
+        EstilosApp.aplicarEstiloBotonSecundario(btnRegistro);
+        btnRegistro.setMaximumSize(new Dimension(250, 40));
+        btnRegistro.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(btnRegistro);
         
         add(panel);
         
