@@ -20,14 +20,14 @@
     </properties>
     
     <dependencies>
-        <!-- JPA - Persistencia -->
+        <!-- JPA - Hibernate (en lugar de EclipseLink) -->
         <dependency>
-            <groupId>org.eclipse.persistence</groupId>
-            <artifactId>eclipselink</artifactId>
-            <version>3.0.3</version>
+            <groupId>org.hibernate.orm</groupId>
+            <artifactId>hibernate-core</artifactId>
+            <version>6.4.1.Final</version>
         </dependency>
         
-        <!-- Base de datos H2 (para desarrollo) -->
+        <!-- Base de datos H2 -->
         <dependency>
             <groupId>com.h2database</groupId>
             <artifactId>h2</artifactId>
@@ -54,13 +54,6 @@
             <artifactId>junit-jupiter</artifactId>
             <version>5.10.0</version>
             <scope>test</scope>
-        </dependency>
-        
-         <!-- Jakarta Persistence API -->
-        <dependency>
-            <groupId>jakarta.persistence</groupId>
-            <artifactId>jakarta.persistence-api</artifactId>
-            <version>3.1.0</version>
         </dependency>
     </dependencies>
     

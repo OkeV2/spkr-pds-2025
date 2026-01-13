@@ -80,7 +80,7 @@ public class VentanaRegistro extends JFrame {
         panel.add(txtPassword, gbc);
         
         // Confirmar contraseña
-        JLabel lblConfirmar = new JLabel("Confirmar:");
+        JLabel lblConfirmar = new JLabel("Confirmar contraseña:");
         gbc.gridx = 0;
         gbc.gridy = 4;
         panel.add(lblConfirmar, gbc);
