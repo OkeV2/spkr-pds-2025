@@ -2,13 +2,22 @@ package es.um.pds.spkr.modelo;
 
 import java.util.Date;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "estadisticas")
 public class Estadisticas {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     private int tiempoTotalUso;
     private int rachaActual;
     private int mejorRacha;
     private int ejerciciosCompletados;
+    
+    @Temporal(TemporalType.TIMESTAMP)
     private Date ultimoAcceso;
     
     public Estadisticas() {

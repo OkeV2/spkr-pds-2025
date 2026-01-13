@@ -3,9 +3,17 @@ package es.um.pds.spkr.modelo;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "bibliotecas")
 public class Biblioteca {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     private List<Curso> cursos;
     
     public Biblioteca() {

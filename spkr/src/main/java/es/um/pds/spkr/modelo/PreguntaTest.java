@@ -1,5 +1,9 @@
 package es.um.pds.spkr.modelo;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "preguntas_test")
 public class PreguntaTest extends Pregunta {
     
     private String opcionCorrecta;

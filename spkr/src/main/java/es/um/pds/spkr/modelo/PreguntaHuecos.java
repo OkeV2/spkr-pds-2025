@@ -1,5 +1,9 @@
 package es.um.pds.spkr.modelo;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "preguntas_huecos")
 public class PreguntaHuecos extends Pregunta {
     
     private String fraseCompleta;

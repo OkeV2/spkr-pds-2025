@@ -3,12 +3,21 @@ package es.um.pds.spkr.modelo;
 import java.util.ArrayList;
 import java.util.List;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "lecciones")
 public class Leccion {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     private String nombre;
     private String descripcion;
     private int orden;
+    
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Pregunta> preguntas;
     
     public Leccion() {

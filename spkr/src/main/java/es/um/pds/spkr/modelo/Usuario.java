@@ -4,16 +4,38 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "usuarios")
 public class Usuario {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @Column(unique = true, nullable = false)
     private String nombreUsuario;
+    
+    @Column(unique = true, nullable = false)
     private String email;
+    
+    @Column(nullable = false)
     private String password;
+    
+    @Temporal(TemporalType.TIMESTAMP)
     private Date fechaRegistro;
+    
+    @OneToOne(cascade = CascadeType.ALL)
     private Estadisticas estadisticas;
+    
+    @OneToOne(cascade = CascadeType.ALL)
     private Biblioteca biblioteca;
+    
+    @OneToMany(cascade = CascadeType.ALL)
     private List<Progreso> progresos;
+    
+    @OneToMany(cascade = CascadeType.ALL)
     private List<ErrorFrecuente> erroresFrecuentes;
     
     public Usuario() {

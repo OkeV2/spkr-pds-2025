@@ -2,11 +2,22 @@ package es.um.pds.spkr.modelo;
 
 import java.util.Date;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "errores_frecuentes")
 public class ErrorFrecuente {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @ManyToOne
     private Pregunta pregunta;
+    
     private int vecesFallada;
+    
+    @Temporal(TemporalType.TIMESTAMP)
     private Date fechaUltimoError;
     
     public ErrorFrecuente() {

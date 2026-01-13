@@ -3,6 +3,11 @@ package es.um.pds.spkr.modelo;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "preguntas")
+@Inheritance(strategy = InheritanceType.JOINED)
 @JsonTypeInfo(
     use = JsonTypeInfo.Id.NAME,
     include = JsonTypeInfo.As.PROPERTY,
@@ -15,7 +20,10 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo;
 })
 public abstract class Pregunta {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     private String enunciado;
     private int orden;
     

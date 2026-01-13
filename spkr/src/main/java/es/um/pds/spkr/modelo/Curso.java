@@ -4,13 +4,24 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "cursos")
 public class Curso {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
     private String titulo;
     private String descripcion;
     private String idioma;
+    
+    @Temporal(TemporalType.TIMESTAMP)
     private Date fechaCreacion;
+    
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Leccion> lecciones;
     
     public Curso() {

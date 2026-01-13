@@ -2,13 +2,24 @@ package es.um.pds.spkr.modelo;
 
 import java.util.Date;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "progresos")
 public class Progreso {
     
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    @ManyToOne
     private Curso curso;
+    
     private int preguntaActual;
     private int aciertos;
     private int errores;
+    
+    @Temporal(TemporalType.TIMESTAMP)
     private Date fechaUltimoAcceso;
     
     public Progreso() {
