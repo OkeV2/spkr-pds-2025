@@ -5,6 +5,7 @@ import es.um.pds.spkr.catalogo.CatalogoUsuarios;
 import es.um.pds.spkr.modelo.Usuario;
 import es.um.pds.spkr.modelo.Estadisticas;
 import es.um.pds.spkr.modelo.Biblioteca;
+import es.um.pds.spkr.persistencia.GestorPersistencia;
 
 public class SpkrApp {
     
@@ -36,17 +37,35 @@ public class SpkrApp {
     public boolean login(String nombreUsuario, String password) {
         if (catalogoUsuarios.validarCredenciales(nombreUsuario, password)) {
             this.usuarioActual = catalogoUsuarios.getUsuario(nombreUsuario);
+            usuarioActual.getEstadisticas().actualizarRacha();
+            catalogoUsuarios.actualizarUsuario(usuarioActual);
             return true;
         }
         return false;
     }
     
     public void logout() {
+        if (usuarioActual != null) {
+            catalogoUsuarios.actualizarUsuario(usuarioActual);
+        }
         this.usuarioActual = null;
+    }
+    
+    public void guardarProgreso() {
+        if (usuarioActual != null) {
+            catalogoUsuarios.actualizarUsuario(usuarioActual);
+        }
     }
     
     public boolean estaLogueado() {
         return this.usuarioActual != null;
+    }
+    
+    public void cerrar() {
+        if (usuarioActual != null) {
+            catalogoUsuarios.actualizarUsuario(usuarioActual);
+        }
+        GestorPersistencia.getInstancia().cerrar();
     }
     
     // Getters

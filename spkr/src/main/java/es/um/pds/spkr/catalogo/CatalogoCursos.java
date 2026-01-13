@@ -1,33 +1,39 @@
 package es.um.pds.spkr.catalogo;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import es.um.pds.spkr.modelo.Curso;
+import es.um.pds.spkr.persistencia.GestorPersistencia;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.TypedQuery;
 
 public class CatalogoCursos {
     
-    private List<Curso> cursos;
+    private GestorPersistencia gestor;
     
     public CatalogoCursos() {
-        this.cursos = new ArrayList<>();
+        this.gestor = GestorPersistencia.getInstancia();
     }
     
     public void addCurso(Curso curso) {
-        this.cursos.add(curso);
+        gestor.guardar(curso);
     }
     
     public void removeCurso(Curso curso) {
-        this.cursos.remove(curso);
+        gestor.eliminar(curso);
     }
     
     public Curso getCurso(String titulo) {
-        for (Curso c : cursos) {
-            if (c.getTitulo().equals(titulo)) {
-                return c;
-            }
+        EntityManager em = gestor.getEntityManager();
+        TypedQuery<Curso> query = em.createQuery(
+            "SELECT c FROM Curso c WHERE c.titulo = :titulo", Curso.class);
+        query.setParameter("titulo", titulo);
+        
+        List<Curso> resultados = query.getResultList();
+        if (resultados.isEmpty()) {
+            return null;
         }
-        return null;
+        return resultados.get(0);
     }
     
     public boolean existeCurso(String titulo) {
@@ -35,6 +41,13 @@ public class CatalogoCursos {
     }
     
     public List<Curso> getCursos() {
-        return cursos;
+        EntityManager em = gestor.getEntityManager();
+        TypedQuery<Curso> query = em.createQuery(
+            "SELECT c FROM Curso c", Curso.class);
+        return query.getResultList();
+    }
+    
+    public void actualizarCurso(Curso curso) {
+        gestor.actualizar(curso);
     }
 }
