@@ -1,0 +1,35 @@
+{
+  "titulo": "Inglés Básico",
+  "descripcion": "Curso de inglés para principiantes",
+  "idioma": "Inglés",
+  "lecciones": [
+    {
+      "nombre": "Lección 1 - Animales",
+      "descripcion": "Aprende nombres de animales",
+      "orden": 1,
+      "preguntas": [
+        {
+          "tipo": "test",
+          "enunciado": "¿Cómo se dice 'perro' en inglés?",
+          "orden": 1,
+          "opcionCorrecta": "dog",
+          "opcionIncorrecta1": "cat",
+          "opcionIncorrecta2": "bird"
+        },
+        {
+          "tipo": "traduccion",
+          "enunciado": "Traduce: 'cat'",
+          "orden": 2,
+          "respuestaCorrecta": "gato"
+        },
+        {
+          "tipo": "huecos",
+          "enunciado": "Completa: The ___ is flying",
+          "orden": 3,
+          "fraseCompleta": "The bird is flying",
+          "palabraOculta": "bird"
+        }
+      ]
+    }
+  ]
+}

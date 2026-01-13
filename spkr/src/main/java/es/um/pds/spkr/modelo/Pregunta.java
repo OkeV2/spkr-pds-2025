@@ -1,5 +1,18 @@
 package es.um.pds.spkr.modelo;
 
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+
+@JsonTypeInfo(
+    use = JsonTypeInfo.Id.NAME,
+    include = JsonTypeInfo.As.PROPERTY,
+    property = "tipo"
+)
+@JsonSubTypes({
+    @JsonSubTypes.Type(value = PreguntaTest.class, name = "test"),
+    @JsonSubTypes.Type(value = PreguntaTraduccion.class, name = "traduccion"),
+    @JsonSubTypes.Type(value = PreguntaHuecos.class, name = "huecos")
+})
 public abstract class Pregunta {
     
     private Long id;
