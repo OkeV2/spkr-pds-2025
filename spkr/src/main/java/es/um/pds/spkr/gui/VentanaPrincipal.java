@@ -13,6 +13,9 @@ import es.um.pds.spkr.cargador.CargadorCursosYAML;
 import es.um.pds.spkr.modelo.Curso;
 import es.um.pds.spkr.util.EstilosApp;
 
+import es.um.pds.spkr.modelo.Leccion;
+import es.um.pds.spkr.modelo.Progreso;
+
 public class VentanaPrincipal extends JFrame {
     
     private SpkrApp app;
@@ -261,7 +264,68 @@ public class VentanaPrincipal extends JFrame {
             return;
         }
         
-        VentanaSeleccionEstrategia ventanaEstrategia = new VentanaSeleccionEstrategia(app, curso, this);
+        // Buscar si hay progreso guardado
+        Progreso progresoExistente = null;
+        for (Progreso p : app.getUsuarioActual().getProgresos()) {
+            if (p.getCurso() != null && p.getCurso().getTitulo() != null && 
+                p.getCurso().getTitulo().equals(curso.getTitulo())) {
+                progresoExistente = p;
+                break;
+            }
+        }
+        
+        // Si hay progreso y no está completado, preguntar
+        if (progresoExistente != null && progresoExistente.getPreguntaActual() > 0) {
+            int totalPreguntas = 0;
+            for (Leccion l : curso.getLecciones()) {
+                totalPreguntas += l.getPreguntas().size();
+            }
+            
+            if (progresoExistente.getPreguntaActual() < totalPreguntas) {
+                int opcion = JOptionPane.showOptionDialog(this,
+                    "Tienes un progreso guardado en este curso.\n" +
+                    "Pregunta " + progresoExistente.getPreguntaActual() + " de " + totalPreguntas + "\n\n" +
+                    "¿Qué deseas hacer?",
+                    "Progreso encontrado",
+                    JOptionPane.YES_NO_OPTION,
+                    JOptionPane.QUESTION_MESSAGE,
+                    null,
+                    new String[]{"Continuar", "Empezar de cero"},
+                    "Continuar");
+                
+                if (opcion == 0) {
+                    // Continuar con la estrategia guardada
+                	VentanaEjercicio ventanaEjercicio = new VentanaEjercicio(app, curso, progresoExistente.getEstrategia(), this, progresoExistente);                    ventanaEjercicio.setVisible(true);
+                    return;
+                } else {
+                    // Empezar de cero
+                    progresoExistente.reiniciar();
+                    app.guardarProgreso();
+                }
+            } else {
+                // Curso completado, preguntar si quiere repetir
+                int opcion = JOptionPane.showConfirmDialog(this,
+                    "Ya has completado este curso.\n¿Deseas repetirlo desde el principio?",
+                    "Curso completado",
+                    JOptionPane.YES_NO_OPTION);
+                
+                if (opcion == JOptionPane.YES_OPTION) {
+                    progresoExistente.reiniciar();
+                    app.guardarProgreso();
+                } else {
+                    return;
+                }
+            }
+        }
+        
+        // Si no hay progreso, crear uno nuevo
+        if (progresoExistente == null) {
+            progresoExistente = new Progreso(curso);
+            app.getUsuarioActual().addProgreso(progresoExistente);
+            app.guardarProgreso();
+        }
+        
+        VentanaSeleccionEstrategia ventanaEstrategia = new VentanaSeleccionEstrategia(app, curso, this, progresoExistente);
         ventanaEstrategia.setVisible(true);
     }
     

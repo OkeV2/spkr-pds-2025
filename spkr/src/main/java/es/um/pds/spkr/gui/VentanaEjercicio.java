@@ -13,6 +13,8 @@ import es.um.pds.spkr.estrategia.EstrategiaAprendizaje;
 import es.um.pds.spkr.estrategia.EstrategiaRepeticionEspaciada;
 import es.um.pds.spkr.modelo.*;
 import es.um.pds.spkr.util.EstilosApp;
+import es.um.pds.spkr.estrategia.EstrategiaAleatoria;
+import es.um.pds.spkr.estrategia.EstrategiaSecuencial;
 
 public class VentanaEjercicio extends JFrame {
     
@@ -20,6 +22,7 @@ public class VentanaEjercicio extends JFrame {
     private Curso curso;
     private EstrategiaAprendizaje estrategia;
     private VentanaPrincipal ventanaPrincipal;
+    private Progreso progreso;
     
     private List<Pregunta> todasLasPreguntas;
     private int preguntaActual;
@@ -40,14 +43,38 @@ public class VentanaEjercicio extends JFrame {
     
     private Pregunta preguntaActualObj;
     
-    public VentanaEjercicio(SpkrApp app, Curso curso, EstrategiaAprendizaje estrategia, VentanaPrincipal ventanaPrincipal) {
+    public VentanaEjercicio(SpkrApp app, Curso curso, EstrategiaAprendizaje estrategia, VentanaPrincipal ventanaPrincipal, Progreso progreso) {
         this.app = app;
         this.curso = curso;
         this.estrategia = estrategia;
         this.ventanaPrincipal = ventanaPrincipal;
-        this.preguntaActual = 0;
-        this.aciertos = 0;
-        this.errores = 0;
+        this.progreso = progreso;
+        this.preguntaActual = progreso.getPreguntaActual();
+        this.aciertos = progreso.getAciertos();
+        this.errores = progreso.getErrores();
+        
+        cargarPreguntas();
+        inicializarComponentes();
+        mostrarPregunta();
+    }
+    
+    public VentanaEjercicio(SpkrApp app, Curso curso, String nombreEstrategia, VentanaPrincipal ventanaPrincipal, Progreso progreso) {
+        this.app = app;
+        this.curso = curso;
+        this.ventanaPrincipal = ventanaPrincipal;
+        this.progreso = progreso;
+        this.preguntaActual = progreso.getPreguntaActual();
+        this.aciertos = progreso.getAciertos();
+        this.errores = progreso.getErrores();
+        
+        // Crear estrategia según el nombre
+        if ("Aleatoria".equals(nombreEstrategia)) {
+            this.estrategia = new EstrategiaAleatoria();
+        } else if ("Repetición Espaciada".equals(nombreEstrategia)) {
+            this.estrategia = new EstrategiaRepeticionEspaciada();
+        } else {
+            this.estrategia = new EstrategiaSecuencial();
+        }
         
         cargarPreguntas();
         inicializarComponentes();
@@ -257,6 +284,7 @@ public class VentanaEjercicio extends JFrame {
             lblResultado.setText("¡Correcto!");
             lblResultado.setForeground(EstilosApp.COLOR_EXITO);
             aciertos++;
+            progreso.registrarAcierto();
             
             if (estrategia instanceof EstrategiaRepeticionEspaciada) {
                 ((EstrategiaRepeticionEspaciada) estrategia).registrarAcierto(preguntaActualObj);
@@ -266,6 +294,7 @@ public class VentanaEjercicio extends JFrame {
             lblResultado.setText("Incorrecto. La respuesta era: " + respuestaCorrecta);
             lblResultado.setForeground(EstilosApp.COLOR_ERROR);
             errores++;
+            progreso.registrarError();
             
             if (estrategia instanceof EstrategiaRepeticionEspaciada) {
                 ((EstrategiaRepeticionEspaciada) estrategia).registrarFallo(preguntaActualObj);
@@ -275,6 +304,7 @@ public class VentanaEjercicio extends JFrame {
         }
         
         app.getUsuarioActual().getEstadisticas().incrementarEjercicios();
+        app.guardarProgreso();
         
         btnComprobar.setEnabled(false);
         btnSiguiente.setEnabled(true);
@@ -323,7 +353,10 @@ public class VentanaEjercicio extends JFrame {
     }
     
     private void mostrarResultadoFinal() {
-        int porcentaje = (aciertos * 100) / (aciertos + errores);
+        int porcentaje = 0;
+        if (aciertos + errores > 0) {
+            porcentaje = (aciertos * 100) / (aciertos + errores);
+        }
         
         String mensaje = "¡Curso completado!\n\n" +
                         "Aciertos: " + aciertos + "\n" +
@@ -338,11 +371,12 @@ public class VentanaEjercicio extends JFrame {
     
     private void salir() {
         int opcion = JOptionPane.showConfirmDialog(this, 
-            "¿Deseas salir? Tu progreso no se guardará.", 
+            "¿Deseas salir? Tu progreso se guardará.", 
             "Salir", 
             JOptionPane.YES_NO_OPTION);
         
         if (opcion == JOptionPane.YES_OPTION) {
+            app.guardarProgreso();
             this.dispose();
         }
     }

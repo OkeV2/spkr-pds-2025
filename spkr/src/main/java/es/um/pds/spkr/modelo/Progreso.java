@@ -18,6 +18,7 @@ public class Progreso {
     private int preguntaActual;
     private int aciertos;
     private int errores;
+    private String estrategia;
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaUltimoAcceso;
@@ -53,6 +54,7 @@ public class Progreso {
         this.preguntaActual = 0;
         this.aciertos = 0;
         this.errores = 0;
+        this.estrategia = null;
         this.fechaUltimoAcceso = new Date();
     }
     
@@ -96,6 +98,14 @@ public class Progreso {
     
     public void setErrores(int errores) {
         this.errores = errores;
+    }
+    
+    public String getEstrategia() {
+        return estrategia;
+    }
+    
+    public void setEstrategia(String estrategia) {
+        this.estrategia = estrategia;
     }
     
     public Date getFechaUltimoAcceso() {

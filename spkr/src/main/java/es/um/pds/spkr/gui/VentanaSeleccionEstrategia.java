@@ -11,6 +11,7 @@ import es.um.pds.spkr.estrategia.EstrategiaAprendizaje;
 import es.um.pds.spkr.estrategia.EstrategiaRepeticionEspaciada;
 import es.um.pds.spkr.estrategia.EstrategiaSecuencial;
 import es.um.pds.spkr.modelo.Curso;
+import es.um.pds.spkr.modelo.Progreso;
 import es.um.pds.spkr.util.EstilosApp;
 
 public class VentanaSeleccionEstrategia extends JFrame {
@@ -18,16 +19,18 @@ public class VentanaSeleccionEstrategia extends JFrame {
     private SpkrApp app;
     private Curso curso;
     private VentanaPrincipal ventanaPrincipal;
+    private Progreso progreso;
     private JRadioButton rbSecuencial;
     private JRadioButton rbAleatoria;
     private JRadioButton rbRepeticionEspaciada;
     private JButton btnIniciar;
     private JButton btnCancelar;
     
-    public VentanaSeleccionEstrategia(SpkrApp app, Curso curso, VentanaPrincipal ventanaPrincipal) {
+    public VentanaSeleccionEstrategia(SpkrApp app, Curso curso, VentanaPrincipal ventanaPrincipal, Progreso progreso) {
         this.app = app;
         this.curso = curso;
         this.ventanaPrincipal = ventanaPrincipal;
+        this.progreso = progreso;
         inicializarComponentes();
     }
     
@@ -129,16 +132,23 @@ public class VentanaSeleccionEstrategia extends JFrame {
     
     private void iniciarCurso() {
         EstrategiaAprendizaje estrategia;
+        String nombreEstrategia;
         
         if (rbSecuencial.isSelected()) {
             estrategia = new EstrategiaSecuencial();
+            nombreEstrategia = "Secuencial";
         } else if (rbAleatoria.isSelected()) {
             estrategia = new EstrategiaAleatoria();
+            nombreEstrategia = "Aleatoria";
         } else {
             estrategia = new EstrategiaRepeticionEspaciada();
+            nombreEstrategia = "Repetición Espaciada";
         }
         
-        VentanaEjercicio ventanaEjercicio = new VentanaEjercicio(app, curso, estrategia, ventanaPrincipal);
+        progreso.setEstrategia(nombreEstrategia);
+        app.guardarProgreso();
+        
+        VentanaEjercicio ventanaEjercicio = new VentanaEjercicio(app, curso, estrategia, ventanaPrincipal, progreso);
         ventanaEjercicio.setVisible(true);
         this.dispose();
     }
