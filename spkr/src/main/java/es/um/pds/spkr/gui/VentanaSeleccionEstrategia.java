@@ -11,6 +11,7 @@ import es.um.pds.spkr.estrategia.EstrategiaAprendizaje;
 import es.um.pds.spkr.estrategia.EstrategiaRepeticionEspaciada;
 import es.um.pds.spkr.estrategia.EstrategiaSecuencial;
 import es.um.pds.spkr.modelo.Curso;
+import es.um.pds.spkr.util.EstilosApp;
 
 public class VentanaSeleccionEstrategia extends JFrame {
     
@@ -31,28 +32,47 @@ public class VentanaSeleccionEstrategia extends JFrame {
     }
     
     private void inicializarComponentes() {
-        setTitle("Seleccionar Estrategia de Aprendizaje");
-        setSize(350, 250);
+        setTitle("Spkr - Seleccionar Estrategia");
+        setSize(400, 400);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
+        EstilosApp.aplicarEstiloVentana(this);
         
+        // Panel principal
         JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBorder(BorderFactory.createEmptyBorder(30, 40, 30, 40));
+        EstilosApp.aplicarEstiloPanel(panel);
+        
+        // Icono
+        JLabel lblIcono = new JLabel();
+        ImageIcon icono = EstilosApp.getIcono(60, 60);
+        if (icono != null) {
+            lblIcono.setIcon(icono);
+        }
+        lblIcono.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblIcono);
+        panel.add(Box.createRigidArea(new Dimension(0, 20)));
         
         // Título
-        JLabel lblTitulo = new JLabel("¿Cómo quieres aprender?");
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 16));
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panel.add(lblTitulo, gbc);
+        JLabel lblTitulo = EstilosApp.crearSubtitulo("¿Cómo quieres aprender?");
+        lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblTitulo);
+        panel.add(Box.createRigidArea(new Dimension(0, 25)));
         
         // Opciones
         rbSecuencial = new JRadioButton("Secuencial - Preguntas en orden");
         rbAleatoria = new JRadioButton("Aleatoria - Preguntas al azar");
         rbRepeticionEspaciada = new JRadioButton("Repetición Espaciada - Repite los fallos");
+        
+        rbSecuencial.setFont(EstilosApp.FUENTE_NORMAL);
+        rbAleatoria.setFont(EstilosApp.FUENTE_NORMAL);
+        rbRepeticionEspaciada.setFont(EstilosApp.FUENTE_NORMAL);
+        
+        rbSecuencial.setBackground(EstilosApp.COLOR_FONDO);
+        rbAleatoria.setBackground(EstilosApp.COLOR_FONDO);
+        rbRepeticionEspaciada.setBackground(EstilosApp.COLOR_FONDO);
         
         ButtonGroup grupo = new ButtonGroup();
         grupo.add(rbSecuencial);
@@ -61,26 +81,33 @@ public class VentanaSeleccionEstrategia extends JFrame {
         
         rbSecuencial.setSelected(true);
         
-        gbc.gridy = 1;
-        gbc.anchor = GridBagConstraints.WEST;
-        panel.add(rbSecuencial, gbc);
+        rbSecuencial.setAlignmentX(Component.CENTER_ALIGNMENT);
+        rbAleatoria.setAlignmentX(Component.CENTER_ALIGNMENT);
+        rbRepeticionEspaciada.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        gbc.gridy = 2;
-        panel.add(rbAleatoria, gbc);
-        
-        gbc.gridy = 3;
-        panel.add(rbRepeticionEspaciada, gbc);
+        panel.add(rbSecuencial);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+        panel.add(rbAleatoria);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+        panel.add(rbRepeticionEspaciada);
+        panel.add(Box.createRigidArea(new Dimension(0, 30)));
         
         // Botones
-        JPanel panelBotones = new JPanel();
         btnIniciar = new JButton("Iniciar");
         btnCancelar = new JButton("Cancelar");
-        panelBotones.add(btnIniciar);
-        panelBotones.add(btnCancelar);
         
-        gbc.gridy = 4;
-        gbc.anchor = GridBagConstraints.CENTER;
-        panel.add(panelBotones, gbc);
+        EstilosApp.aplicarEstiloBoton(btnIniciar);
+        EstilosApp.aplicarEstiloBotonSecundario(btnCancelar);
+        
+        btnIniciar.setMaximumSize(new Dimension(200, 40));
+        btnCancelar.setMaximumSize(new Dimension(200, 40));
+        
+        btnIniciar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        btnCancelar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        panel.add(btnIniciar);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+        panel.add(btnCancelar);
         
         add(panel);
         

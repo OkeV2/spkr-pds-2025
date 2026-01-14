@@ -12,6 +12,7 @@ import es.um.pds.spkr.SpkrApp;
 import es.um.pds.spkr.estrategia.EstrategiaAprendizaje;
 import es.um.pds.spkr.estrategia.EstrategiaRepeticionEspaciada;
 import es.um.pds.spkr.modelo.*;
+import es.um.pds.spkr.util.EstilosApp;
 
 public class VentanaEjercicio extends JFrame {
     
@@ -33,7 +34,6 @@ public class VentanaEjercicio extends JFrame {
     private JButton btnSalir;
     private JLabel lblResultado;
     
-    // Componentes para diferentes tipos de pregunta
     private JTextField txtRespuesta;
     private ButtonGroup grupoOpciones;
     private List<JRadioButton> opcionesTest;
@@ -63,47 +63,65 @@ public class VentanaEjercicio extends JFrame {
     
     private void inicializarComponentes() {
         setTitle("Spkr - " + curso.getTitulo());
-        setSize(500, 400);
+        setSize(600, 500);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(null);
+        EstilosApp.aplicarEstiloVentana(this);
         
-        JPanel panelPrincipal = new JPanel(new BorderLayout(10, 10));
-        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        // Panel principal
+        JPanel panelPrincipal = new JPanel(new BorderLayout(15, 15));
+        panelPrincipal.setBorder(BorderFactory.createEmptyBorder(25, 30, 25, 30));
+        EstilosApp.aplicarEstiloPanel(panelPrincipal);
         
         // Panel superior - Progreso
+        JPanel panelSuperior = new JPanel(new BorderLayout());
+        EstilosApp.aplicarEstiloPanel(panelSuperior);
+        
         lblProgreso = new JLabel();
-        lblProgreso.setFont(new Font("Arial", Font.BOLD, 14));
-        panelPrincipal.add(lblProgreso, BorderLayout.NORTH);
+        lblProgreso.setFont(EstilosApp.FUENTE_NORMAL);
+        lblProgreso.setForeground(EstilosApp.COLOR_SECUNDARIO);
+        panelSuperior.add(lblProgreso, BorderLayout.WEST);
+        
+        panelPrincipal.add(panelSuperior, BorderLayout.NORTH);
         
         // Panel central
         JPanel panelCentral = new JPanel();
         panelCentral.setLayout(new BoxLayout(panelCentral, BoxLayout.Y_AXIS));
+        EstilosApp.aplicarEstiloPanel(panelCentral);
         
         lblEnunciado = new JLabel();
-        lblEnunciado.setFont(new Font("Arial", Font.PLAIN, 18));
+        lblEnunciado.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblEnunciado.setForeground(EstilosApp.COLOR_TEXTO);
         lblEnunciado.setAlignmentX(Component.LEFT_ALIGNMENT);
         panelCentral.add(lblEnunciado);
-        panelCentral.add(Box.createRigidArea(new Dimension(0, 20)));
+        panelCentral.add(Box.createRigidArea(new Dimension(0, 25)));
         
         panelRespuesta = new JPanel();
         panelRespuesta.setLayout(new BoxLayout(panelRespuesta, BoxLayout.Y_AXIS));
         panelRespuesta.setAlignmentX(Component.LEFT_ALIGNMENT);
+        EstilosApp.aplicarEstiloPanel(panelRespuesta);
         panelCentral.add(panelRespuesta);
         
-        panelCentral.add(Box.createRigidArea(new Dimension(0, 20)));
+        panelCentral.add(Box.createRigidArea(new Dimension(0, 25)));
         
         lblResultado = new JLabel(" ");
-        lblResultado.setFont(new Font("Arial", Font.BOLD, 16));
+        lblResultado.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblResultado.setAlignmentX(Component.LEFT_ALIGNMENT);
         panelCentral.add(lblResultado);
         
         panelPrincipal.add(panelCentral, BorderLayout.CENTER);
         
         // Panel inferior - Botones
-        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        EstilosApp.aplicarEstiloPanel(panelBotones);
+        
         btnComprobar = new JButton("Comprobar");
         btnSiguiente = new JButton("Siguiente");
         btnSalir = new JButton("Salir");
+        
+        EstilosApp.aplicarEstiloBoton(btnComprobar);
+        EstilosApp.aplicarEstiloBoton(btnSiguiente);
+        EstilosApp.aplicarEstiloBotonSecundario(btnSalir);
         
         btnSiguiente.setEnabled(false);
         
@@ -147,7 +165,7 @@ public class VentanaEjercicio extends JFrame {
         }
         
         lblProgreso.setText("Pregunta " + (preguntaActual + 1) + " de " + todasLasPreguntas.size() + 
-                           " | Aciertos: " + aciertos + " | Errores: " + errores);
+                           "  |  Aciertos: " + aciertos + "  |  Errores: " + errores);
         lblEnunciado.setText(preguntaActualObj.getEnunciado());
         lblResultado.setText(" ");
         
@@ -179,37 +197,49 @@ public class VentanaEjercicio extends JFrame {
         Collections.shuffle(opciones);
         
         for (String opcion : opciones) {
+            JPanel panelOpcion = new JPanel(new BorderLayout());
+            panelOpcion.setBackground(Color.WHITE);
+            panelOpcion.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(180, 180, 180), 1),
+                BorderFactory.createEmptyBorder(12, 20, 12, 20)
+            ));
+            panelOpcion.setMaximumSize(new Dimension(450, 55));
+            panelOpcion.setCursor(new Cursor(Cursor.HAND_CURSOR));
+            
             JRadioButton rb = new JRadioButton(opcion);
-            rb.setFont(new Font("Arial", Font.PLAIN, 14));
+            rb.setFont(new Font("Segoe UI", Font.PLAIN, 15));
+            rb.setBackground(Color.WHITE);
+            rb.setFocusPainted(false);
             rb.setActionCommand(opcion);
+            
             grupoOpciones.add(rb);
             opcionesTest.add(rb);
-            panelRespuesta.add(rb);
-            panelRespuesta.add(Box.createRigidArea(new Dimension(0, 5)));
+            
+            panelOpcion.add(rb, BorderLayout.CENTER);
+            panelRespuesta.add(panelOpcion);
+            panelRespuesta.add(Box.createRigidArea(new Dimension(0, 8)));
         }
     }
     
     private void mostrarPreguntaTraduccion() {
-        JLabel lblInstruccion = new JLabel("Escribe la traducción:");
-        lblInstruccion.setFont(new Font("Arial", Font.PLAIN, 14));
+        JLabel lblInstruccion = EstilosApp.crearEtiqueta("Escribe la traducción:");
         panelRespuesta.add(lblInstruccion);
         panelRespuesta.add(Box.createRigidArea(new Dimension(0, 10)));
         
-        txtRespuesta = new JTextField(20);
-        txtRespuesta.setFont(new Font("Arial", Font.PLAIN, 14));
-        txtRespuesta.setMaximumSize(new Dimension(300, 30));
+        txtRespuesta = new JTextField();
+        EstilosApp.aplicarEstiloCampoTexto(txtRespuesta);
+        txtRespuesta.setMaximumSize(new Dimension(350, 40));
         panelRespuesta.add(txtRespuesta);
     }
     
     private void mostrarPreguntaHuecos(PreguntaHuecos pregunta) {
-        JLabel lblInstruccion = new JLabel("Completa la palabra que falta:");
-        lblInstruccion.setFont(new Font("Arial", Font.PLAIN, 14));
+        JLabel lblInstruccion = EstilosApp.crearEtiqueta("Completa la palabra que falta:");
         panelRespuesta.add(lblInstruccion);
         panelRespuesta.add(Box.createRigidArea(new Dimension(0, 10)));
         
-        txtRespuesta = new JTextField(20);
-        txtRespuesta.setFont(new Font("Arial", Font.PLAIN, 14));
-        txtRespuesta.setMaximumSize(new Dimension(300, 30));
+        txtRespuesta = new JTextField();
+        EstilosApp.aplicarEstiloCampoTexto(txtRespuesta);
+        txtRespuesta.setMaximumSize(new Dimension(350, 40));
         panelRespuesta.add(txtRespuesta);
     }
     
@@ -225,7 +255,7 @@ public class VentanaEjercicio extends JFrame {
         
         if (correcta) {
             lblResultado.setText("¡Correcto!");
-            lblResultado.setForeground(new Color(0, 150, 0));
+            lblResultado.setForeground(EstilosApp.COLOR_EXITO);
             aciertos++;
             
             if (estrategia instanceof EstrategiaRepeticionEspaciada) {
@@ -234,7 +264,7 @@ public class VentanaEjercicio extends JFrame {
         } else {
             String respuestaCorrecta = obtenerRespuestaCorrecta();
             lblResultado.setText("Incorrecto. La respuesta era: " + respuestaCorrecta);
-            lblResultado.setForeground(Color.RED);
+            lblResultado.setForeground(EstilosApp.COLOR_ERROR);
             errores++;
             
             if (estrategia instanceof EstrategiaRepeticionEspaciada) {
@@ -293,13 +323,16 @@ public class VentanaEjercicio extends JFrame {
     }
     
     private void mostrarResultadoFinal() {
-        JOptionPane.showMessageDialog(this, 
-            "¡Curso completado!\n\n" +
-            "Aciertos: " + aciertos + "\n" +
-            "Errores: " + errores + "\n" +
-            "Porcentaje: " + (aciertos * 100 / (aciertos + errores)) + "%"
-        );
+        int porcentaje = (aciertos * 100) / (aciertos + errores);
         
+        String mensaje = "¡Curso completado!\n\n" +
+                        "Aciertos: " + aciertos + "\n" +
+                        "Errores: " + errores + "\n" +
+                        "Porcentaje: " + porcentaje + "%";
+        
+        JOptionPane.showMessageDialog(this, mensaje, "Resultado", JOptionPane.INFORMATION_MESSAGE);
+        
+        app.guardarProgreso();
         this.dispose();
     }
     
