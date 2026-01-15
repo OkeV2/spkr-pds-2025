@@ -19,6 +19,7 @@ public class Progreso {
     private int aciertos;
     private int errores;
     private String estrategia;
+    private int tiempoSegundos;
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaUltimoAcceso;
@@ -55,6 +56,7 @@ public class Progreso {
         this.aciertos = 0;
         this.errores = 0;
         this.estrategia = null;
+        this.tiempoSegundos = 0;
         this.fechaUltimoAcceso = new Date();
     }
     
@@ -114,5 +116,13 @@ public class Progreso {
     
     public void setFechaUltimoAcceso(Date fechaUltimoAcceso) {
         this.fechaUltimoAcceso = fechaUltimoAcceso;
+    }
+    
+    public int getTiempoSegundos() {
+        return tiempoSegundos;
+    }
+    
+    public void setTiempoSegundos(int tiempoSegundos) {
+        this.tiempoSegundos = tiempoSegundos;
     }
 }

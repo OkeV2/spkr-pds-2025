@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -29,19 +31,24 @@ public class VentanaEjercicio extends JFrame {
     private int aciertos;
     private int errores;
     
+    // Temporizador
+    private Timer temporizador;
+    private int segundosTotales;
+    private boolean pausado;
+    
     private JLabel lblPreguntaNum;
+    private JLabel lblTemporizador;
     private JProgressBar barraProgreso;
     private JLabel lblEnunciado;
     private JPanel panelRespuesta;
-    private JButton btnComprobar;
     private JButton btnSiguiente;
+    private JButton btnPausar;
     private JButton btnSalir;
     private JPanel panelResultado;
     private JLabel lblResultado;
     private JLabel lblRespuestaCorrecta;
     private JLabel lblAciertosContador;
-    private JLabel lblErroresContador; 
-   
+    private JLabel lblErroresContador;
     
     private JTextField txtRespuesta;
     private ButtonGroup grupoOpciones;
@@ -49,6 +56,7 @@ public class VentanaEjercicio extends JFrame {
     private List<JPanel> panelesOpciones;
     
     private Pregunta preguntaActualObj;
+    private boolean preguntaRespondida;
     
     public VentanaEjercicio(SpkrApp app, Curso curso, EstrategiaAprendizaje estrategia, VentanaPrincipal ventanaPrincipal, Progreso progreso) {
         this.app = app;
@@ -59,9 +67,13 @@ public class VentanaEjercicio extends JFrame {
         this.preguntaActual = progreso.getPreguntaActual();
         this.aciertos = progreso.getAciertos();
         this.errores = progreso.getErrores();
+        this.segundosTotales = progreso.getTiempoSegundos();
+        this.pausado = false;
+        this.preguntaRespondida = false;
         
         cargarPreguntas();
         inicializarComponentes();
+        iniciarTemporizador();
         mostrarPregunta();
     }
     
@@ -73,6 +85,9 @@ public class VentanaEjercicio extends JFrame {
         this.preguntaActual = progreso.getPreguntaActual();
         this.aciertos = progreso.getAciertos();
         this.errores = progreso.getErrores();
+        this.segundosTotales = progreso.getTiempoSegundos();
+        this.pausado = false;
+        this.preguntaRespondida = false;
         
         if ("Aleatoria".equals(nombreEstrategia)) {
             this.estrategia = new EstrategiaAleatoria();
@@ -84,6 +99,7 @@ public class VentanaEjercicio extends JFrame {
         
         cargarPreguntas();
         inicializarComponentes();
+        iniciarTemporizador();
         mostrarPregunta();
     }
     
@@ -94,9 +110,34 @@ public class VentanaEjercicio extends JFrame {
         }
     }
     
+    private void iniciarTemporizador() {
+        temporizador = new Timer(1000, new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (!pausado) {
+                    segundosTotales++;
+                    actualizarLabelTemporizador();
+                }
+            }
+        });
+        temporizador.start();
+    }
+    
+    private void actualizarLabelTemporizador() {
+        int horas = segundosTotales / 3600;
+        int minutos = (segundosTotales % 3600) / 60;
+        int segundos = segundosTotales % 60;
+        
+        if (horas > 0) {
+            lblTemporizador.setText(String.format("%d:%02d:%02d", horas, minutos, segundos));
+        } else {
+            lblTemporizador.setText(String.format("%02d:%02d", minutos, segundos));
+        }
+    }
+    
     private void inicializarComponentes() {
         setTitle("Spkr - " + curso.getTitulo());
-        setSize(650, 580);
+        setSize(650, 620);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(null);
         EstilosApp.aplicarEstiloVentana(this);
@@ -114,7 +155,7 @@ public class VentanaEjercicio extends JFrame {
             BorderFactory.createEmptyBorder(20, 30, 20, 30)
         ));
         
-        // Fila superior: número de pregunta y botón salir
+        // Fila superior: número de pregunta, temporizador y botón salir
         JPanel filaTop = new JPanel(new BorderLayout());
         filaTop.setBackground(Color.WHITE);
         filaTop.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
@@ -124,15 +165,67 @@ public class VentanaEjercicio extends JFrame {
         lblPreguntaNum.setForeground(EstilosApp.COLOR_SECUNDARIO);
         filaTop.add(lblPreguntaNum, BorderLayout.WEST);
         
-        btnSalir = new JButton("x Salir");
-        btnSalir.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        btnSalir.setForeground(new Color(150, 150, 150));
-        btnSalir.setBackground(Color.WHITE);
-        btnSalir.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        // Panel central con temporizador
+        JPanel panelTemporizador = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
+        panelTemporizador.setBackground(Color.WHITE);
+        
+        lblTemporizador = new JLabel("00:00");
+        lblTemporizador.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblTemporizador.setForeground(EstilosApp.COLOR_PRIMARIO);
+        panelTemporizador.add(lblTemporizador);
+        
+        filaTop.add(panelTemporizador, BorderLayout.CENTER);
+        
+        // Panel derecho con botones pausar y salir
+        JPanel panelBotonesSuperior = new JPanel(new FlowLayout(FlowLayout.RIGHT, 5, 0));
+        panelBotonesSuperior.setBackground(Color.WHITE);
+        
+        btnPausar = new JButton("Pausar");
+        btnPausar.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnPausar.setForeground(Color.WHITE);
+        btnPausar.setBackground(new Color(255, 152, 0));
+        btnPausar.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
+        btnPausar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnPausar.setFocusPainted(false);
+        btnPausar.setContentAreaFilled(false);
+        btnPausar.setOpaque(true);
+        
+        btnPausar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                if (!pausado) {
+                    btnPausar.setBackground(new Color(255, 167, 38));
+                }
+            }
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                if (!pausado) {
+                    btnPausar.setBackground(new Color(255, 152, 0));
+                }
+            }
+        });
+        
+        btnSalir = new JButton("Guardar y Salir");
+        btnSalir.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnSalir.setForeground(Color.WHITE);
+        btnSalir.setBackground(EstilosApp.COLOR_SECUNDARIO);
+        btnSalir.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
         btnSalir.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnSalir.setFocusPainted(false);
         btnSalir.setContentAreaFilled(false);
-        filaTop.add(btnSalir, BorderLayout.EAST);
+        btnSalir.setOpaque(true);
+        
+        btnSalir.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                btnSalir.setBackground(new Color(100, 100, 100));
+            }
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                btnSalir.setBackground(EstilosApp.COLOR_SECUNDARIO);
+            }
+        });
+        
+        panelBotonesSuperior.add(btnPausar);
+        panelBotonesSuperior.add(btnSalir);
+        
+        filaTop.add(panelBotonesSuperior, BorderLayout.EAST);
         
         panelSuperior.add(filaTop);
         panelSuperior.add(Box.createRigidArea(new Dimension(0, 15)));
@@ -216,20 +309,15 @@ public class VentanaEjercicio extends JFrame {
         
         panelPrincipal.add(panelCentral, BorderLayout.CENTER);
         
-        // Panel inferior con botones
+        // Panel inferior con botón siguiente
         JPanel panelInferior = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
         panelInferior.setBackground(EstilosApp.COLOR_FONDO);
         panelInferior.setBorder(BorderFactory.createEmptyBorder(15, 30, 25, 30));
         
-        btnComprobar = new JButton("Comprobar");
         btnSiguiente = new JButton("Siguiente");
-        
-        estilizarBotonPrincipal(btnComprobar);
-        estilizarBotonSecundario(btnSiguiente);
-        
+        estilizarBotonPrincipal(btnSiguiente);
         btnSiguiente.setEnabled(false);
         
-        panelInferior.add(btnComprobar);
         panelInferior.add(btnSiguiente);
         
         panelPrincipal.add(panelInferior, BorderLayout.SOUTH);
@@ -237,8 +325,8 @@ public class VentanaEjercicio extends JFrame {
         add(panelPrincipal);
         
         // Eventos
-        btnComprobar.addActionListener(e -> comprobarRespuesta());
         btnSiguiente.addActionListener(e -> siguientePregunta());
+        btnPausar.addActionListener(e -> togglePausa());
         btnSalir.addActionListener(e -> salir());
     }
     
@@ -272,41 +360,20 @@ public class VentanaEjercicio extends JFrame {
         });
     }
     
-    private void estilizarBotonSecundario(JButton boton) {
-        boton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        boton.setBackground(Color.WHITE);
-        boton.setForeground(EstilosApp.COLOR_PRIMARIO);
-        boton.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(EstilosApp.COLOR_PRIMARIO, 2),
-            BorderFactory.createEmptyBorder(10, 38, 10, 38)
-        ));
-        boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        boton.setFocusPainted(false);
-        boton.setContentAreaFilled(false);
-        boton.setOpaque(true);
-        
-        boton.addMouseListener(new java.awt.event.MouseAdapter() {
-            @Override
-            public void mouseEntered(java.awt.event.MouseEvent e) {
-                if (boton.isEnabled()) boton.setBackground(new Color(245, 245, 245));
-            }
-            @Override
-            public void mouseExited(java.awt.event.MouseEvent e) {
-                if (boton.isEnabled()) boton.setBackground(Color.WHITE);
-            }
-            @Override
-            public void mousePressed(java.awt.event.MouseEvent e) {
-                if (boton.isEnabled()) boton.setBackground(new Color(230, 230, 230));
-            }
-            @Override
-            public void mouseReleased(java.awt.event.MouseEvent e) {
-                if (boton.isEnabled()) boton.setBackground(new Color(245, 245, 245));
-            }
-        });
+    private void togglePausa() {
+        pausado = !pausado;
+        if (pausado) {
+            btnPausar.setText("Reanudar");
+            btnPausar.setBackground(EstilosApp.COLOR_EXITO);
+        } else {
+            btnPausar.setText("Pausar");
+            btnPausar.setBackground(new Color(255, 152, 0));
+        }
     }
     
     private void mostrarPregunta() {
         preguntaActualObj = estrategia.siguientePregunta(todasLasPreguntas, preguntaActual);
+        preguntaRespondida = false;
         
         if (preguntaActualObj == null) {
             mostrarResultadoFinal();
@@ -334,9 +401,8 @@ public class VentanaEjercicio extends JFrame {
         panelRespuesta.revalidate();
         panelRespuesta.repaint();
         
-        btnComprobar.setEnabled(true);
-        btnComprobar.setBackground(EstilosApp.COLOR_PRIMARIO);
         btnSiguiente.setEnabled(false);
+        btnSiguiente.setBackground(new Color(180, 180, 180));
     }
     
     private void mostrarPreguntaTest(PreguntaTest pregunta) {
@@ -369,30 +435,36 @@ public class VentanaEjercicio extends JFrame {
             opcionesTest.add(rb);
             panelesOpciones.add(panelOpcion);
             
-            // Evento para seleccionar al hacer clic en el panel
+            // Evento para seleccionar y comprobar automáticamente
             panelOpcion.addMouseListener(new java.awt.event.MouseAdapter() {
                 @Override
                 public void mouseClicked(java.awt.event.MouseEvent e) {
-                    rb.setSelected(true);
-                    actualizarSeleccionOpciones();
+                    if (!preguntaRespondida) {
+                        rb.setSelected(true);
+                        comprobarRespuesta();
+                    }
                 }
                 @Override
                 public void mouseEntered(java.awt.event.MouseEvent e) {
-                    if (!rb.isSelected()) {
+                    if (!preguntaRespondida && !rb.isSelected()) {
                         panelOpcion.setBackground(new Color(250, 250, 252));
                         rb.setBackground(new Color(250, 250, 252));
                     }
                 }
                 @Override
                 public void mouseExited(java.awt.event.MouseEvent e) {
-                    if (!rb.isSelected()) {
+                    if (!preguntaRespondida && !rb.isSelected()) {
                         panelOpcion.setBackground(Color.WHITE);
                         rb.setBackground(Color.WHITE);
                     }
                 }
             });
             
-            rb.addActionListener(e -> actualizarSeleccionOpciones());
+            rb.addActionListener(e -> {
+                if (!preguntaRespondida) {
+                    comprobarRespuesta();
+                }
+            });
             
             panelOpcion.add(rb, BorderLayout.CENTER);
             panelRespuesta.add(panelOpcion);
@@ -400,31 +472,8 @@ public class VentanaEjercicio extends JFrame {
         }
     }
     
-    private void actualizarSeleccionOpciones() {
-        for (int i = 0; i < opcionesTest.size(); i++) {
-            JRadioButton rb = opcionesTest.get(i);
-            JPanel panel = panelesOpciones.get(i);
-            
-            if (rb.isSelected()) {
-                panel.setBackground(new Color(240, 245, 255));
-                panel.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(EstilosApp.COLOR_PRIMARIO, 2),
-                    BorderFactory.createEmptyBorder(14, 19, 14, 19)
-                ));
-                rb.setBackground(new Color(240, 245, 255));
-            } else {
-                panel.setBackground(Color.WHITE);
-                panel.setBorder(BorderFactory.createCompoundBorder(
-                    BorderFactory.createLineBorder(new Color(220, 220, 220), 1),
-                    BorderFactory.createEmptyBorder(15, 20, 15, 20)
-                ));
-                rb.setBackground(Color.WHITE);
-            }
-        }
-    }
-    
     private void mostrarPreguntaTraduccion() {
-        JLabel lblInstruccion = new JLabel("Escribe la traducción:");
+        JLabel lblInstruccion = new JLabel("Escribe la traducción y pulsa Enter:");
         lblInstruccion.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblInstruccion.setForeground(EstilosApp.COLOR_SECUNDARIO);
         lblInstruccion.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -439,11 +488,23 @@ public class VentanaEjercicio extends JFrame {
         ));
         txtRespuesta.setMaximumSize(new Dimension(400, 50));
         txtRespuesta.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Comprobar al pulsar Enter
+        txtRespuesta.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER && !preguntaRespondida) {
+                    comprobarRespuesta();
+                }
+            }
+        });
+        
         panelRespuesta.add(txtRespuesta);
+        txtRespuesta.requestFocusInWindow();
     }
     
     private void mostrarPreguntaHuecos(PreguntaHuecos pregunta) {
-        JLabel lblInstruccion = new JLabel("Completa la palabra que falta:");
+        JLabel lblInstruccion = new JLabel("Completa la palabra que falta y pulsa Enter:");
         lblInstruccion.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblInstruccion.setForeground(EstilosApp.COLOR_SECUNDARIO);
         lblInstruccion.setAlignmentX(Component.LEFT_ALIGNMENT);
@@ -458,7 +519,19 @@ public class VentanaEjercicio extends JFrame {
         ));
         txtRespuesta.setMaximumSize(new Dimension(400, 50));
         txtRespuesta.setAlignmentX(Component.LEFT_ALIGNMENT);
+        
+        // Comprobar al pulsar Enter
+        txtRespuesta.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.getKeyCode() == KeyEvent.VK_ENTER && !preguntaRespondida) {
+                    comprobarRespuesta();
+                }
+            }
+        });
+        
         panelRespuesta.add(txtRespuesta);
+        txtRespuesta.requestFocusInWindow();
     }
     
     private void comprobarRespuesta() {
@@ -468,6 +541,8 @@ public class VentanaEjercicio extends JFrame {
             JOptionPane.showMessageDialog(this, "Introduce una respuesta");
             return;
         }
+        
+        preguntaRespondida = true;
         
         boolean correcta = preguntaActualObj.validarRespuesta(respuesta);
         boolean yaContada = false;
@@ -530,11 +605,14 @@ public class VentanaEjercicio extends JFrame {
         if (!yaContada) {
             app.getUsuarioActual().getEstadisticas().incrementarEjercicios();
         }
-        app.guardarProgreso();
         
-        btnComprobar.setEnabled(false);
-        btnComprobar.setBackground(new Color(180, 180, 180));
+        // Deshabilitar campo de texto si existe
+        if (txtRespuesta != null) {
+            txtRespuesta.setEnabled(false);
+        }
+        
         btnSiguiente.setEnabled(true);
+        btnSiguiente.setBackground(EstilosApp.COLOR_PRIMARIO);
     }
     
     private void marcarOpcionCorrecta() {
@@ -550,6 +628,7 @@ public class VentanaEjercicio extends JFrame {
                 ));
                 rb.setBackground(new Color(232, 245, 233));
             }
+            rb.setEnabled(false);
         }
     }
     
@@ -577,6 +656,7 @@ public class VentanaEjercicio extends JFrame {
                 ));
                 rb.setBackground(new Color(232, 245, 233));
             }
+            rb.setEnabled(false);
         }
     }
     
@@ -623,15 +703,31 @@ public class VentanaEjercicio extends JFrame {
     }
     
     private void mostrarResultadoFinal() {
+        temporizador.stop();
+        
         int porcentaje = 0;
         if (aciertos + errores > 0) {
             porcentaje = (aciertos * 100) / (aciertos + errores);
         }
         
+        // Guardar tiempo en progreso
+        progreso.setTiempoSegundos(segundosTotales);
+        
+        String tiempoFormateado;
+        int horas = segundosTotales / 3600;
+        int minutos = (segundosTotales % 3600) / 60;
+        int segundos = segundosTotales % 60;
+        if (horas > 0) {
+            tiempoFormateado = String.format("%d:%02d:%02d", horas, minutos, segundos);
+        } else {
+            tiempoFormateado = String.format("%02d:%02d", minutos, segundos);
+        }
+        
         String mensaje = "¡Curso completado!\n\n" +
                         "Aciertos: " + aciertos + "\n" +
                         "Errores: " + errores + "\n" +
-                        "Porcentaje: " + porcentaje + "%";
+                        "Porcentaje: " + porcentaje + "%\n" +
+                        "Tiempo: " + tiempoFormateado;
         
         JOptionPane.showMessageDialog(this, mensaje, "Resultado", JOptionPane.INFORMATION_MESSAGE);
         
@@ -640,14 +736,9 @@ public class VentanaEjercicio extends JFrame {
     }
     
     private void salir() {
-        int opcion = JOptionPane.showConfirmDialog(this, 
-            "¿Deseas salir? Tu progreso se guardará.", 
-            "Salir", 
-            JOptionPane.YES_NO_OPTION);
-        
-        if (opcion == JOptionPane.YES_OPTION) {
-            app.guardarProgreso();
-            this.dispose();
-        }
+        temporizador.stop();
+        progreso.setTiempoSegundos(segundosTotales);
+        app.guardarProgreso();
+        this.dispose();
     }
 }

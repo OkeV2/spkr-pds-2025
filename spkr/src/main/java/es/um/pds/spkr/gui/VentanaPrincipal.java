@@ -87,12 +87,23 @@ public class VentanaPrincipal extends JFrame {
         panelSaludo.add(lblBienvenida);
         
         JButton btnCerrarSesion = new JButton("Cerrar Sesión");
-        btnCerrarSesion.setFont(new Font("Segoe UI", Font.PLAIN, 12));
-        btnCerrarSesion.setForeground(EstilosApp.COLOR_PRIMARIO);
-        btnCerrarSesion.setBackground(EstilosApp.COLOR_FONDO);
-        btnCerrarSesion.setBorder(BorderFactory.createEmptyBorder(5, 10, 5, 10));
+        btnCerrarSesion.setFont(new Font("Segoe UI", Font.BOLD, 12));
+        btnCerrarSesion.setForeground(Color.WHITE);
+        btnCerrarSesion.setBackground(new Color(220, 80, 80));
+        btnCerrarSesion.setBorder(BorderFactory.createEmptyBorder(8, 15, 8, 15));
         btnCerrarSesion.setCursor(new Cursor(Cursor.HAND_CURSOR));
         btnCerrarSesion.setFocusPainted(false);
+        btnCerrarSesion.setContentAreaFilled(false);
+        btnCerrarSesion.setOpaque(true);
+        
+        btnCerrarSesion.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                btnCerrarSesion.setBackground(new Color(200, 60, 60));
+            }
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                btnCerrarSesion.setBackground(new Color(220, 80, 80));
+            }
+        });
         
         panelUsuario.add(lblSaludo);
         panelUsuario.add(btnCerrarSesion);

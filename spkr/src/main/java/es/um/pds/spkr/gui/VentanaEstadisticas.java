@@ -18,7 +18,7 @@ public class VentanaEstadisticas extends JFrame {
     
     private void inicializarComponentes() {
         setTitle("Spkr - Estadísticas");
-        setSize(550, 600);
+        setSize(600, 650);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -28,6 +28,8 @@ public class VentanaEstadisticas extends JFrame {
         int erroresPendientes = app.getUsuarioActual().getErroresFrecuentes().size();
         int aciertos = stats.getEjerciciosCompletados() - erroresPendientes;
         if (aciertos < 0) aciertos = stats.getEjerciciosCompletados();
+        int total = aciertos + erroresPendientes;
+        int porcentaje = total > 0 ? (aciertos * 100) / total : 0;
         
         // Panel principal
         JPanel panelPrincipal = new JPanel(new BorderLayout(0, 0));
@@ -65,28 +67,62 @@ public class VentanaEstadisticas extends JFrame {
         JPanel panelCentral = new JPanel();
         panelCentral.setLayout(new BoxLayout(panelCentral, BoxLayout.Y_AXIS));
         panelCentral.setBackground(EstilosApp.COLOR_FONDO);
-        panelCentral.setBorder(BorderFactory.createEmptyBorder(30, 40, 20, 40));
+        panelCentral.setBorder(BorderFactory.createEmptyBorder(25, 40, 20, 40));
         
-        // Diagrama de queso
+        // Panel del diagrama y porcentaje lado a lado
+        JPanel panelDiagramaInfo = new JPanel(new GridLayout(1, 2, 30, 0));
+        panelDiagramaInfo.setBackground(EstilosApp.COLOR_FONDO);
+        panelDiagramaInfo.setMaximumSize(new Dimension(500, 160));
+        panelDiagramaInfo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        // Diagrama de queso (solo el gráfico)
         PanelDiagramaQueso diagrama = new PanelDiagramaQueso(aciertos, erroresPendientes);
-        diagrama.setPreferredSize(new Dimension(220, 220));
-        diagrama.setMaximumSize(new Dimension(220, 220));
-        diagrama.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panelCentral.add(diagrama);
-        panelCentral.add(Box.createRigidArea(new Dimension(0, 15)));
+        diagrama.setPreferredSize(new Dimension(140, 140));
+        
+        // Panel de información del porcentaje
+        JPanel panelPorcentaje = new JPanel();
+        panelPorcentaje.setLayout(new BoxLayout(panelPorcentaje, BoxLayout.Y_AXIS));
+        panelPorcentaje.setBackground(EstilosApp.COLOR_FONDO);
+        
+        panelPorcentaje.add(Box.createVerticalGlue());
+        
+        JLabel lblPorcentajeNum = new JLabel(porcentaje + "%");
+        lblPorcentajeNum.setFont(new Font("Segoe UI", Font.BOLD, 48));
+        lblPorcentajeNum.setForeground(EstilosApp.COLOR_PRIMARIO);
+        lblPorcentajeNum.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelPorcentaje.add(lblPorcentajeNum);
+        
+        JLabel lblPorcentajeTexto = new JLabel("de aciertos");
+        lblPorcentajeTexto.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblPorcentajeTexto.setForeground(EstilosApp.COLOR_SECUNDARIO);
+        lblPorcentajeTexto.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelPorcentaje.add(lblPorcentajeTexto);
+        
+        panelPorcentaje.add(Box.createRigidArea(new Dimension(0, 15)));
         
         // Leyenda
-        JPanel panelLeyenda = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 0));
-        panelLeyenda.setBackground(EstilosApp.COLOR_FONDO);
-        panelLeyenda.add(crearLeyenda(EstilosApp.COLOR_EXITO, "Aciertos"));
-        panelLeyenda.add(crearLeyenda(EstilosApp.COLOR_ERROR, "Errores"));
-        panelCentral.add(panelLeyenda);
+        JPanel leyendaAciertos = crearLeyenda(EstilosApp.COLOR_EXITO, "Aciertos: " + aciertos);
+        leyendaAciertos.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelPorcentaje.add(leyendaAciertos);
+        
+        panelPorcentaje.add(Box.createRigidArea(new Dimension(0, 5)));
+        
+        JPanel leyendaErrores = crearLeyenda(EstilosApp.COLOR_ERROR, "Errores: " + erroresPendientes);
+        leyendaErrores.setAlignmentX(Component.LEFT_ALIGNMENT);
+        panelPorcentaje.add(leyendaErrores);
+        
+        panelPorcentaje.add(Box.createVerticalGlue());
+        
+        panelDiagramaInfo.add(diagrama);
+        panelDiagramaInfo.add(panelPorcentaje);
+        
+        panelCentral.add(panelDiagramaInfo);
         panelCentral.add(Box.createRigidArea(new Dimension(0, 30)));
         
         // Tarjetas de estadísticas
         JPanel panelTarjetas = new JPanel(new GridLayout(2, 2, 15, 15));
         panelTarjetas.setBackground(EstilosApp.COLOR_FONDO);
-        panelTarjetas.setMaximumSize(new Dimension(450, 180));
+        panelTarjetas.setMaximumSize(new Dimension(500, 180));
         panelTarjetas.setAlignmentX(Component.CENTER_ALIGNMENT);
         
         panelTarjetas.add(crearTarjetaEstadistica("Ejercicios", String.valueOf(stats.getEjerciciosCompletados()), EstilosApp.COLOR_PRIMARIO));
@@ -163,7 +199,7 @@ public class VentanaEstadisticas extends JFrame {
         
         JPanel cuadro = new JPanel();
         cuadro.setBackground(color);
-        cuadro.setPreferredSize(new Dimension(14, 14));
+        cuadro.setPreferredSize(new Dimension(12, 12));
         
         JLabel label = new JLabel(texto);
         label.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -175,7 +211,7 @@ public class VentanaEstadisticas extends JFrame {
         return panel;
     }
     
-    // Clase interna para el diagrama de queso
+    // Clase interna para el diagrama de queso (solo el gráfico)
     private class PanelDiagramaQueso extends JPanel {
         
         private int aciertos;
@@ -201,40 +237,38 @@ public class VentanaEstadisticas extends JFrame {
             int y = (getHeight() - size) / 2;
             
             if (total == 0) {
+                // Círculo vacío
                 g2d.setColor(new Color(220, 220, 220));
                 g2d.fillOval(x, y, size, size);
                 
-                g2d.setColor(EstilosApp.COLOR_SECUNDARIO);
-                g2d.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-                String texto = "Sin datos";
-                FontMetrics fm = g2d.getFontMetrics();
-                int textoX = x + (size - fm.stringWidth(texto)) / 2;
-                int textoY = y + (size + fm.getAscent()) / 2 - 5;
-                g2d.drawString(texto, textoX, textoY);
+                // Círculo interior
+                int innerSize = (int)(size * 0.5);
+                int innerX = x + (size - innerSize) / 2;
+                int innerY = y + (size - innerSize) / 2;
+                g2d.setColor(EstilosApp.COLOR_FONDO);
+                g2d.fillOval(innerX, innerY, innerSize, innerSize);
             } else {
+                // Sombra
+                g2d.setColor(new Color(0, 0, 0, 15));
+                g2d.fillOval(x + 2, y + 2, size, size);
+                
+                // Calcular ángulos
                 int anguloAciertos = (int) Math.round(360.0 * aciertos / total);
+                
+                // Sector aciertos
                 g2d.setColor(EstilosApp.COLOR_EXITO);
                 g2d.fillArc(x, y, size, size, 90, -anguloAciertos);
                 
+                // Sector errores
                 g2d.setColor(EstilosApp.COLOR_ERROR);
                 g2d.fillArc(x, y, size, size, 90 - anguloAciertos, -(360 - anguloAciertos));
                 
-                // Círculo central
-                int centroSize = size / 2;
-                int centroX = x + (size - centroSize) / 2;
-                int centroY = y + (size - centroSize) / 2;
+                // Círculo interior (efecto donut)
+                int innerSize = (int)(size * 0.5);
+                int innerX = x + (size - innerSize) / 2;
+                int innerY = y + (size - innerSize) / 2;
                 g2d.setColor(EstilosApp.COLOR_FONDO);
-                g2d.fillOval(centroX, centroY, centroSize, centroSize);
-                
-                // Porcentaje
-                int porcentaje = (aciertos * 100) / total;
-                g2d.setColor(EstilosApp.COLOR_TEXTO);
-                g2d.setFont(new Font("Segoe UI", Font.BOLD, 28));
-                String texto = porcentaje + "%";
-                FontMetrics fm = g2d.getFontMetrics();
-                int textoX = x + (size - fm.stringWidth(texto)) / 2;
-                int textoY = y + (size + fm.getAscent()) / 2 - 5;
-                g2d.drawString(texto, textoX, textoY);
+                g2d.fillOval(innerX, innerY, innerSize, innerSize);
             }
         }
     }

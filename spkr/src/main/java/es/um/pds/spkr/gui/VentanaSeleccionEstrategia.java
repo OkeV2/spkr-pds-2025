@@ -245,8 +245,77 @@ public class VentanaSeleccionEstrategia extends JFrame {
         progreso.setEstrategia(nombreEstrategia);
         app.guardarProgreso();
         
-        VentanaEjercicio ventanaEjercicio = new VentanaEjercicio(app, curso, estrategia, ventanaPrincipal, progreso);
-        ventanaEjercicio.setVisible(true);
+        // Mostrar ventana de preparación
+        mostrarVentanaPreparacion(estrategia);
+    }
+    
+    private void mostrarVentanaPreparacion(EstrategiaAprendizaje estrategia) {
         this.dispose();
+        
+        JFrame ventanaPreparacion = new JFrame("Spkr - Preparado");
+        ventanaPreparacion.setSize(400, 300);
+        ventanaPreparacion.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        ventanaPreparacion.setLocationRelativeTo(null);
+        ventanaPreparacion.setResizable(false);
+        EstilosApp.aplicarEstiloVentana(ventanaPreparacion);
+        
+        JPanel panel = new JPanel();
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        panel.setBackground(EstilosApp.COLOR_FONDO);
+        panel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
+        
+        JLabel lblIcono = new JLabel();
+        ImageIcon icono = EstilosApp.getIcono(60, 60);
+        if (icono != null) {
+            lblIcono.setIcon(icono);
+        }
+        lblIcono.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblIcono);
+        panel.add(Box.createRigidArea(new Dimension(0, 25)));
+        
+        JLabel lblTitulo = new JLabel(curso.getTitulo());
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
+        lblTitulo.setForeground(EstilosApp.COLOR_TEXTO);
+        lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblTitulo);
+        panel.add(Box.createRigidArea(new Dimension(0, 10)));
+        
+        JLabel lblEstrategia = new JLabel("Estrategia: " + estrategiaSeleccionada);
+        lblEstrategia.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        lblEstrategia.setForeground(EstilosApp.COLOR_SECUNDARIO);
+        lblEstrategia.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panel.add(lblEstrategia);
+        panel.add(Box.createRigidArea(new Dimension(0, 35)));
+        
+        JButton btnEmpezar = new JButton("Empezar");
+        btnEmpezar.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        btnEmpezar.setBackground(EstilosApp.COLOR_PRIMARIO);
+        btnEmpezar.setForeground(Color.WHITE);
+        btnEmpezar.setBorder(BorderFactory.createEmptyBorder(15, 60, 15, 60));
+        btnEmpezar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnEmpezar.setFocusPainted(false);
+        btnEmpezar.setContentAreaFilled(false);
+        btnEmpezar.setOpaque(true);
+        btnEmpezar.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        btnEmpezar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                btnEmpezar.setBackground(EstilosApp.COLOR_SECUNDARIO);
+            }
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                btnEmpezar.setBackground(EstilosApp.COLOR_PRIMARIO);
+            }
+        });
+        
+        btnEmpezar.addActionListener(e -> {
+            ventanaPreparacion.dispose();
+            VentanaEjercicio ventanaEjercicio = new VentanaEjercicio(app, curso, estrategia, ventanaPrincipal, progreso);
+            ventanaEjercicio.setVisible(true);
+        });
+        
+        panel.add(btnEmpezar);
+        
+        ventanaPreparacion.add(panel);
+        ventanaPreparacion.setVisible(true);
     }
 }
