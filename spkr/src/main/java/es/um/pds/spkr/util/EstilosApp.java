@@ -23,6 +23,7 @@ public class EstilosApp {
     // Imágenes
     private static ImageIcon logoOriginal;
     private static ImageIcon iconoOriginal;
+    private static ImageIcon iconoInvertidoOriginal;
     
     static {
         try {
@@ -40,6 +41,14 @@ public class EstilosApp {
             }
         } catch (Exception e) {
             System.err.println("No se pudo cargar el icono: " + e.getMessage());
+        }
+        try {
+            java.net.URL iconoInvUrl = EstilosApp.class.getResource("/imagenes/iconoInvertido.png");
+            if (iconoInvUrl != null) {
+                iconoInvertidoOriginal = new ImageIcon(iconoInvUrl);
+            }
+        } catch (Exception e) {
+            System.err.println("No se pudo cargar el icono invertido: " + e.getMessage());
         }
     }
     
@@ -63,6 +72,33 @@ public class EstilosApp {
         boton.setBorderPainted(false);
         boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         boton.setPreferredSize(new Dimension(150, 40));
+        boton.setContentAreaFilled(false);
+        boton.setOpaque(true);
+        
+        // Efecto hover y clic
+        boton.addMouseListener(new java.awt.event.MouseAdapter() {
+            Color colorOriginal = COLOR_PRIMARIO;
+            
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                boton.setBackground(COLOR_SECUNDARIO);
+            }
+            
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                boton.setBackground(colorOriginal);
+            }
+            
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                boton.setBackground(new Color(50, 50, 50));
+            }
+            
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent e) {
+                boton.setBackground(COLOR_SECUNDARIO);
+            }
+        });
     }
     
     public static void aplicarEstiloBotonSecundario(JButton boton) {
@@ -73,6 +109,31 @@ public class EstilosApp {
         boton.setBorder(BorderFactory.createLineBorder(COLOR_PRIMARIO, 2));
         boton.setCursor(new Cursor(Cursor.HAND_CURSOR));
         boton.setPreferredSize(new Dimension(150, 40));
+        boton.setContentAreaFilled(false);
+        boton.setOpaque(true);
+        
+        // Efecto hover y clic
+        boton.addMouseListener(new java.awt.event.MouseAdapter() {
+            @Override
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                boton.setBackground(new Color(245, 245, 245));
+            }
+            
+            @Override
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                boton.setBackground(Color.WHITE);
+            }
+            
+            @Override
+            public void mousePressed(java.awt.event.MouseEvent e) {
+                boton.setBackground(new Color(230, 230, 230));
+            }
+            
+            @Override
+            public void mouseReleased(java.awt.event.MouseEvent e) {
+                boton.setBackground(new Color(245, 245, 245));
+            }
+        });
     }
     
     public static void aplicarEstiloCampoTexto(JTextField campo) {
@@ -90,9 +151,23 @@ public class EstilosApp {
     
     public static void aplicarEstiloVentana(JFrame ventana) {
         ventana.getContentPane().setBackground(COLOR_FONDO);
+        
+        // Usar lista de iconos para diferentes tamaños
+        java.util.List<Image> iconos = new java.util.ArrayList<>();
+        
         if (iconoOriginal != null) {
-            Image iconoRedimensionado = iconoOriginal.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH);
-            ventana.setIconImage(iconoRedimensionado);
+            // Icono pequeño para esquina de ventana (16x16)
+            iconos.add(iconoOriginal.getImage().getScaledInstance(16, 16, Image.SCALE_SMOOTH));
+        }
+        
+        if (iconoInvertidoOriginal != null) {
+            // Icono grande para barra de tareas (32x32, 48x48)
+            iconos.add(iconoInvertidoOriginal.getImage().getScaledInstance(32, 32, Image.SCALE_SMOOTH));
+            iconos.add(iconoInvertidoOriginal.getImage().getScaledInstance(48, 48, Image.SCALE_SMOOTH));
+        }
+        
+        if (!iconos.isEmpty()) {
+            ventana.setIconImages(iconos);
         }
     }
     

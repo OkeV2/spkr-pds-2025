@@ -4,6 +4,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 import es.um.pds.spkr.SpkrApp;
 import es.um.pds.spkr.estrategia.EstrategiaAleatoria;
@@ -20,11 +22,16 @@ public class VentanaSeleccionEstrategia extends JFrame {
     private Curso curso;
     private VentanaPrincipal ventanaPrincipal;
     private Progreso progreso;
-    private JRadioButton rbSecuencial;
-    private JRadioButton rbAleatoria;
-    private JRadioButton rbRepeticionEspaciada;
+    
+    private JPanel panelSecuencial;
+    private JPanel panelAleatoria;
+    private JPanel panelRepeticion;
+    private JPanel panelSeleccionado;
+    
     private JButton btnIniciar;
     private JButton btnCancelar;
+    
+    private String estrategiaSeleccionada = "Secuencial";
     
     public VentanaSeleccionEstrategia(SpkrApp app, Curso curso, VentanaPrincipal ventanaPrincipal, Progreso progreso) {
         this.app = app;
@@ -36,7 +43,7 @@ public class VentanaSeleccionEstrategia extends JFrame {
     
     private void inicializarComponentes() {
         setTitle("Spkr - Seleccionar Estrategia");
-        setSize(400, 400);
+        setSize(450, 650);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -50,13 +57,13 @@ public class VentanaSeleccionEstrategia extends JFrame {
         
         // Icono
         JLabel lblIcono = new JLabel();
-        ImageIcon icono = EstilosApp.getIcono(60, 60);
+        ImageIcon icono = EstilosApp.getIcono(50, 50);
         if (icono != null) {
             lblIcono.setIcon(icono);
         }
         lblIcono.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(lblIcono);
-        panel.add(Box.createRigidArea(new Dimension(0, 20)));
+        panel.add(Box.createRigidArea(new Dimension(0, 15)));
         
         // Título
         JLabel lblTitulo = EstilosApp.crearSubtitulo("¿Cómo quieres aprender?");
@@ -64,53 +71,49 @@ public class VentanaSeleccionEstrategia extends JFrame {
         panel.add(lblTitulo);
         panel.add(Box.createRigidArea(new Dimension(0, 25)));
         
-        // Opciones
-        rbSecuencial = new JRadioButton("Secuencial - Preguntas en orden");
-        rbAleatoria = new JRadioButton("Aleatoria - Preguntas al azar");
-        rbRepeticionEspaciada = new JRadioButton("Repetición Espaciada - Repite los fallos");
+        // Opciones como tarjetas
+        panelSecuencial = crearTarjetaEstrategia(
+            "Secuencial",
+            "Preguntas en orden",
+            "Ideal para tu primera vez con el curso"
+        );
         
-        rbSecuencial.setFont(EstilosApp.FUENTE_NORMAL);
-        rbAleatoria.setFont(EstilosApp.FUENTE_NORMAL);
-        rbRepeticionEspaciada.setFont(EstilosApp.FUENTE_NORMAL);
+        panelAleatoria = crearTarjetaEstrategia(
+            "Aleatoria", 
+            "Preguntas al azar",
+            "Perfecto para repasar y reforzar"
+        );
         
-        rbSecuencial.setBackground(EstilosApp.COLOR_FONDO);
-        rbAleatoria.setBackground(EstilosApp.COLOR_FONDO);
-        rbRepeticionEspaciada.setBackground(EstilosApp.COLOR_FONDO);
+        panelRepeticion = crearTarjetaEstrategia(
+            "Repetición Espaciada",
+            "Repite los fallos",
+            "Enfócate en lo que más te cuesta"
+        );
         
-        ButtonGroup grupo = new ButtonGroup();
-        grupo.add(rbSecuencial);
-        grupo.add(rbAleatoria);
-        grupo.add(rbRepeticionEspaciada);
-        
-        rbSecuencial.setSelected(true);
-        
-        rbSecuencial.setAlignmentX(Component.CENTER_ALIGNMENT);
-        rbAleatoria.setAlignmentX(Component.CENTER_ALIGNMENT);
-        rbRepeticionEspaciada.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        panel.add(rbSecuencial);
+        panel.add(panelSecuencial);
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
-        panel.add(rbAleatoria);
+        panel.add(panelAleatoria);
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
-        panel.add(rbRepeticionEspaciada);
-        panel.add(Box.createRigidArea(new Dimension(0, 30)));
+        panel.add(panelRepeticion);
+        panel.add(Box.createRigidArea(new Dimension(0, 25)));
+        
+        // Seleccionar secuencial por defecto
+        seleccionarTarjeta(panelSecuencial, "Secuencial");
         
         // Botones
-        btnIniciar = new JButton("Iniciar");
+        JPanel panelBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        EstilosApp.aplicarEstiloPanel(panelBotones);
+        
+        btnIniciar = new JButton("Comenzar");
         btnCancelar = new JButton("Cancelar");
         
         EstilosApp.aplicarEstiloBoton(btnIniciar);
         EstilosApp.aplicarEstiloBotonSecundario(btnCancelar);
         
-        btnIniciar.setMaximumSize(new Dimension(200, 40));
-        btnCancelar.setMaximumSize(new Dimension(200, 40));
+        panelBotones.add(btnIniciar);
+        panelBotones.add(btnCancelar);
         
-        btnIniciar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        btnCancelar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
-        panel.add(btnIniciar);
-        panel.add(Box.createRigidArea(new Dimension(0, 10)));
-        panel.add(btnCancelar);
+        panel.add(panelBotones);
         
         add(panel);
         
@@ -130,14 +133,108 @@ public class VentanaSeleccionEstrategia extends JFrame {
         });
     }
     
+    private JPanel crearTarjetaEstrategia(String titulo, String subtitulo, String descripcion) {
+        JPanel tarjeta = new JPanel();
+        tarjeta.setLayout(new BorderLayout());
+        tarjeta.setBackground(Color.WHITE);
+        tarjeta.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+            BorderFactory.createEmptyBorder(15, 20, 15, 20)
+        ));
+        tarjeta.setMaximumSize(new Dimension(370, 80));
+        tarjeta.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        
+        JPanel panelTexto = new JPanel();
+        panelTexto.setLayout(new BoxLayout(panelTexto, BoxLayout.Y_AXIS));
+        panelTexto.setBackground(Color.WHITE);
+        
+        JLabel lblTitulo = new JLabel(titulo);
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 15));
+        lblTitulo.setForeground(EstilosApp.COLOR_TEXTO);
+        
+        JLabel lblSubtitulo = new JLabel(subtitulo);
+        lblSubtitulo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblSubtitulo.setForeground(EstilosApp.COLOR_SECUNDARIO);
+        
+        JLabel lblDescripcion = new JLabel(descripcion);
+        lblDescripcion.setFont(new Font("Segoe UI", Font.ITALIC, 11));
+        lblDescripcion.setForeground(new Color(130, 130, 130));
+        
+        panelTexto.add(lblTitulo);
+        panelTexto.add(Box.createRigidArea(new Dimension(0, 3)));
+        panelTexto.add(lblSubtitulo);
+        panelTexto.add(Box.createRigidArea(new Dimension(0, 3)));
+        panelTexto.add(lblDescripcion);
+        
+        tarjeta.add(panelTexto, BorderLayout.CENTER);
+        
+        // Evento de clic
+        tarjeta.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                seleccionarTarjeta(tarjeta, titulo);
+            }
+            
+            @Override
+            public void mouseEntered(MouseEvent e) {
+                if (tarjeta != panelSeleccionado) {
+                    tarjeta.setBackground(new Color(248, 248, 248));
+                    panelTexto.setBackground(new Color(248, 248, 248));
+                }
+            }
+            
+            @Override
+            public void mouseExited(MouseEvent e) {
+                if (tarjeta != panelSeleccionado) {
+                    tarjeta.setBackground(Color.WHITE);
+                    panelTexto.setBackground(Color.WHITE);
+                }
+            }
+        });
+        
+        return tarjeta;
+    }
+    
+    private void seleccionarTarjeta(JPanel tarjeta, String estrategia) {
+        // Deseleccionar anterior
+        if (panelSeleccionado != null) {
+            panelSeleccionado.setBackground(Color.WHITE);
+            panelSeleccionado.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(new Color(200, 200, 200), 1),
+                BorderFactory.createEmptyBorder(15, 20, 15, 20)
+            ));
+            actualizarColorFondo(panelSeleccionado, Color.WHITE);
+        }
+        
+        // Seleccionar nueva
+        panelSeleccionado = tarjeta;
+        estrategiaSeleccionada = estrategia;
+        
+        tarjeta.setBackground(new Color(240, 245, 250));
+        tarjeta.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(EstilosApp.COLOR_PRIMARIO, 2),
+            BorderFactory.createEmptyBorder(14, 19, 14, 19)
+        ));
+        actualizarColorFondo(tarjeta, new Color(240, 245, 250));
+    }
+    
+    private void actualizarColorFondo(JPanel panel, Color color) {
+        for (Component comp : panel.getComponents()) {
+            if (comp instanceof JPanel) {
+                comp.setBackground(color);
+                actualizarColorFondo((JPanel) comp, color);
+            }
+        }
+    }
+    
     private void iniciarCurso() {
         EstrategiaAprendizaje estrategia;
         String nombreEstrategia;
         
-        if (rbSecuencial.isSelected()) {
+        if ("Secuencial".equals(estrategiaSeleccionada)) {
             estrategia = new EstrategiaSecuencial();
             nombreEstrategia = "Secuencial";
-        } else if (rbAleatoria.isSelected()) {
+        } else if ("Aleatoria".equals(estrategiaSeleccionada)) {
             estrategia = new EstrategiaAleatoria();
             nombreEstrategia = "Aleatoria";
         } else {

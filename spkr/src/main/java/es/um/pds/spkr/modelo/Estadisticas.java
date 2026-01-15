@@ -30,16 +30,33 @@ public class Estadisticas {
     
     public void actualizarRacha() {
         Date hoy = new Date();
-        long diffDias = (hoy.getTime() - ultimoAcceso.getTime()) / (1000 * 60 * 60 * 24);
         
-        if (diffDias <= 1) {
+        if (ultimoAcceso == null) {
+            rachaActual = 1;
+            ultimoAcceso = hoy;
+            if (rachaActual > mejorRacha) {
+                mejorRacha = rachaActual;
+            }
+            return;
+        }
+        
+        // Calcular diferencia en días
+        long diffMs = hoy.getTime() - ultimoAcceso.getTime();
+        long diffDias = diffMs / (1000 * 60 * 60 * 24);
+        
+        if (diffDias == 0) {
+            // Mismo día, no hacer nada
+        } else if (diffDias == 1) {
+            // Día consecutivo
             rachaActual++;
             if (rachaActual > mejorRacha) {
                 mejorRacha = rachaActual;
             }
         } else {
+            // Se rompió la racha
             rachaActual = 1;
         }
+        
         ultimoAcceso = hoy;
     }
     

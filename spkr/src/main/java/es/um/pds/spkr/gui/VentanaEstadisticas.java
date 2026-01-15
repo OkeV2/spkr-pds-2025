@@ -2,8 +2,6 @@ package es.um.pds.spkr.gui;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 import es.um.pds.spkr.SpkrApp;
 import es.um.pds.spkr.modelo.Estadisticas;
@@ -20,7 +18,7 @@ public class VentanaEstadisticas extends JFrame {
     
     private void inicializarComponentes() {
         setTitle("Spkr - Estadísticas");
-        setSize(500, 550);
+        setSize(550, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
@@ -28,16 +26,24 @@ public class VentanaEstadisticas extends JFrame {
         
         Estadisticas stats = app.getUsuarioActual().getEstadisticas();
         int erroresPendientes = app.getUsuarioActual().getErroresFrecuentes().size();
+        int aciertos = stats.getEjerciciosCompletados() - erroresPendientes;
+        if (aciertos < 0) aciertos = stats.getEjerciciosCompletados();
         
         // Panel principal
-        JPanel panel = new JPanel();
-        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
-        panel.setBorder(BorderFactory.createEmptyBorder(25, 30, 25, 30));
-        EstilosApp.aplicarEstiloPanel(panel);
+        JPanel panelPrincipal = new JPanel(new BorderLayout(0, 0));
+        panelPrincipal.setBackground(EstilosApp.COLOR_FONDO);
         
-        // Icono y título
-        JPanel panelTitulo = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        EstilosApp.aplicarEstiloPanel(panelTitulo);
+        // Panel superior con título
+        JPanel panelSuperior = new JPanel();
+        panelSuperior.setLayout(new BoxLayout(panelSuperior, BoxLayout.Y_AXIS));
+        panelSuperior.setBackground(Color.WHITE);
+        panelSuperior.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(230, 230, 230)),
+            BorderFactory.createEmptyBorder(25, 30, 25, 30)
+        ));
+        
+        JPanel panelTitulo = new JPanel(new FlowLayout(FlowLayout.LEFT, 15, 0));
+        panelTitulo.setBackground(Color.WHITE);
         
         JLabel lblIcono = new JLabel();
         ImageIcon icono = EstilosApp.getIcono(40, 40);
@@ -46,93 +52,122 @@ public class VentanaEstadisticas extends JFrame {
         }
         panelTitulo.add(lblIcono);
         
-        JLabel lblTitulo = EstilosApp.crearSubtitulo("Mis Estadísticas");
+        JLabel lblTitulo = new JLabel("Mis Estadísticas");
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblTitulo.setForeground(EstilosApp.COLOR_TEXTO);
         panelTitulo.add(lblTitulo);
         
-        panel.add(panelTitulo);
-        panel.add(Box.createRigidArea(new Dimension(0, 25)));
+        panelSuperior.add(panelTitulo);
         
-        // Panel de diagrama
-        int aciertos = stats.getEjerciciosCompletados() - erroresPendientes;
-        if (aciertos < 0) aciertos = stats.getEjerciciosCompletados();
+        panelPrincipal.add(panelSuperior, BorderLayout.NORTH);
         
+        // Panel central
+        JPanel panelCentral = new JPanel();
+        panelCentral.setLayout(new BoxLayout(panelCentral, BoxLayout.Y_AXIS));
+        panelCentral.setBackground(EstilosApp.COLOR_FONDO);
+        panelCentral.setBorder(BorderFactory.createEmptyBorder(30, 40, 20, 40));
+        
+        // Diagrama de queso
         PanelDiagramaQueso diagrama = new PanelDiagramaQueso(aciertos, erroresPendientes);
-        diagrama.setPreferredSize(new Dimension(200, 200));
-        diagrama.setMaximumSize(new Dimension(200, 200));
+        diagrama.setPreferredSize(new Dimension(220, 220));
+        diagrama.setMaximumSize(new Dimension(220, 220));
         diagrama.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(diagrama);
-        panel.add(Box.createRigidArea(new Dimension(0, 20)));
+        panelCentral.add(diagrama);
+        panelCentral.add(Box.createRigidArea(new Dimension(0, 15)));
         
-        // Leyenda del diagrama
-        JPanel panelLeyenda = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 0));
-        EstilosApp.aplicarEstiloPanel(panelLeyenda);
+        // Leyenda
+        JPanel panelLeyenda = new JPanel(new FlowLayout(FlowLayout.CENTER, 30, 0));
+        panelLeyenda.setBackground(EstilosApp.COLOR_FONDO);
+        panelLeyenda.add(crearLeyenda(EstilosApp.COLOR_EXITO, "Aciertos"));
+        panelLeyenda.add(crearLeyenda(EstilosApp.COLOR_ERROR, "Errores"));
+        panelCentral.add(panelLeyenda);
+        panelCentral.add(Box.createRigidArea(new Dimension(0, 30)));
         
-        JPanel leyendaAciertos = crearLeyenda(EstilosApp.COLOR_EXITO, "Aciertos");
-        JPanel leyendaErrores = crearLeyenda(EstilosApp.COLOR_ERROR, "Errores");
+        // Tarjetas de estadísticas
+        JPanel panelTarjetas = new JPanel(new GridLayout(2, 2, 15, 15));
+        panelTarjetas.setBackground(EstilosApp.COLOR_FONDO);
+        panelTarjetas.setMaximumSize(new Dimension(450, 180));
+        panelTarjetas.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        panelLeyenda.add(leyendaAciertos);
-        panelLeyenda.add(leyendaErrores);
+        panelTarjetas.add(crearTarjetaEstadistica("Ejercicios", String.valueOf(stats.getEjerciciosCompletados()), EstilosApp.COLOR_PRIMARIO));
+        panelTarjetas.add(crearTarjetaEstadistica("Tiempo de uso", stats.getTiempoTotalUso() + " min", EstilosApp.COLOR_SECUNDARIO));
+        panelTarjetas.add(crearTarjetaEstadistica("Racha actual", stats.getRachaActual() + " días", EstilosApp.COLOR_EXITO));
+        panelTarjetas.add(crearTarjetaEstadistica("Mejor racha", stats.getMejorRacha() + " días", new Color(255, 152, 0)));
         
-        panel.add(panelLeyenda);
-        panel.add(Box.createRigidArea(new Dimension(0, 25)));
+        panelCentral.add(panelTarjetas);
+        panelCentral.add(Box.createVerticalGlue());
         
-        // Panel de estadísticas detalladas
-        JPanel panelStats = new JPanel(new GridLayout(5, 2, 10, 15));
-        EstilosApp.aplicarEstiloPanel(panelStats);
-        panelStats.setMaximumSize(new Dimension(350, 200));
-        panelStats.setAlignmentX(Component.CENTER_ALIGNMENT);
+        panelPrincipal.add(panelCentral, BorderLayout.CENTER);
         
-        panelStats.add(EstilosApp.crearEtiqueta("Ejercicios completados:"));
-        panelStats.add(crearValor(String.valueOf(stats.getEjerciciosCompletados())));
+        // Panel inferior con botón
+        JPanel panelInferior = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        panelInferior.setBackground(EstilosApp.COLOR_FONDO);
+        panelInferior.setBorder(BorderFactory.createEmptyBorder(10, 30, 25, 30));
         
-        panelStats.add(EstilosApp.crearEtiqueta("Tiempo total de uso:"));
-        panelStats.add(crearValor(stats.getTiempoTotalUso() + " minutos"));
-        
-        panelStats.add(EstilosApp.crearEtiqueta("Racha actual:"));
-        panelStats.add(crearValor(stats.getRachaActual() + " días"));
-        
-        panelStats.add(EstilosApp.crearEtiqueta("Mejor racha:"));
-        panelStats.add(crearValor(stats.getMejorRacha() + " días"));
-        
-        panelStats.add(EstilosApp.crearEtiqueta("Errores pendientes:"));
-        panelStats.add(crearValor(String.valueOf(erroresPendientes)));
-        
-        panel.add(panelStats);
-        panel.add(Box.createRigidArea(new Dimension(0, 25)));
-        
-        // Botón cerrar
         JButton btnCerrar = new JButton("Cerrar");
-        EstilosApp.aplicarEstiloBoton(btnCerrar);
-        btnCerrar.setMaximumSize(new Dimension(150, 40));
-        btnCerrar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        panel.add(btnCerrar);
+        btnCerrar.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        btnCerrar.setBackground(EstilosApp.COLOR_PRIMARIO);
+        btnCerrar.setForeground(Color.WHITE);
+        btnCerrar.setBorder(BorderFactory.createEmptyBorder(12, 50, 12, 50));
+        btnCerrar.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        btnCerrar.setFocusPainted(false);
+        btnCerrar.setContentAreaFilled(false);
+        btnCerrar.setOpaque(true);
         
-        btnCerrar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                dispose();
+        btnCerrar.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent e) {
+                btnCerrar.setBackground(EstilosApp.COLOR_SECUNDARIO);
+            }
+            public void mouseExited(java.awt.event.MouseEvent e) {
+                btnCerrar.setBackground(EstilosApp.COLOR_PRIMARIO);
             }
         });
         
-        add(panel);
+        btnCerrar.addActionListener(e -> dispose());
+        
+        panelInferior.add(btnCerrar);
+        panelPrincipal.add(panelInferior, BorderLayout.SOUTH);
+        
+        add(panelPrincipal);
     }
     
-    private JLabel crearValor(String texto) {
-        JLabel label = new JLabel(texto);
-        label.setFont(new Font("Segoe UI", Font.BOLD, 14));
-        label.setForeground(EstilosApp.COLOR_PRIMARIO);
-        return label;
+    private JPanel crearTarjetaEstadistica(String titulo, String valor, Color color) {
+        JPanel tarjeta = new JPanel();
+        tarjeta.setLayout(new BoxLayout(tarjeta, BoxLayout.Y_AXIS));
+        tarjeta.setBackground(Color.WHITE);
+        tarjeta.setBorder(BorderFactory.createCompoundBorder(
+            BorderFactory.createLineBorder(new Color(230, 230, 230), 1),
+            BorderFactory.createEmptyBorder(20, 20, 20, 20)
+        ));
+        
+        JLabel lblValor = new JLabel(valor);
+        lblValor.setFont(new Font("Segoe UI", Font.BOLD, 24));
+        lblValor.setForeground(color);
+        lblValor.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        JLabel lblTitulo = new JLabel(titulo);
+        lblTitulo.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblTitulo.setForeground(EstilosApp.COLOR_SECUNDARIO);
+        lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        tarjeta.add(lblValor);
+        tarjeta.add(Box.createRigidArea(new Dimension(0, 8)));
+        tarjeta.add(lblTitulo);
+        
+        return tarjeta;
     }
     
     private JPanel crearLeyenda(Color color, String texto) {
-        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 5, 0));
-        EstilosApp.aplicarEstiloPanel(panel);
+        JPanel panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 8, 0));
+        panel.setBackground(EstilosApp.COLOR_FONDO);
         
         JPanel cuadro = new JPanel();
         cuadro.setBackground(color);
-        cuadro.setPreferredSize(new Dimension(15, 15));
+        cuadro.setPreferredSize(new Dimension(14, 14));
         
-        JLabel label = EstilosApp.crearEtiqueta(texto);
+        JLabel label = new JLabel(texto);
+        label.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        label.setForeground(EstilosApp.COLOR_TEXTO);
         
         panel.add(cuadro);
         panel.add(label);
@@ -161,47 +196,44 @@ public class VentanaEstadisticas extends JFrame {
             
             int total = aciertos + errores;
             
-            int size = Math.min(getWidth(), getHeight()) - 20;
+            int size = Math.min(getWidth(), getHeight()) - 10;
             int x = (getWidth() - size) / 2;
             int y = (getHeight() - size) / 2;
             
             if (total == 0) {
-                // Si no hay datos, mostrar círculo gris
-                g2d.setColor(new Color(200, 200, 200));
+                g2d.setColor(new Color(220, 220, 220));
                 g2d.fillOval(x, y, size, size);
                 
-                g2d.setColor(EstilosApp.COLOR_TEXTO);
-                g2d.setFont(new Font("Segoe UI", Font.PLAIN, 12));
+                g2d.setColor(EstilosApp.COLOR_SECUNDARIO);
+                g2d.setFont(new Font("Segoe UI", Font.PLAIN, 13));
                 String texto = "Sin datos";
                 FontMetrics fm = g2d.getFontMetrics();
                 int textoX = x + (size - fm.stringWidth(texto)) / 2;
-                int textoY = y + (size + fm.getAscent()) / 2;
+                int textoY = y + (size + fm.getAscent()) / 2 - 5;
                 g2d.drawString(texto, textoX, textoY);
             } else {
-                // Dibujar sección de aciertos (verde)
                 int anguloAciertos = (int) Math.round(360.0 * aciertos / total);
                 g2d.setColor(EstilosApp.COLOR_EXITO);
                 g2d.fillArc(x, y, size, size, 90, -anguloAciertos);
                 
-                // Dibujar sección de errores (rojo)
                 g2d.setColor(EstilosApp.COLOR_ERROR);
                 g2d.fillArc(x, y, size, size, 90 - anguloAciertos, -(360 - anguloAciertos));
                 
-                // Dibujar porcentajes en el centro
-                g2d.setColor(Color.WHITE);
-                g2d.setFont(new Font("Segoe UI", Font.BOLD, 16));
+                // Círculo central
+                int centroSize = size / 2;
+                int centroX = x + (size - centroSize) / 2;
+                int centroY = y + (size - centroSize) / 2;
+                g2d.setColor(EstilosApp.COLOR_FONDO);
+                g2d.fillOval(centroX, centroY, centroSize, centroSize);
                 
-                int porcentajeAciertos = (aciertos * 100) / total;
-                String texto = porcentajeAciertos + "% éxito";
+                // Porcentaje
+                int porcentaje = (aciertos * 100) / total;
+                g2d.setColor(EstilosApp.COLOR_TEXTO);
+                g2d.setFont(new Font("Segoe UI", Font.BOLD, 28));
+                String texto = porcentaje + "%";
                 FontMetrics fm = g2d.getFontMetrics();
                 int textoX = x + (size - fm.stringWidth(texto)) / 2;
-                int textoY = y + (size + fm.getAscent()) / 2;
-                
-                // Fondo para el texto
-                g2d.setColor(new Color(0, 0, 0, 100));
-                g2d.fillOval(x + size/4, y + size/4, size/2, size/2);
-                
-                g2d.setColor(Color.WHITE);
+                int textoY = y + (size + fm.getAscent()) / 2 - 5;
                 g2d.drawString(texto, textoX, textoY);
             }
         }
