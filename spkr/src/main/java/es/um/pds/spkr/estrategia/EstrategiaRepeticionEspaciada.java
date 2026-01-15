@@ -8,31 +8,27 @@ import es.um.pds.spkr.modelo.Pregunta;
 public class EstrategiaRepeticionEspaciada implements EstrategiaAprendizaje {
     
     private List<Pregunta> preguntasFalladas;
-    private int contadorParaRepetir;
-    private static final int INTERVALO_REPETICION = 3;
+    private List<Pregunta> preguntasYaContadas;
+    private int indiceFalladas;
     
     public EstrategiaRepeticionEspaciada() {
         this.preguntasFalladas = new ArrayList<>();
-        this.contadorParaRepetir = 0;
+        this.preguntasYaContadas = new ArrayList<>();
+        this.indiceFalladas = 0;
     }
     
     @Override
-    public Pregunta siguientePregunta(List<Pregunta> preguntas, int preguntaActual) {
-        // Si hay preguntas falladas y toca repetir
-        if (!preguntasFalladas.isEmpty() && contadorParaRepetir >= INTERVALO_REPETICION) {
-            contadorParaRepetir = 0;
-            return preguntasFalladas.remove(0);
+    public Pregunta siguientePregunta(List<Pregunta> preguntas, int indiceActual) {
+        // Primero recorremos las preguntas normales
+        if (indiceActual < preguntas.size()) {
+            return preguntas.get(indiceActual);
         }
         
-        // Si no, seguir con la siguiente pregunta normal
-        if (preguntaActual < preguntas.size()) {
-            contadorParaRepetir++;
-            return preguntas.get(preguntaActual);
-        }
-        
-        // Si ya no hay preguntas normales, mostrar las falladas restantes
-        if (!preguntasFalladas.isEmpty()) {
-            return preguntasFalladas.remove(0);
+        // Luego repasamos las falladas
+        if (indiceFalladas < preguntasFalladas.size()) {
+            Pregunta pregunta = preguntasFalladas.get(indiceFalladas);
+            indiceFalladas++;
+            return pregunta;
         }
         
         return null;
@@ -46,6 +42,16 @@ public class EstrategiaRepeticionEspaciada implements EstrategiaAprendizaje {
     
     public void registrarAcierto(Pregunta pregunta) {
         preguntasFalladas.remove(pregunta);
+    }
+    
+    public boolean esPreguntaYaContada(Pregunta pregunta) {
+        return preguntasYaContadas.contains(pregunta);
+    }
+    
+    public void marcarComoContada(Pregunta pregunta) {
+        if (!preguntasYaContadas.contains(pregunta)) {
+            preguntasYaContadas.add(pregunta);
+        }
     }
     
     @Override

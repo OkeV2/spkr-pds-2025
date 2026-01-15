@@ -39,6 +39,9 @@ public class VentanaEjercicio extends JFrame {
     private JPanel panelResultado;
     private JLabel lblResultado;
     private JLabel lblRespuestaCorrecta;
+    private JLabel lblAciertosContador;
+    private JLabel lblErroresContador; 
+   
     
     private JTextField txtRespuesta;
     private ButtonGroup grupoOpciones;
@@ -149,16 +152,16 @@ public class VentanaEjercicio extends JFrame {
         panelStats.setBackground(Color.WHITE);
         panelStats.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         
-        JLabel lblAciertos = new JLabel("Aciertos: " + aciertos);
-        lblAciertos.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblAciertos.setForeground(EstilosApp.COLOR_EXITO);
+        lblAciertosContador = new JLabel("Aciertos: " + aciertos);
+        lblAciertosContador.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblAciertosContador.setForeground(EstilosApp.COLOR_EXITO);
         
-        JLabel lblErrores = new JLabel("Errores: " + errores);
-        lblErrores.setFont(new Font("Segoe UI", Font.BOLD, 13));
-        lblErrores.setForeground(EstilosApp.COLOR_ERROR);
+        lblErroresContador = new JLabel("Errores: " + errores);
+        lblErroresContador.setFont(new Font("Segoe UI", Font.BOLD, 13));
+        lblErroresContador.setForeground(EstilosApp.COLOR_ERROR);
         
-        panelStats.add(lblAciertos);
-        panelStats.add(lblErrores);
+        panelStats.add(lblAciertosContador);
+        panelStats.add(lblErroresContador);
         
         panelSuperior.add(Box.createRigidArea(new Dimension(0, 10)));
         panelSuperior.add(panelStats);
@@ -467,6 +470,12 @@ public class VentanaEjercicio extends JFrame {
         }
         
         boolean correcta = preguntaActualObj.validarRespuesta(respuesta);
+        boolean yaContada = false;
+        
+        // Verificar si la pregunta ya fue contada anteriormente
+        if (estrategia instanceof EstrategiaRepeticionEspaciada) {
+            yaContada = ((EstrategiaRepeticionEspaciada) estrategia).esPreguntaYaContada(preguntaActualObj);
+        }
         
         panelResultado.setVisible(true);
         
@@ -474,14 +483,21 @@ public class VentanaEjercicio extends JFrame {
             lblResultado.setText("¡Correcto!");
             lblResultado.setForeground(EstilosApp.COLOR_EXITO);
             lblRespuestaCorrecta.setText("");
-            aciertos++;
-            progreso.registrarAcierto();
+            
+            if (!yaContada) {
+                aciertos++;
+                progreso.registrarAcierto();
+                lblAciertosContador.setText("Aciertos: " + aciertos);
+                
+                if (estrategia instanceof EstrategiaRepeticionEspaciada) {
+                    ((EstrategiaRepeticionEspaciada) estrategia).marcarComoContada(preguntaActualObj);
+                }
+            }
             
             if (estrategia instanceof EstrategiaRepeticionEspaciada) {
                 ((EstrategiaRepeticionEspaciada) estrategia).registrarAcierto(preguntaActualObj);
             }
             
-            // Marcar opción correcta en verde
             if (preguntaActualObj instanceof PreguntaTest) {
                 marcarOpcionCorrecta();
             }
@@ -490,22 +506,30 @@ public class VentanaEjercicio extends JFrame {
             lblResultado.setText("Incorrecto");
             lblResultado.setForeground(EstilosApp.COLOR_ERROR);
             lblRespuestaCorrecta.setText("La respuesta correcta era: " + respuestaCorrectaStr);
-            errores++;
-            progreso.registrarError();
+            
+            if (!yaContada) {
+                errores++;
+                progreso.registrarError();
+                lblErroresContador.setText("Errores: " + errores);
+                registrarError();
+                
+                if (estrategia instanceof EstrategiaRepeticionEspaciada) {
+                    ((EstrategiaRepeticionEspaciada) estrategia).marcarComoContada(preguntaActualObj);
+                }
+            }
             
             if (estrategia instanceof EstrategiaRepeticionEspaciada) {
                 ((EstrategiaRepeticionEspaciada) estrategia).registrarFallo(preguntaActualObj);
             }
             
-            registrarError();
-            
-            // Marcar opciones en rojo/verde
             if (preguntaActualObj instanceof PreguntaTest) {
                 marcarOpcionIncorrecta();
             }
         }
         
-        app.getUsuarioActual().getEstadisticas().incrementarEjercicios();
+        if (!yaContada) {
+            app.getUsuarioActual().getEstadisticas().incrementarEjercicios();
+        }
         app.guardarProgreso();
         
         btnComprobar.setEnabled(false);
