@@ -1,20 +1,18 @@
 @startuml modelo-dominio
-
 ' Configuración
 skinparam classAttributeIconSize 0
 skinparam classFontStyle bold
 
 ' ===== CONTROLADOR =====
-
 class SpkrApp <<Controlador>> {
     - Usuario usuarioActual
     + iniciar()
     + login(String nombre, String password)
     + logout()
+    + guardarProgreso()
 }
 
 ' ===== CATÁLOGOS =====
-
 class CatalogoUsuarios {
     + Usuario getUsuario(String nombre)
     + void addUsuario(Usuario u)
@@ -29,7 +27,6 @@ class CatalogoCursos {
 }
 
 ' ===== CARGADORES DE CURSOS =====
-
 interface CargadorCursos {
     + Curso cargarCurso(String ruta)
     + void exportarCurso(Curso c, String ruta)
@@ -45,8 +42,27 @@ class CargadorCursosYAML {
     + void exportarCurso(Curso c, String ruta)
 }
 
-' ===== CLASES PRINCIPALES =====
+' ===== ESTRATEGIAS DE APRENDIZAJE =====
+interface EstrategiaAprendizaje {
+    + Pregunta siguientePregunta(List<Pregunta> preguntas, int indice)
+}
 
+class EstrategiaSecuencial {
+    + Pregunta siguientePregunta(List<Pregunta> preguntas, int indice)
+}
+
+class EstrategiaAleatoria {
+    + Pregunta siguientePregunta(List<Pregunta> preguntas, int indice)
+}
+
+class EstrategiaRepeticionEspaciada {
+    - List<Pregunta> preguntasFalladas
+    + Pregunta siguientePregunta(List<Pregunta> preguntas, int indice)
+    + void registrarFallo(Pregunta p)
+    + void registrarAcierto(Pregunta p)
+}
+
+' ===== CLASES PRINCIPALES =====
 class Usuario {
     - Long id
     - String nombreUsuario
@@ -77,7 +93,6 @@ class Leccion {
 }
 
 ' ===== JERARQUÍA DE PREGUNTAS =====
-
 abstract class Pregunta {
     - Long id
     - String enunciado
@@ -104,15 +119,17 @@ class PreguntaHuecos {
 }
 
 ' ===== PROGRESO Y ESTADÍSTICAS =====
-
 class Progreso {
     - Long id
     - int preguntaActual
     - int aciertos
     - int errores
+    - int tiempoSegundos
+    - String estrategia
     - Date fechaUltimoAcceso
-    + void guardar()
-    + void reanudar()
+    + void registrarAcierto()
+    + void registrarError()
+    + void reiniciar()
 }
 
 class Estadisticas {
@@ -137,7 +154,6 @@ class ErrorFrecuente {
 }
 
 ' ===== RELACIONES =====
-
 ' Controlador con Catálogos
 SpkrApp "1" -- "1" CatalogoUsuarios : usa >
 SpkrApp "1" -- "1" CatalogoCursos : usa >
@@ -146,6 +162,11 @@ SpkrApp "1" -- "1" CatalogoCursos : usa >
 CatalogoCursos ..> CargadorCursos : usa >
 CargadorCursos <|.. CargadorCursosJSON
 CargadorCursos <|.. CargadorCursosYAML
+
+' Estrategias
+EstrategiaAprendizaje <|.. EstrategiaSecuencial
+EstrategiaAprendizaje <|.. EstrategiaAleatoria
+EstrategiaAprendizaje <|.. EstrategiaRepeticionEspaciada
 
 ' Catálogos y entidades
 CatalogoUsuarios "1" -- "0..*" Usuario : gestiona >
@@ -156,9 +177,6 @@ Usuario "1" *-- "1" Biblioteca : tiene >
 Usuario "1" *-- "1" Estadisticas : tiene >
 Biblioteca "1" -- "0..*" Curso : contiene >
 
-' Usuario crea Cursos
-Usuario "1" -- "0..*" Curso : crea >
-
 ' Progreso (relaciona Usuario con Curso)
 Usuario "1" -- "0..*" Progreso : tiene >
 Progreso "0..*" -- "1" Curso : de >
@@ -168,8 +186,8 @@ Usuario "1" -- "0..*" ErrorFrecuente : tiene >
 ErrorFrecuente "0..*" -- "1" Pregunta : referencia >
 
 ' Curso y Lecciones
-Curso "1" *-- "1..*" Leccion : contiene >
-Leccion "1" *-- "1..*" Pregunta : contiene >
+Curso "1" *-- "0..*" Leccion : contiene >
+Leccion "1" *-- "0..*" Pregunta : contiene >
 
 ' Herencia de Preguntas
 Pregunta <|-- PreguntaTest
