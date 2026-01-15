@@ -253,7 +253,7 @@ public class VentanaSeleccionEstrategia extends JFrame {
         this.dispose();
         
         JFrame ventanaPreparacion = new JFrame("Spkr - Preparado");
-        ventanaPreparacion.setSize(400, 300);
+        ventanaPreparacion.setSize(400, 400);
         ventanaPreparacion.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         ventanaPreparacion.setLocationRelativeTo(null);
         ventanaPreparacion.setResizable(false);
