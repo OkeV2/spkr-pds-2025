@@ -71,22 +71,6 @@ Esta pantalla permite crear una nueva cuenta de usuario en el sistema.
 
 ---
 
-### 2.3 Pantalla de Inicio de Sesión
-
-Permite a los usuarios registrados acceder a su cuenta.
-
-![Pantalla de Inicio de Sesión](imagenes/manual/login.png)
-
-**Campos del formulario:**
-- **Nombre de usuario:** El identificador con el que se registró
-- **Contraseña:** La clave de acceso asociada a la cuenta
-
-**Acciones disponibles:**
-- **Botón "Iniciar Sesión":** Valida las credenciales y accede a la aplicación
-- **Enlace "¿No tienes cuenta? Regístrate":** Accede al formulario de registro
-
----
-
 ### 2.4 Menú Principal
 
 Una vez iniciada la sesión, se muestra el menú principal con todas las opciones disponibles.
