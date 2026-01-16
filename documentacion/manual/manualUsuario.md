@@ -61,7 +61,7 @@ Esta pantalla permite crear una nueva cuenta de usuario en el sistema.
 
 **Acciones disponibles:**
 - **Botón "Registrarse":** Crea la cuenta si todos los datos son válidos
-- **Enlace "¿Ya tienes cuenta? Inicia sesión":** Vuelve a la pantalla de inicio de sesión
+- **Botón "Canelar":** Volver al panel de bienvenida
 
 **Validaciones:**
 - Todos los campos son obligatorios
