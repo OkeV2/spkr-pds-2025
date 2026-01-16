@@ -51,7 +51,7 @@
 
 Los casos de uso del sistema se encuentran documentados en los issues del repositorio:
 
-- [Issue principal de Casos de Uso](https://github.com/OkeV2/spkr/issues/1)
+- [Issue principal de Casos de Uso](https://github.com/OkeV2/spkr-pds-2025/issues/1)
 
 
 ### Modelo de Dominio
