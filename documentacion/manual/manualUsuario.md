@@ -38,7 +38,7 @@ Este manual tiene como objetivo guiar al usuario a través de todas las funciona
 
 Al iniciar la aplicación, se muestra la pantalla de bienvenida que permite al usuario elegir entre iniciar sesión con una cuenta existente o registrarse como nuevo usuario.
 
-![Pantalla de Bienvenida](documentacion/manual/imagenes/bienvenida.png)
+![Pantalla de Bienvenida](../imagenes/bienvenida.png)
 
 **Elementos de la pantalla:**
 - **Logo de la aplicación:** Identificación visual de Spkr
@@ -61,29 +61,13 @@ Esta pantalla permite crear una nueva cuenta de usuario en el sistema.
 
 **Acciones disponibles:**
 - **Botón "Registrarse":** Crea la cuenta si todos los datos son válidos
-- **Enlace "¿Ya tienes cuenta? Inicia sesión":** Vuelve a la pantalla de inicio de sesión
+- **Botón "Canelar":** Volver al panel de bienvenida
 
 **Validaciones:**
 - Todos los campos son obligatorios
 - El nombre de usuario no debe existir previamente
 - El correo electrónico debe tener un formato válido
 - Las contraseñas deben coincidir
-
----
-
-### 2.3 Pantalla de Inicio de Sesión
-
-Permite a los usuarios registrados acceder a su cuenta.
-
-![Pantalla de Inicio de Sesión](imagenes/manual/login.png)
-
-**Campos del formulario:**
-- **Nombre de usuario:** El identificador con el que se registró
-- **Contraseña:** La clave de acceso asociada a la cuenta
-
-**Acciones disponibles:**
-- **Botón "Iniciar Sesión":** Valida las credenciales y accede a la aplicación
-- **Enlace "¿No tienes cuenta? Regístrate":** Accede al formulario de registro
 
 ---
 
