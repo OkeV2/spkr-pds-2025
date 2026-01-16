@@ -142,9 +142,8 @@ Permite guardar un curso como archivo para compartirlo o hacer copia de segurida
 **Proceso de exportación:**
 1. Seleccionar el curso a exportar en la lista
 2. Pulsar el botón "Exportar Curso"
-3. Elegir el formato de exportación (JSON o YAML)
-4. Seleccionar la ubicación y nombre del archivo
-5. El curso se guarda en el formato seleccionado
+3. Seleccionar la ubicación y nombre del archivo (añadir .json/.yml/.yaml respectivamente)
+4. El curso se guarda en el formato seleccionado
 
 ---
 
