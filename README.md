@@ -97,7 +97,7 @@ El modelo de dominio y diagramas UML se encuentran en:
 
 3. **Ejecutar la aplicación:**
 ```bash
-   mvn exec:java -Dexec.mainClass="es.um.pds.spkr.Main"
+   mvn exec:java "-Dexec.mainClass=es.um.pds.spkr.Main"
 ```
 
 ### Usuario de Prueba
