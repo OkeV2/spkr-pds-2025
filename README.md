@@ -7,7 +7,7 @@
 <h3 align="center">Spkr - Prácticas de PDS</h3>
 
 <p align="center">
-  Aplicación de aprendizaje de idiomas mediante ejercicios interactivos y flashcards
+  Aplicación de aprendizaje de idiomas mediante ejercicios interactivos
 </p>
 
 ---
