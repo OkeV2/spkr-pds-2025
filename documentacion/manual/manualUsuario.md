@@ -38,7 +38,7 @@ Este manual tiene como objetivo guiar al usuario a través de todas las funciona
 
 Al iniciar la aplicación, se muestra la pantalla de bienvenida que permite al usuario elegir entre iniciar sesión con una cuenta existente o registrarse como nuevo usuario.
 
-![Pantalla de Bienvenida](documentacion/imagenes/bienvenida.png)
+![Pantalla de Bienvenida](../imagenes/bienvenida.png)
 
 **Elementos de la pantalla:**
 - **Logo de la aplicación:** Identificación visual de Spkr
