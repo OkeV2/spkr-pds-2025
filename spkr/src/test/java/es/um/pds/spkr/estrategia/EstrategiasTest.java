@@ -87,14 +87,16 @@ public class EstrategiasTest {
     public void testRepeticionEspaciadaRepiteFalladas() {
         EstrategiaRepeticionEspaciada estrategia = new EstrategiaRepeticionEspaciada();
         
+        // Recorrer todas las preguntas normales
         Pregunta pregunta1 = estrategia.siguientePregunta(preguntas, 0);
         estrategia.registrarFallo(pregunta1);
         
         estrategia.siguientePregunta(preguntas, 1);
         estrategia.siguientePregunta(preguntas, 2);
+        estrategia.siguientePregunta(preguntas, 3);
         
-        // Después de 3 preguntas, debe repetir la fallada
-        Pregunta repetida = estrategia.siguientePregunta(preguntas, 3);
+        // Después de todas las preguntas (índice 4), debe repetir la fallada
+        Pregunta repetida = estrategia.siguientePregunta(preguntas, 4);
         assertEquals(pregunta1, repetida);
     }
     

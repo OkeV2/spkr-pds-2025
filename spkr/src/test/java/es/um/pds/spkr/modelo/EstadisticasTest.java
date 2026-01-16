@@ -43,6 +43,8 @@ public class EstadisticasTest {
     
     @Test
     public void testActualizarRacha() {
+        // Primera llamada - inicializa la racha
+        estadisticas.setUltimoAcceso(null);
         estadisticas.actualizarRacha();
         assertEquals(1, estadisticas.getRachaActual());
         assertEquals(1, estadisticas.getMejorRacha());
