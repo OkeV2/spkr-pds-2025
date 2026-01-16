@@ -20,6 +20,8 @@ public class Progreso {
     private int errores;
     private String estrategia;
     private int tiempoSegundos;
+    private boolean completado;
+
     
     @Temporal(TemporalType.TIMESTAMP)
     private Date fechaUltimoAcceso;
@@ -28,6 +30,7 @@ public class Progreso {
         this.preguntaActual = 0;
         this.aciertos = 0;
         this.errores = 0;
+        this.completado = false;
         this.fechaUltimoAcceso = new Date();
     }
     
@@ -36,6 +39,7 @@ public class Progreso {
         this.preguntaActual = 0;
         this.aciertos = 0;
         this.errores = 0;
+        this.completado = false;
         this.fechaUltimoAcceso = new Date();
     }
     
@@ -57,6 +61,7 @@ public class Progreso {
         this.errores = 0;
         this.estrategia = null;
         this.tiempoSegundos = 0;
+        this.completado = false;
         this.fechaUltimoAcceso = new Date();
     }
     
@@ -124,5 +129,13 @@ public class Progreso {
     
     public void setTiempoSegundos(int tiempoSegundos) {
         this.tiempoSegundos = tiempoSegundos;
+    }
+    
+    public boolean isCompletado() {
+        return completado;
+    }
+
+    public void setCompletado(boolean completado) {
+        this.completado = completado;
     }
 }

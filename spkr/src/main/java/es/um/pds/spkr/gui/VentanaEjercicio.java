@@ -748,6 +748,8 @@ public class VentanaEjercicio extends JFrame {
         JOptionPane.showMessageDialog(this, mensaje, "Resultado", JOptionPane.INFORMATION_MESSAGE);
         
         app.guardarProgreso();
+        ventanaPrincipal.actualizarListaCursos();
+        ventanaPrincipal.setVisible(true);
         this.dispose();
     }
     
@@ -762,6 +764,8 @@ public class VentanaEjercicio extends JFrame {
         }
         
         app.guardarProgreso();
+        ventanaPrincipal.actualizarListaCursos();
+        ventanaPrincipal.setVisible(true);
         this.dispose();
     }
 }

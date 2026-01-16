@@ -275,7 +275,7 @@ public class VentanaPrincipal extends JFrame {
         return boton;
     }
     
-    private void actualizarListaCursos() {
+    public void actualizarListaCursos() {
         panelCursos.removeAll();
         cursoSeleccionadoIndex = -1;
         panelCursoSeleccionado = null;
@@ -364,8 +364,13 @@ public class VentanaPrincipal extends JFrame {
         
      // Progreso si existe
         Progreso progreso = buscarProgreso(curso);
-        if (progreso != null && progreso.getPreguntaActual() > 0) {
-            int porcentaje = (progreso.getPreguntaActual() * 100) / numPreguntas;
+        if (progreso != null && (progreso.getPreguntaActual() > 0 || progreso.isCompletado())) {
+            int porcentaje;
+            if (progreso.isCompletado()) {
+                porcentaje = 100;
+            } else {
+                porcentaje = (progreso.getPreguntaActual() * 100) / numPreguntas;
+            }
             JLabel lblProgreso = new JLabel(porcentaje + "%");
             lblProgreso.setFont(new Font("Segoe UI", Font.BOLD, 14));
             lblProgreso.setForeground(EstilosApp.COLOR_EXITO);
