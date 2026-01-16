@@ -628,7 +628,12 @@ public class VentanaEjercicio extends JFrame {
                 ));
                 rb.setBackground(new Color(232, 245, 233));
             }
-            rb.setEnabled(false);
+            // Mantener color del texto
+            rb.setFocusable(false);
+            rb.setForeground(EstilosApp.COLOR_TEXTO);
+            for (java.awt.event.MouseListener ml : panel.getMouseListeners()) {
+                panel.removeMouseListener(ml);
+            }
         }
     }
     
@@ -656,7 +661,12 @@ public class VentanaEjercicio extends JFrame {
                 ));
                 rb.setBackground(new Color(232, 245, 233));
             }
-            rb.setEnabled(false);
+            // Mantener color del texto
+            rb.setFocusable(false);
+            rb.setForeground(EstilosApp.COLOR_TEXTO);
+            for (java.awt.event.MouseListener ml : panel.getMouseListeners()) {
+                panel.removeMouseListener(ml);
+            }
         }
     }
     
@@ -713,14 +723,20 @@ public class VentanaEjercicio extends JFrame {
         // Guardar tiempo en progreso
         progreso.setTiempoSegundos(segundosTotales);
         
+        // Añadir tiempo a estadísticas globales (en minutos)
+        int minutos = segundosTotales / 60;
+        if (minutos > 0) {
+            app.getUsuarioActual().getEstadisticas().incrementarTiempo(minutos);
+        }
+        
         String tiempoFormateado;
         int horas = segundosTotales / 3600;
-        int minutos = (segundosTotales % 3600) / 60;
+        int minutosDisplay = (segundosTotales % 3600) / 60;
         int segundos = segundosTotales % 60;
         if (horas > 0) {
-            tiempoFormateado = String.format("%d:%02d:%02d", horas, minutos, segundos);
+            tiempoFormateado = String.format("%d:%02d:%02d", horas, minutosDisplay, segundos);
         } else {
-            tiempoFormateado = String.format("%02d:%02d", minutos, segundos);
+            tiempoFormateado = String.format("%02d:%02d", minutosDisplay, segundos);
         }
         
         String mensaje = "¡Curso completado!\n\n" +
@@ -738,6 +754,13 @@ public class VentanaEjercicio extends JFrame {
     private void salir() {
         temporizador.stop();
         progreso.setTiempoSegundos(segundosTotales);
+        
+        // Añadir tiempo a estadísticas globales (en minutos)
+        int minutos = segundosTotales / 60;
+        if (minutos > 0) {
+            app.getUsuarioActual().getEstadisticas().incrementarTiempo(minutos);
+        }
+        
         app.guardarProgreso();
         this.dispose();
     }
