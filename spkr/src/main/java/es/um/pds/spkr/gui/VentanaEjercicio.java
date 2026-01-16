@@ -544,6 +544,13 @@ public class VentanaEjercicio extends JFrame {
         
         preguntaRespondida = true;
         
+     // Deshabilitar todos los radio buttons inmediatamente
+        if (opcionesTest != null) {
+            for (JRadioButton rb : opcionesTest) {
+                rb.setEnabled(false);
+            }
+        }
+        
         boolean correcta = preguntaActualObj.validarRespuesta(respuesta);
         boolean yaContada = false;
         
