@@ -20,7 +20,7 @@
 
 - **Tres tipos de ejercicios:** Test de opciones múltiples, traducción escrita y rellenar huecos
 - **Tres estrategias de aprendizaje:** Secuencial, aleatoria y repetición espaciada
-- **Sistema de progreso:** Guarda automáticamente el avance para continuar donde lo dejaste
+- **Sistema de progreso:** Guarda el avance para continuar donde lo dejaste
 - **Temporizador:** Control del tiempo dedicado a cada sesión de estudio
 - **Estadísticas detalladas:** Seguimiento de aciertos, errores, tiempo de uso y rachas
 - **Repaso de errores:** Sistema inteligente para reforzar las preguntas falladas
@@ -28,12 +28,7 @@
 
 ### Funcionalidad Extra Implementada
 
-- Sistema de rachas de días consecutivos
-- Temporizador con pausa y reanudación
-- Múltiples estrategias de aprendizaje (incluyendo repetición espaciada)
-- Exportación de cursos en múltiples formatos (JSON/YAML)
-- Interfaz gráfica moderna y responsive
-
+- **Repaso de errores frecuentes:** Sistema inteligente que registra automáticamente todas las preguntas falladas durante la realización de cualquier curso. Los errores se acumulan en una lista global que recopila fallos de todos los cursos del usuario. Al acceder a la función "Repasar Errores", el usuario puede practicar específicamente aquellas preguntas que más le cuestan. Cada vez que se acierta una pregunta durante el repaso, su contador de errores se reduce. Cuando el usuario demuestra dominio de una pregunta (contador llega a cero), esta se elimina automáticamente de la lista de errores frecuentes. Este sistema permite un aprendizaje más eficiente al focalizar el estudio en las áreas de mayor dificultad.
 ---
 
 ## Equipo de Desarrollo
