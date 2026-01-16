@@ -422,7 +422,7 @@ public class VentanaRepaso extends JFrame {
             
             errorActual.reducirErrores();
             if (errorActual.estaDominada()) {
-                app.getUsuarioActual().removeErrorFrecuente(errorActual);
+                app.eliminarErrorFrecuente(errorActual);
             }
         } else {
             String respuestaCorrectaStr = obtenerRespuestaCorrecta();

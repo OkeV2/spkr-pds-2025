@@ -5,6 +5,7 @@ import es.um.pds.spkr.catalogo.CatalogoUsuarios;
 import es.um.pds.spkr.modelo.Usuario;
 import es.um.pds.spkr.modelo.Estadisticas;
 import es.um.pds.spkr.modelo.Biblioteca;
+import es.um.pds.spkr.modelo.ErrorFrecuente;
 import es.um.pds.spkr.persistencia.GestorPersistencia;
 
 public class SpkrApp {
@@ -66,6 +67,13 @@ public class SpkrApp {
             catalogoUsuarios.actualizarUsuario(usuarioActual);
         }
         GestorPersistencia.getInstancia().cerrar();
+    }
+    
+    public void eliminarErrorFrecuente(ErrorFrecuente error) {
+        if (usuarioActual != null) {
+            usuarioActual.removeErrorFrecuente(error);
+            GestorPersistencia.getInstancia().eliminar(error);
+        }
     }
     
     // Getters
