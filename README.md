@@ -33,9 +33,17 @@
 
 ## Equipo de Desarrollo
 
-| Nombre | GitHub |
-|--------|--------|
-| <img src="https://github.com/OkeV2.png" width="50" height="50" alt="OkeV2"/> Ismel Alejandro Oquendo Rodríguez | [@OkeV2](https://github.com/OkeV2) |
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/OkeV2">
+        <img src="https://github.com/OkeV2.png" width="100" height="100" alt="OkeV2"/><br />
+        <b>Ismel Alejandro Oquendo Rodríguez</b><br />
+        @OkeV2
+      </a>
+    </td>
+  </tr>
+</table>
 
 ### Profesor Responsable
 
