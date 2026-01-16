@@ -35,7 +35,7 @@
 
 | Nombre | GitHub |
 |--------|--------|
-| Ismel Alejandro Oquendo Rodríguez | [@OkeV2](https://github.com/OkeV2) |
+| <img src="https://github.com/OkeV2.png" width="50" height="50" alt="OkeV2"/> Ismel Alejandro Oquendo Rodríguez | [@OkeV2](https://github.com/OkeV2) |
 
 ### Profesor Responsable
 
