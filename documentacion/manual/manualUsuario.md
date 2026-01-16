@@ -51,7 +51,7 @@ Al iniciar la aplicación, se muestra la pantalla de bienvenida que permite al u
 
 Esta pantalla permite crear una nueva cuenta de usuario en el sistema.
 
-![Pantalla de Registro](imagenes/manual/registro.png)
+![Pantalla de Registro](../imagenes/registro.png)
 
 **Campos del formulario:**
 - **Nombre de usuario:** Identificador único para acceder a la aplicación
@@ -75,7 +75,7 @@ Esta pantalla permite crear una nueva cuenta de usuario en el sistema.
 
 Una vez iniciada la sesión, se muestra el menú principal con todas las opciones disponibles.
 
-![Menú Principal](imagenes/manual/menu-principal.png)
+![Menú Principal](../imagenes/menu-principal.png)
 
 **Secciones de la pantalla:**
 
@@ -99,7 +99,7 @@ Una vez iniciada la sesión, se muestra el menú principal con todas las opcione
 
 Muestra un resumen del progreso y rendimiento del usuario.
 
-![Pantalla de Estadísticas](imagenes/manual/estadisticas.png)
+![Pantalla de Estadísticas](../imagenes/estadisticas.png)
 
 **Información mostrada:**
 
@@ -121,7 +121,7 @@ Muestra un resumen del progreso y rendimiento del usuario.
 
 Permite añadir nuevos cursos a la biblioteca desde archivos JSON o YAML.
 
-![Importar Curso](imagenes/manual/importar-curso.png)
+![Importar Curso](../imagenes/importar-curso.png)
 
 **Proceso de importación:**
 1. Pulsar el botón "Importar Curso" en el menú principal
@@ -137,7 +137,7 @@ Permite añadir nuevos cursos a la biblioteca desde archivos JSON o YAML.
 
 Permite guardar un curso como archivo para compartirlo o hacer copia de seguridad.
 
-![Exportar Curso](imagenes/manual/exportar-curso.png)
+![Exportar Curso](../imagenes/exportar-curso.png)
 
 **Proceso de exportación:**
 1. Seleccionar el curso a exportar en la lista
@@ -153,13 +153,13 @@ Permite guardar un curso como archivo para compartirlo o hacer copia de segurida
 
 Para comenzar a practicar, selecciona un curso de tu biblioteca haciendo clic sobre él y pulsa "Iniciar Curso".
 
-![Selección de Curso](imagenes/manual/seleccion-curso.png)
+![Selección de Curso](../imagenes/seleccion-curso.png)
 
 #### 2.7.2 Continuar o Reiniciar
 
 Si el curso tiene progreso guardado, se mostrará un diálogo con dos opciones:
 
-![Continuar o Reiniciar](imagenes/manual/continuar-reiniciar.png)
+![Continuar o Reiniciar](../imagenes/continuar-reiniciar.png)
 
 - **Continuar:** Retoma el curso desde donde lo dejaste, manteniendo aciertos, errores, tiempo y estrategia
 - **Empezar de cero:** Reinicia el progreso completamente
@@ -168,7 +168,7 @@ Si el curso tiene progreso guardado, se mostrará un diálogo con dos opciones:
 
 Antes de comenzar, debes elegir una estrategia de aprendizaje:
 
-![Selección de Estrategia](imagenes/manual/seleccion-estrategia.png)
+![Selección de Estrategia](../imagenes/seleccion-estrategia.png)
 
 **Estrategias disponibles:**
 
@@ -182,7 +182,7 @@ Antes de comenzar, debes elegir una estrategia de aprendizaje:
 
 Tras seleccionar la estrategia, se muestra una ventana de preparación:
 
-![Ventana de Preparación](imagenes/manual/preparacion.png)
+![Ventana de Preparación](../imagenes/preparacion.png)
 
 - Muestra el nombre del curso y la estrategia seleccionada
 - El botón "Empezar" inicia el temporizador y los ejercicios
@@ -195,7 +195,7 @@ Tras seleccionar la estrategia, se muestra una ventana de preparación:
 
 Durante la realización del curso, la interfaz muestra:
 
-![Interfaz de Ejercicios](imagenes/manual/interfaz-ejercicios.png)
+![Interfaz de Ejercicios](../imagenes/interfaz-ejercicios.png)
 
 **Elementos de la pantalla:**
 
@@ -223,14 +223,14 @@ Durante la realización del curso, la interfaz muestra:
 
 **Pausar/Reanudar:**
 
-![Botón Pausar](imagenes/manual/boton-pausar.png)
+![Botón Pausar](../imagenes/boton-pausar.png)
 
 - El botón naranja "Pausar" detiene el temporizador
 - Cambia a verde "Reanudar" para continuar
 
 **Guardar y Salir:**
 
-![Botón Guardar y Salir](imagenes/manual/boton-guardar.png)
+![Botón Guardar y Salir](../imagenes/boton-guardar.png)
 
 - Guarda el progreso actual (pregunta, aciertos, errores, tiempo)
 - Cierra la ventana de ejercicios
@@ -244,7 +244,7 @@ Durante la realización del curso, la interfaz muestra:
 
 Muestra una pregunta con tres opciones de respuesta.
 
-![Ejercicio Test](imagenes/manual/ejercicio-test.png)
+![Ejercicio Test](../imagenes/ejercicio-test.png)
 
 **Cómo responder:**
 1. Lee la pregunta en el enunciado
@@ -255,14 +255,14 @@ Muestra una pregunta con tres opciones de respuesta.
 - Respuesta correcta: Se resalta en verde
 - Respuesta incorrecta: Se resalta en rojo y se muestra la correcta en verde
 
-![Test Correcto](imagenes/manual/test-correcto.png)
-![Test Incorrecto](imagenes/manual/test-incorrecto.png)
+![Test Correcto](../imagenes/test-correcto.png)
+![Test Incorrecto](../imagenes/test-incorrecto.png)
 
 #### 2.9.2 Ejercicio de Traducción
 
 Muestra una palabra o frase para traducir.
 
-![Ejercicio Traducción](imagenes/manual/ejercicio-traduccion.png)
+![Ejercicio Traducción](../imagenes/ejercicio-traduccion.png)
 
 **Cómo responder:**
 1. Lee la palabra o frase a traducir
@@ -275,7 +275,7 @@ Muestra una palabra o frase para traducir.
 
 Muestra una frase con una palabra oculta que debes completar.
 
-![Ejercicio Huecos](imagenes/manual/ejercicio-huecos.png)
+![Ejercicio Huecos](../imagenes/ejercicio-huecos.png)
 
 **Cómo responder:**
 1. Lee la frase con el hueco (representado por ___)
@@ -288,7 +288,7 @@ Muestra una frase con una palabra oculta que debes completar.
 
 Si has guardado el progreso de un curso, puedes reanudarlo en cualquier momento.
 
-![Reanudar Curso](imagenes/manual/reanudar-curso.png)
+![Reanudar Curso](../imagenes/reanudar-curso.png)
 
 **Proceso:**
 1. Selecciona el curso en tu biblioteca
@@ -306,7 +306,7 @@ Si has guardado el progreso de un curso, puedes reanudarlo en cualquier momento.
 
 Al completar todas las preguntas del curso, se muestra un resumen de resultados.
 
-![Resultado Final](imagenes/manual/resultado-final.png)
+![Resultado Final](../imagenes/resultado-final.png)
 
 **Información mostrada:**
 - Número de aciertos
@@ -325,7 +325,7 @@ Al completar todas las preguntas del curso, se muestra un resumen de resultados.
 
 Esta función permite practicar las preguntas que has fallado anteriormente.
 
-![Repasar Errores](imagenes/manual/repasar-errores.png)
+![Repasar Errores](../imagenes/repasar-errores.png)
 
 **Cómo funciona:**
 1. Pulsa "Repasar Errores" en el menú principal
@@ -335,7 +335,7 @@ Esta función permite practicar las preguntas que has fallado anteriormente.
 
 **Si no tienes errores:**
 
-![Sin Errores](imagenes/manual/sin-errores.png)
+![Sin Errores](../imagenes/sin-errores.png)
 
 Se mostrará un mensaje indicando que no hay errores pendientes para repasar.
 
