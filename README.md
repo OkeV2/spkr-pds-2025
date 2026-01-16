@@ -1,5 +1,8 @@
 # Spkr
 
+<img width="1024" height="1024" alt="logoReadme" src="https://github.com/user-attachments/assets/4ec9da36-70c2-49af-8d6e-c90378bdd378" />
+
+
 Aplicación de aprendizaje de idiomas inspirada en Duolingo.
 
 ## Descripción
