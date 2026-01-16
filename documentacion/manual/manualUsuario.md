@@ -2,7 +2,7 @@
 
 ## 1. Introducción
 
-**Spkr** es una aplicación de escritorio diseñada para el aprendizaje de idiomas mediante el uso de tarjetas de memoria (flashcards). La aplicación permite a los usuarios practicar vocabulario y gramática a través de diferentes tipos de ejercicios interactivos, ofreciendo múltiples estrategias de aprendizaje adaptadas a las necesidades de cada usuario.
+**Spkr** es una aplicación de escritorio diseñada para el aprendizaje de idiomas mediante el uso de ejercicios interactivos. La aplicación permite a los usuarios practicar vocabulario y gramática a través de diferentes tipos de ejercicios, ofreciendo múltiples estrategias de aprendizaje adaptadas a las necesidades de cada usuario.
 
 ### Características principales
 
