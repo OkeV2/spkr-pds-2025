@@ -71,7 +71,7 @@ Esta pantalla permite crear una nueva cuenta de usuario en el sistema.
 
 ---
 
-### 2.4 Menú Principal
+### 2.3 Menú Principal
 
 Una vez iniciada la sesión, se muestra el menú principal con todas las opciones disponibles.
 
@@ -95,7 +95,7 @@ Una vez iniciada la sesión, se muestra el menú principal con todas las opcione
 
 ---
 
-### 2.5 Estadísticas
+### 2.4 Estadísticas
 
 Muestra un resumen del progreso y rendimiento del usuario.
 
@@ -115,9 +115,9 @@ Muestra un resumen del progreso y rendimiento del usuario.
 
 ---
 
-### 2.6 Gestión de Cursos
+### 2.5 Gestión de Cursos
 
-#### 2.6.1 Importar Curso
+#### 2.5.1 Importar Curso
 
 Permite añadir nuevos cursos a la biblioteca desde archivos JSON o YAML.
 
@@ -133,7 +133,7 @@ Permite añadir nuevos cursos a la biblioteca desde archivos JSON o YAML.
 - JSON (.json)
 - YAML (.yaml, .yml)
 
-#### 2.6.2 Exportar Curso
+#### 2.5.2 Exportar Curso
 
 Permite guardar un curso como archivo para compartirlo o hacer copia de seguridad.
 
@@ -147,15 +147,15 @@ Permite guardar un curso como archivo para compartirlo o hacer copia de segurida
 
 ---
 
-### 2.7 Iniciar un Curso
+### 2.6 Iniciar un Curso
 
-#### 2.7.1 Selección del Curso
+#### 2.6.1 Selección del Curso
 
 Para comenzar a practicar, selecciona un curso de tu biblioteca haciendo clic sobre él y pulsa "Iniciar Curso".
 
 ![Selección de Curso](../imagenes/seleccion-curso.png)
 
-#### 2.7.2 Continuar o Reiniciar
+#### 2.6.2 Continuar o Reiniciar
 
 Si el curso tiene progreso guardado, se mostrará un diálogo con dos opciones:
 
@@ -164,7 +164,7 @@ Si el curso tiene progreso guardado, se mostrará un diálogo con dos opciones:
 - **Continuar:** Retoma el curso desde donde lo dejaste, manteniendo aciertos, errores, tiempo y estrategia
 - **Empezar de cero:** Reinicia el progreso completamente
 
-#### 2.7.3 Selección de Estrategia
+#### 2.6.3 Selección de Estrategia
 
 Antes de comenzar, debes elegir una estrategia de aprendizaje:
 
@@ -178,7 +178,7 @@ Antes de comenzar, debes elegir una estrategia de aprendizaje:
 | **Aleatoria** | Las preguntas aparecen en orden aleatorio |
 | **Repetición Espaciada** | Las preguntas falladas se repiten al final de la sesión |
 
-#### 2.7.4 Ventana de Preparación
+#### 2.6.4 Ventana de Preparación
 
 Tras seleccionar la estrategia, se muestra una ventana de preparación:
 
@@ -189,9 +189,9 @@ Tras seleccionar la estrategia, se muestra una ventana de preparación:
 
 ---
 
-### 2.8 Realización del Curso
+### 2.7 Realización del Curso
 
-#### 2.8.1 Interfaz de Ejercicios
+#### 2.7.1 Interfaz de Ejercicios
 
 Durante la realización del curso, la interfaz muestra:
 
@@ -219,7 +219,7 @@ Durante la realización del curso, la interfaz muestra:
 **Botón "Siguiente":**
 - Avanza a la siguiente pregunta (se activa tras responder)
 
-#### 2.8.2 Controles durante el ejercicio
+#### 2.7.2 Controles durante el ejercicio
 
 **Pausar/Reanudar:**
 
@@ -238,9 +238,9 @@ Durante la realización del curso, la interfaz muestra:
 
 ---
 
-### 2.9 Tipos de Ejercicios
+### 2.8 Tipos de Ejercicios
 
-#### 2.9.1 Ejercicio Tipo Test
+#### 2.8.1 Ejercicio Tipo Test
 
 Muestra una pregunta con tres opciones de respuesta.
 
@@ -258,7 +258,7 @@ Muestra una pregunta con tres opciones de respuesta.
 ![Test Correcto](../imagenes/test-correcto.png)
 ![Test Incorrecto](../imagenes/test-incorrecto.png)
 
-#### 2.9.2 Ejercicio de Traducción
+#### 2.8.2 Ejercicio de Traducción
 
 Muestra una palabra o frase para traducir.
 
@@ -271,7 +271,7 @@ Muestra una palabra o frase para traducir.
 
 **Nota:** La validación ignora mayúsculas y minúsculas.
 
-#### 2.9.3 Ejercicio de Rellenar Huecos
+#### 2.8.3 Ejercicio de Rellenar Huecos
 
 Muestra una frase con una palabra oculta que debes completar.
 
@@ -284,7 +284,7 @@ Muestra una frase con una palabra oculta que debes completar.
 
 ---
 
-### 2.10 Reanudar Curso
+### 2.9 Reanudar Curso
 
 Si has guardado el progreso de un curso, puedes reanudarlo en cualquier momento.
 
@@ -302,7 +302,7 @@ Si has guardado el progreso de un curso, puedes reanudarlo en cualquier momento.
 
 ---
 
-### 2.11 Finalización del Curso
+### 2.10 Finalización del Curso
 
 Al completar todas las preguntas del curso, se muestra un resumen de resultados.
 
@@ -321,7 +321,7 @@ Al completar todas las preguntas del curso, se muestra un resumen de resultados.
 
 ---
 
-### 2.12 Repasar Errores Frecuentes
+### 2.11 Repasar Errores Frecuentes
 
 Esta función permite practicar las preguntas que has fallado anteriormente.
 
