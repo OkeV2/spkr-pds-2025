@@ -85,7 +85,7 @@ El modelo de dominio y diagramas UML se encuentran en:
 
 1. **Clonar el repositorio:**
 ```bash
-   [git clone https://github.com/ismelai/spkr.git](https://github.com/OkeV2/spkr-pds-2025.git)
+   [git clone https://github.com/OkeV2/spkr-pds-2025.git]
    cd spkr-pds-2025
 ```
 
