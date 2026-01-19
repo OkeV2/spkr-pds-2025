@@ -11,10 +11,7 @@ import java.util.Collections;
 import java.util.List;
 
 import es.um.pds.spkr.SpkrApp;
-import es.um.pds.spkr.estrategia.EstrategiaAleatoria;
 import es.um.pds.spkr.estrategia.EstrategiaAprendizaje;
-import es.um.pds.spkr.estrategia.EstrategiaRepeticionEspaciada;
-import es.um.pds.spkr.estrategia.EstrategiaSecuencial;
 import es.um.pds.spkr.modelo.*;
 import es.um.pds.spkr.util.EstilosApp;
 
@@ -89,13 +86,7 @@ public class VentanaEjercicio extends JFrame {
         this.pausado = false;
         this.preguntaRespondida = false;
         
-        if ("Aleatoria".equals(nombreEstrategia)) {
-            this.estrategia = new EstrategiaAleatoria();
-        } else if ("Repetición Espaciada".equals(nombreEstrategia)) {
-            this.estrategia = new EstrategiaRepeticionEspaciada();
-        } else {
-            this.estrategia = new EstrategiaSecuencial();
-        }
+        this.estrategia = app.crearEstrategia(nombreEstrategia);
         
         cargarPreguntas();
         inicializarComponentes();
@@ -536,88 +527,62 @@ public class VentanaEjercicio extends JFrame {
     
     private void comprobarRespuesta() {
         String respuesta = obtenerRespuesta();
-        
+
         if (respuesta == null || respuesta.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Introduce una respuesta");
             return;
         }
-        
+
         preguntaRespondida = true;
-        
-     // Deshabilitar todos los radio buttons inmediatamente
+
+        // Deshabilitar todos los radio buttons inmediatamente
         if (opcionesTest != null) {
             for (JRadioButton rb : opcionesTest) {
                 rb.setEnabled(false);
             }
         }
-        
-        boolean correcta = preguntaActualObj.validarRespuesta(respuesta);
-        boolean yaContada = false;
-        
-        // Verificar si la pregunta ya fue contada anteriormente
-        if (estrategia instanceof EstrategiaRepeticionEspaciada) {
-            yaContada = ((EstrategiaRepeticionEspaciada) estrategia).esPreguntaYaContada(preguntaActualObj);
+
+        // Delegar la lógica de negocio al controlador
+        ResultadoRespuesta resultado = app.procesarRespuestaEjercicio(
+                preguntaActualObj, respuesta, progreso, estrategia);
+
+        // Actualizar contadores desde el resultado del controlador
+        if (!resultado.isYaContada()) {
+            if (resultado.isCorrecta()) {
+                aciertos = resultado.getAciertosActuales();
+            } else {
+                errores = resultado.getErroresActuales();
+            }
         }
-        
+
+        // Actualizar la interfaz según el resultado
         panelResultado.setVisible(true);
-        
-        if (correcta) {
+
+        if (resultado.isCorrecta()) {
             lblResultado.setText("¡Correcto!");
             lblResultado.setForeground(EstilosApp.COLOR_EXITO);
             lblRespuestaCorrecta.setText("");
-            
-            if (!yaContada) {
-                aciertos++;
-                progreso.registrarAcierto();
-                lblAciertosContador.setText("Aciertos: " + aciertos);
-                
-                if (estrategia instanceof EstrategiaRepeticionEspaciada) {
-                    ((EstrategiaRepeticionEspaciada) estrategia).marcarComoContada(preguntaActualObj);
-                }
-            }
-            
-            if (estrategia instanceof EstrategiaRepeticionEspaciada) {
-                ((EstrategiaRepeticionEspaciada) estrategia).registrarAcierto(preguntaActualObj);
-            }
-            
+            lblAciertosContador.setText("Aciertos: " + aciertos);
+
             if (preguntaActualObj instanceof PreguntaTest) {
                 marcarOpcionCorrecta();
             }
         } else {
-            String respuestaCorrectaStr = obtenerRespuestaCorrecta();
             lblResultado.setText("Incorrecto");
             lblResultado.setForeground(EstilosApp.COLOR_ERROR);
-            lblRespuestaCorrecta.setText("La respuesta correcta era: " + respuestaCorrectaStr);
-            
-            if (!yaContada) {
-                errores++;
-                progreso.registrarError();
-                lblErroresContador.setText("Errores: " + errores);
-                registrarError();
-                
-                if (estrategia instanceof EstrategiaRepeticionEspaciada) {
-                    ((EstrategiaRepeticionEspaciada) estrategia).marcarComoContada(preguntaActualObj);
-                }
-            }
-            
-            if (estrategia instanceof EstrategiaRepeticionEspaciada) {
-                ((EstrategiaRepeticionEspaciada) estrategia).registrarFallo(preguntaActualObj);
-            }
-            
+            lblRespuestaCorrecta.setText("La respuesta correcta era: " + resultado.getRespuestaCorrecta());
+            lblErroresContador.setText("Errores: " + errores);
+
             if (preguntaActualObj instanceof PreguntaTest) {
                 marcarOpcionIncorrecta();
             }
         }
-        
-        if (!yaContada) {
-            app.getUsuarioActual().getEstadisticas().incrementarEjercicios();
-        }
-        
+
         // Deshabilitar campo de texto si existe
         if (txtRespuesta != null) {
             txtRespuesta.setEnabled(false);
         }
-        
+
         btnSiguiente.setEnabled(true);
         btnSiguiente.setBackground(EstilosApp.COLOR_PRIMARIO);
     }
@@ -645,7 +610,7 @@ public class VentanaEjercicio extends JFrame {
     }
     
     private void marcarOpcionIncorrecta() {
-        String correcta = ((PreguntaTest) preguntaActualObj).getOpcionCorrecta();
+        String correcta = app.obtenerRespuestaCorrecta(preguntaActualObj);
         
         for (int i = 0; i < opcionesTest.size(); i++) {
             JRadioButton rb = opcionesTest.get(i);
@@ -689,31 +654,6 @@ public class VentanaEjercicio extends JFrame {
         }
     }
     
-    private String obtenerRespuestaCorrecta() {
-        if (preguntaActualObj instanceof PreguntaTest) {
-            return ((PreguntaTest) preguntaActualObj).getOpcionCorrecta();
-        } else if (preguntaActualObj instanceof PreguntaTraduccion) {
-            return ((PreguntaTraduccion) preguntaActualObj).getRespuestaCorrecta();
-        } else if (preguntaActualObj instanceof PreguntaHuecos) {
-            return ((PreguntaHuecos) preguntaActualObj).getPalabraOculta();
-        }
-        return "";
-    }
-    
-    private void registrarError() {
-        List<ErrorFrecuente> erroresFrecuentes = app.getUsuarioActual().getErroresFrecuentes();
-        
-        for (ErrorFrecuente ef : erroresFrecuentes) {
-            if (ef.getPregunta().equals(preguntaActualObj)) {
-                ef.incrementarErrores();
-                return;
-            }
-        }
-        
-        ErrorFrecuente nuevoError = new ErrorFrecuente(preguntaActualObj);
-        app.getUsuarioActual().addErrorFrecuente(nuevoError);
-    }
-    
     private void siguientePregunta() {
         preguntaActual++;
         mostrarPregunta();
@@ -721,56 +661,46 @@ public class VentanaEjercicio extends JFrame {
     
     private void mostrarResultadoFinal() {
         temporizador.stop();
-        
+
         int porcentaje = 0;
         if (aciertos + errores > 0) {
             porcentaje = (aciertos * 100) / (aciertos + errores);
         }
-        
-        // Guardar tiempo en progreso
-        progreso.setTiempoSegundos(segundosTotales);
-        
-        // Añadir tiempo a estadísticas globales (en minutos)
-        int minutos = segundosTotales / 60;
-        if (minutos > 0) {
-            app.getUsuarioActual().getEstadisticas().incrementarTiempo(minutos);
-        }
-        
-        String tiempoFormateado;
-        int horas = segundosTotales / 3600;
-        int minutosDisplay = (segundosTotales % 3600) / 60;
-        int segundos = segundosTotales % 60;
-        if (horas > 0) {
-            tiempoFormateado = String.format("%d:%02d:%02d", horas, minutosDisplay, segundos);
-        } else {
-            tiempoFormateado = String.format("%02d:%02d", minutosDisplay, segundos);
-        }
-        
+
+        // Delegar al controlador la finalización del ejercicio
+        app.finalizarEjercicio(progreso, segundosTotales);
+
+        String tiempoFormateado = formatearTiempo(segundosTotales);
+
         String mensaje = "¡Curso completado!\n\n" +
                         "Aciertos: " + aciertos + "\n" +
                         "Errores: " + errores + "\n" +
                         "Porcentaje: " + porcentaje + "%\n" +
                         "Tiempo: " + tiempoFormateado;
-        
+
         JOptionPane.showMessageDialog(this, mensaje, "Resultado", JOptionPane.INFORMATION_MESSAGE);
-        
-        app.guardarProgreso();
+
         ventanaPrincipal.actualizarListaCursos();
         ventanaPrincipal.setVisible(true);
         this.dispose();
     }
+
+    private String formatearTiempo(int totalSegundos) {
+        int horas = totalSegundos / 3600;
+        int minutos = (totalSegundos % 3600) / 60;
+        int segundos = totalSegundos % 60;
+        if (horas > 0) {
+            return String.format("%d:%02d:%02d", horas, minutos, segundos);
+        }
+        return String.format("%02d:%02d", minutos, segundos);
+    }
     
     private void salir() {
         temporizador.stop();
-        progreso.setTiempoSegundos(segundosTotales);
-        
-        // Añadir tiempo a estadísticas globales (en minutos)
-        int minutos = segundosTotales / 60;
-        if (minutos > 0) {
-            app.getUsuarioActual().getEstadisticas().incrementarTiempo(minutos);
-        }
-        
-        app.guardarProgreso();
+
+        // Delegar al controlador la finalización del ejercicio
+        app.finalizarEjercicio(progreso, segundosTotales);
+
         ventanaPrincipal.actualizarListaCursos();
         ventanaPrincipal.setVisible(true);
         this.dispose();

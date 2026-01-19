@@ -1,6 +1,7 @@
 package es.um.pds.spkr.modelo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -74,10 +75,6 @@ public class Leccion {
     }
     
     public List<Pregunta> getPreguntas() {
-        return preguntas;
-    }
-    
-    public void setPreguntas(List<Pregunta> preguntas) {
-        this.preguntas = preguntas;
+        return Collections.unmodifiableList(preguntas);
     }
 }

@@ -71,15 +71,97 @@ public class SpkrAppTest {
     public void testUsuarioTieneEstadisticas() {
         app.registrarUsuario("juan", "juan@email.com", "1234");
         app.login("juan", "1234");
-        
-        assertNotNull(app.getUsuarioActual().getEstadisticas());
+
+        assertNotNull(app.obtenerEstadisticasActuales());
     }
-    
+
     @Test
     public void testUsuarioTieneBiblioteca() {
         app.registrarUsuario("juan", "juan@email.com", "1234");
         app.login("juan", "1234");
-        
-        assertNotNull(app.getUsuarioActual().getBiblioteca());
+
+        assertNotNull(app.getCursosBiblioteca());
+    }
+
+    @Test
+    public void testGetNombreUsuarioActual() {
+        app.registrarUsuario("juan", "juan@email.com", "1234");
+        app.login("juan", "1234");
+
+        assertEquals("juan", app.getNombreUsuarioActual());
+    }
+
+    @Test
+    public void testGetNombreUsuarioActualSinLogin() {
+        assertEquals("", app.getNombreUsuarioActual());
+    }
+
+    @Test
+    public void testIncrementarEjerciciosCompletados() {
+        app.registrarUsuario("juan", "juan@email.com", "1234");
+        app.login("juan", "1234");
+
+        assertEquals(0, app.obtenerEstadisticasActuales().getEjerciciosCompletados());
+        app.incrementarEjerciciosCompletados();
+        assertEquals(1, app.obtenerEstadisticasActuales().getEjerciciosCompletados());
+    }
+
+    @Test
+    public void testIncrementarTiempoEstadisticas() {
+        app.registrarUsuario("juan", "juan@email.com", "1234");
+        app.login("juan", "1234");
+
+        assertEquals(0, app.obtenerEstadisticasActuales().getTiempoTotalUso());
+        app.incrementarTiempoEstadisticas(120); // 2 minutos
+        assertEquals(2, app.obtenerEstadisticasActuales().getTiempoTotalUso());
+    }
+
+    @Test
+    public void testTieneErroresFrecuentes() {
+        app.registrarUsuario("juan", "juan@email.com", "1234");
+        app.login("juan", "1234");
+
+        assertFalse(app.tieneErroresFrecuentes());
+    }
+
+    @Test
+    public void testContarErroresFrecuentes() {
+        app.registrarUsuario("juan", "juan@email.com", "1234");
+        app.login("juan", "1234");
+
+        assertEquals(0, app.contarErroresFrecuentes());
+    }
+
+    @Test
+    public void testObtenerErroresFrecuentesActuales() {
+        app.registrarUsuario("juan", "juan@email.com", "1234");
+        app.login("juan", "1234");
+
+        assertNotNull(app.obtenerErroresFrecuentesActuales());
+        assertTrue(app.obtenerErroresFrecuentesActuales().isEmpty());
+    }
+
+    @Test
+    public void testCrearEstrategiaSecuencial() {
+        assertNotNull(app.crearEstrategia("Secuencial"));
+        assertEquals("Secuencial", app.crearEstrategia("Secuencial").getNombre());
+    }
+
+    @Test
+    public void testCrearEstrategiaAleatoria() {
+        assertNotNull(app.crearEstrategia("Aleatoria"));
+        assertEquals("Aleatoria", app.crearEstrategia("Aleatoria").getNombre());
+    }
+
+    @Test
+    public void testCrearEstrategiaRepeticionEspaciada() {
+        assertNotNull(app.crearEstrategia("Repetición Espaciada"));
+        assertEquals("Repetición Espaciada", app.crearEstrategia("Repetición Espaciada").getNombre());
+    }
+
+    @Test
+    public void testCrearEstrategiaDesconocidaDevuelveSecuencial() {
+        assertNotNull(app.crearEstrategia("Desconocida"));
+        assertEquals("Secuencial", app.crearEstrategia("Desconocida").getNombre());
     }
 }

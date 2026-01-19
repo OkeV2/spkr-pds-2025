@@ -73,7 +73,7 @@ public class ErrorFrecuente {
     }
     
     public Date getFechaUltimoError() {
-        return fechaUltimoError;
+        return fechaUltimoError != null ? new Date(fechaUltimoError.getTime()) : null;
     }
     
     public void setFechaUltimoError(Date fechaUltimoError) {

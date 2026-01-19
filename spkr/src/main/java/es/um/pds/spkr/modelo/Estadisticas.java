@@ -111,9 +111,9 @@ public class Estadisticas {
     }
     
     public Date getUltimoAcceso() {
-        return ultimoAcceso;
+        return ultimoAcceso != null ? new Date(ultimoAcceso.getTime()) : null;
     }
-    
+
     public void setUltimoAcceso(Date ultimoAcceso) {
         this.ultimoAcceso = ultimoAcceso;
     }

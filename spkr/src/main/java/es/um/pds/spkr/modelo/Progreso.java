@@ -116,7 +116,7 @@ public class Progreso {
     }
     
     public Date getFechaUltimoAcceso() {
-        return fechaUltimoAcceso;
+        return fechaUltimoAcceso != null ? new Date(fechaUltimoAcceso.getTime()) : null;
     }
     
     public void setFechaUltimoAcceso(Date fechaUltimoAcceso) {

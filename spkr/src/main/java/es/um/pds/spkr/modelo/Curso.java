@@ -1,6 +1,7 @@
 package es.um.pds.spkr.modelo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -80,18 +81,10 @@ public class Curso {
     }
     
     public Date getFechaCreacion() {
-        return fechaCreacion;
+        return fechaCreacion != null ? new Date(fechaCreacion.getTime()) : null;
     }
-    
-    public void setFechaCreacion(Date fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
-    }
-    
+
     public List<Leccion> getLecciones() {
-        return lecciones;
-    }
-    
-    public void setLecciones(List<Leccion> lecciones) {
-        this.lecciones = lecciones;
+        return Collections.unmodifiableList(lecciones);
     }
 }

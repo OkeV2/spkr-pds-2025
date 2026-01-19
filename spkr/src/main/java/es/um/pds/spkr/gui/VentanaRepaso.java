@@ -52,7 +52,7 @@ public class VentanaRepaso extends JFrame {
     }
     
     private void cargarErrores() {
-        erroresPendientes = new ArrayList<>(app.getUsuarioActual().getErroresFrecuentes());
+        erroresPendientes = new ArrayList<>(app.obtenerErroresFrecuentesActuales());
     }
     
     private void inicializarComponentes() {
@@ -404,34 +404,29 @@ public class VentanaRepaso extends JFrame {
     
     private void comprobarRespuesta() {
         String respuesta = obtenerRespuesta();
-        
+
         if (respuesta == null || respuesta.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Introduce una respuesta");
             return;
         }
-        
-        boolean correcta = preguntaActualObj.validarRespuesta(respuesta);
-        
+
+        // Delegar la lógica de negocio al controlador
+        ResultadoRespuesta resultado = app.procesarRespuestaRepaso(errorActual, respuesta);
+
         panelResultado.setVisible(true);
-        
-        if (correcta) {
+
+        if (resultado.isCorrecta()) {
             lblResultado.setText("¡Correcto! Error dominado.");
             lblResultado.setForeground(EstilosApp.COLOR_EXITO);
             lblRespuestaCorrecta.setText("");
             aciertos++;
-            
-            errorActual.reducirErrores();
-            if (errorActual.estaDominada()) {
-                app.eliminarErrorFrecuente(errorActual);
-            }
         } else {
-            String respuestaCorrectaStr = obtenerRespuestaCorrecta();
             lblResultado.setText("Incorrecto");
             lblResultado.setForeground(EstilosApp.COLOR_ERROR);
-            lblRespuestaCorrecta.setText("La respuesta correcta era: " + respuestaCorrectaStr);
+            lblRespuestaCorrecta.setText("La respuesta correcta era: " + resultado.getRespuestaCorrecta());
             errores++;
         }
-        
+
         btnComprobar.setEnabled(false);
         btnComprobar.setBackground(new Color(180, 180, 180));
         btnSiguiente.setEnabled(true);
@@ -447,17 +442,6 @@ public class VentanaRepaso extends JFrame {
         } else {
             return txtRespuesta.getText().trim();
         }
-    }
-    
-    private String obtenerRespuestaCorrecta() {
-        if (preguntaActualObj instanceof PreguntaTest) {
-            return ((PreguntaTest) preguntaActualObj).getOpcionCorrecta();
-        } else if (preguntaActualObj instanceof PreguntaTraduccion) {
-            return ((PreguntaTraduccion) preguntaActualObj).getRespuestaCorrecta();
-        } else if (preguntaActualObj instanceof PreguntaHuecos) {
-            return ((PreguntaHuecos) preguntaActualObj).getPalabraOculta();
-        }
-        return "";
     }
     
     private void siguientePregunta() {

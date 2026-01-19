@@ -8,10 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import es.um.pds.spkr.SpkrApp;
-import es.um.pds.spkr.estrategia.EstrategiaAleatoria;
 import es.um.pds.spkr.estrategia.EstrategiaAprendizaje;
-import es.um.pds.spkr.estrategia.EstrategiaRepeticionEspaciada;
-import es.um.pds.spkr.estrategia.EstrategiaSecuencial;
 import es.um.pds.spkr.modelo.Curso;
 import es.um.pds.spkr.modelo.Progreso;
 import es.um.pds.spkr.util.EstilosApp;
@@ -228,23 +225,19 @@ public class VentanaSeleccionEstrategia extends JFrame {
     }
     
     private void iniciarCurso() {
-        EstrategiaAprendizaje estrategia;
         String nombreEstrategia;
-        
+
         if ("Secuencial".equals(estrategiaSeleccionada)) {
-            estrategia = new EstrategiaSecuencial();
             nombreEstrategia = "Secuencial";
         } else if ("Aleatoria".equals(estrategiaSeleccionada)) {
-            estrategia = new EstrategiaAleatoria();
             nombreEstrategia = "Aleatoria";
         } else {
-            estrategia = new EstrategiaRepeticionEspaciada();
             nombreEstrategia = "Repetición Espaciada";
         }
-        
-        progreso.setEstrategia(nombreEstrategia);
-        app.guardarProgreso();
-        
+
+        app.asignarEstrategiaProgreso(progreso, nombreEstrategia);
+        EstrategiaAprendizaje estrategia = app.crearEstrategia(nombreEstrategia);
+
         // Mostrar ventana de preparación
         mostrarVentanaPreparacion(estrategia);
     }

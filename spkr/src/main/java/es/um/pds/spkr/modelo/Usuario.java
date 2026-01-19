@@ -1,6 +1,7 @@
 package es.um.pds.spkr.modelo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
@@ -99,11 +100,7 @@ public class Usuario {
     }
     
     public Date getFechaRegistro() {
-        return fechaRegistro;
-    }
-    
-    public void setFechaRegistro(Date fechaRegistro) {
-        this.fechaRegistro = fechaRegistro;
+        return fechaRegistro != null ? new Date(fechaRegistro.getTime()) : null;
     }
     
     public Estadisticas getEstadisticas() {
@@ -123,18 +120,10 @@ public class Usuario {
     }
     
     public List<Progreso> getProgresos() {
-        return progresos;
+        return Collections.unmodifiableList(progresos);
     }
-    
-    public void setProgresos(List<Progreso> progresos) {
-        this.progresos = progresos;
-    }
-    
+
     public List<ErrorFrecuente> getErroresFrecuentes() {
-        return erroresFrecuentes;
-    }
-    
-    public void setErroresFrecuentes(List<ErrorFrecuente> erroresFrecuentes) {
-        this.erroresFrecuentes = erroresFrecuentes;
+        return Collections.unmodifiableList(erroresFrecuentes);
     }
 }

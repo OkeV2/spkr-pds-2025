@@ -10,10 +10,7 @@ import java.io.File;
 import java.util.List;
 
 import es.um.pds.spkr.SpkrApp;
-import es.um.pds.spkr.cargador.CargadorCursosJSON;
-import es.um.pds.spkr.cargador.CargadorCursosYAML;
 import es.um.pds.spkr.modelo.Curso;
-import es.um.pds.spkr.modelo.Leccion;
 import es.um.pds.spkr.modelo.Progreso;
 import es.um.pds.spkr.util.EstilosApp;
 
@@ -73,7 +70,7 @@ public class VentanaPrincipal extends JFrame {
         panelSaludo.setLayout(new BoxLayout(panelSaludo, BoxLayout.Y_AXIS));
         panelSaludo.setBackground(EstilosApp.COLOR_FONDO);
         
-        JLabel lblSaludo = new JLabel("Hola, " + app.getUsuarioActual().getNombreUsuario());
+        JLabel lblSaludo = new JLabel("Hola, " + app.getNombreUsuarioActual());
         lblSaludo.setFont(new Font("Segoe UI", Font.BOLD, 16));
         lblSaludo.setForeground(EstilosApp.COLOR_TEXTO);
         lblSaludo.setAlignmentX(Component.RIGHT_ALIGNMENT);
@@ -279,8 +276,8 @@ public class VentanaPrincipal extends JFrame {
         panelCursos.removeAll();
         cursoSeleccionadoIndex = -1;
         panelCursoSeleccionado = null;
-        
-        List<Curso> cursos = app.getUsuarioActual().getBiblioteca().getCursos();
+
+        List<Curso> cursos = app.getCursosBiblioteca();
         
         if (cursos.isEmpty()) {
             JPanel panelVacio = new JPanel();
@@ -345,10 +342,7 @@ public class VentanaPrincipal extends JFrame {
         lblIdioma.setForeground(EstilosApp.COLOR_SECUNDARIO);
         
         int numLecciones = curso.getLecciones().size();
-        int numPreguntas = 0;
-        for (Leccion l : curso.getLecciones()) {
-            numPreguntas += l.getPreguntas().size();
-        }
+        int numPreguntas = app.calcularTotalPreguntas(curso);
         
         JLabel lblDetalles = new JLabel(numLecciones + " lecciones • " + numPreguntas + " preguntas");
         lblDetalles.setFont(new Font("Segoe UI", Font.PLAIN, 12));
@@ -362,20 +356,15 @@ public class VentanaPrincipal extends JFrame {
         
         tarjeta.add(panelInfo, BorderLayout.CENTER);
         
-     // Progreso si existe
+        // Progreso si existe - delegamos el cálculo al controlador
         Progreso progreso = buscarProgreso(curso);
         if (progreso != null && (progreso.getPreguntaActual() > 0 || progreso.isCompletado())) {
-            int porcentaje;
-            if (progreso.isCompletado()) {
-                porcentaje = 100;
-            } else {
-                porcentaje = (progreso.getPreguntaActual() * 100) / numPreguntas;
-            }
+            int porcentaje = app.calcularPorcentajeProgreso(curso, progreso);
             JLabel lblProgreso = new JLabel(porcentaje + "%");
             lblProgreso.setFont(new Font("Segoe UI", Font.BOLD, 14));
             lblProgreso.setForeground(EstilosApp.COLOR_EXITO);
             lblProgreso.setOpaque(false);
-            
+
             tarjeta.add(lblProgreso, BorderLayout.EAST);
         }
         
@@ -442,39 +431,20 @@ public class VentanaPrincipal extends JFrame {
     }
     
     private Progreso buscarProgreso(Curso curso) {
-        for (Progreso p : app.getUsuarioActual().getProgresos()) {
-            if (p.getCurso() != null && p.getCurso().getTitulo() != null &&
-                p.getCurso().getTitulo().equals(curso.getTitulo())) {
-                return p;
-            }
-        }
-        return null;
+        return app.buscarProgresoCurso(curso);
     }
     
     private void importarCurso() {
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Seleccionar archivo de curso");
-        
+
         int resultado = fileChooser.showOpenDialog(this);
         if (resultado == JFileChooser.APPROVE_OPTION) {
             File archivo = fileChooser.getSelectedFile();
             String ruta = archivo.getAbsolutePath();
-            
+
             try {
-                Curso curso;
-                if (ruta.endsWith(".json")) {
-                    CargadorCursosJSON cargador = new CargadorCursosJSON();
-                    curso = cargador.cargarCurso(ruta);
-                } else if (ruta.endsWith(".yaml") || ruta.endsWith(".yml")) {
-                    CargadorCursosYAML cargador = new CargadorCursosYAML();
-                    curso = cargador.cargarCurso(ruta);
-                } else {
-                    JOptionPane.showMessageDialog(this, "Formato no soportado. Use JSON o YAML.");
-                    return;
-                }
-                
-                app.getUsuarioActual().getBiblioteca().addCurso(curso);
-                app.guardarProgreso();
+                app.importarCurso(ruta);
                 actualizarListaCursos();
                 JOptionPane.showMessageDialog(this, "Curso importado correctamente");
             } catch (Exception ex) {
@@ -488,29 +458,19 @@ public class VentanaPrincipal extends JFrame {
             JOptionPane.showMessageDialog(this, "Seleccione un curso para exportar");
             return;
         }
-        
-        Curso curso = app.getUsuarioActual().getBiblioteca().getCursos().get(cursoSeleccionadoIndex);
-        
+
+        Curso curso = app.getCursoBiblioteca(cursoSeleccionadoIndex);
+
         JFileChooser fileChooser = new JFileChooser();
         fileChooser.setDialogTitle("Guardar curso como");
-        
+
         int resultado = fileChooser.showSaveDialog(this);
         if (resultado == JFileChooser.APPROVE_OPTION) {
             File archivo = fileChooser.getSelectedFile();
             String ruta = archivo.getAbsolutePath();
-            
+
             try {
-                if (ruta.endsWith(".json")) {
-                    CargadorCursosJSON cargador = new CargadorCursosJSON();
-                    cargador.exportarCurso(curso, ruta);
-                } else if (ruta.endsWith(".yaml") || ruta.endsWith(".yml")) {
-                    CargadorCursosYAML cargador = new CargadorCursosYAML();
-                    cargador.exportarCurso(curso, ruta);
-                } else {
-                    CargadorCursosJSON cargador = new CargadorCursosJSON();
-                    cargador.exportarCurso(curso, ruta + ".json");
-                }
-                
+                app.exportarCurso(curso, ruta);
                 JOptionPane.showMessageDialog(this, "Curso exportado correctamente");
             } catch (Exception ex) {
                 JOptionPane.showMessageDialog(this, "Error al exportar: " + ex.getMessage());
@@ -523,31 +483,18 @@ public class VentanaPrincipal extends JFrame {
             JOptionPane.showMessageDialog(this, "Seleccione un curso para iniciar");
             return;
         }
-        
-        Curso curso = app.getUsuarioActual().getBiblioteca().getCursos().get(cursoSeleccionadoIndex);
-        
+
+        Curso curso = app.getCursoBiblioteca(cursoSeleccionadoIndex);
+
         if (curso.getLecciones().isEmpty()) {
             JOptionPane.showMessageDialog(this, "Este curso no tiene lecciones");
             return;
         }
-        
-        // Buscar si hay progreso guardado
-        Progreso progresoExistente = null;
-        for (Progreso p : app.getUsuarioActual().getProgresos()) {
-            if (p.getCurso() != null && p.getCurso().getTitulo() != null && 
-                p.getCurso().getTitulo().equals(curso.getTitulo())) {
-                progresoExistente = p;
-                break;
-            }
-        }
-        
-        // Si hay progreso y no está completado, preguntar
+
+        Progreso progresoExistente = app.buscarProgresoCurso(curso);
+        int totalPreguntas = app.calcularTotalPreguntas(curso);
+
         if (progresoExistente != null && progresoExistente.getPreguntaActual() > 0) {
-            int totalPreguntas = 0;
-            for (Leccion l : curso.getLecciones()) {
-                totalPreguntas += l.getPreguntas().size();
-            }
-            
             if (progresoExistente.getPreguntaActual() < totalPreguntas) {
                 int opcion = JOptionPane.showOptionDialog(this,
                     "Tienes un progreso guardado en este curso.\n" +
@@ -559,40 +506,32 @@ public class VentanaPrincipal extends JFrame {
                     null,
                     new String[]{"Continuar", "Empezar de cero"},
                     "Continuar");
-                
+
                 if (opcion == 0) {
-                    // Continuar con la estrategia guardada
                     VentanaEjercicio ventanaEjercicio = new VentanaEjercicio(app, curso, progresoExistente.getEstrategia(), this, progresoExistente);
                     ventanaEjercicio.setVisible(true);
                     return;
                 } else {
-                    // Empezar de cero
-                    progresoExistente.reiniciar();
-                    app.guardarProgreso();
+                    app.reiniciarProgreso(progresoExistente);
                 }
             } else {
-                // Curso completado, preguntar si quiere repetir
                 int opcion = JOptionPane.showConfirmDialog(this,
                     "Ya has completado este curso.\n¿Deseas repetirlo desde el principio?",
                     "Curso completado",
                     JOptionPane.YES_NO_OPTION);
-                
+
                 if (opcion == JOptionPane.YES_OPTION) {
-                    progresoExistente.reiniciar();
-                    app.guardarProgreso();
+                    app.reiniciarProgreso(progresoExistente);
                 } else {
                     return;
                 }
             }
         }
-        
-        // Si no hay progreso, crear uno nuevo
+
         if (progresoExistente == null) {
-            progresoExistente = new Progreso(curso);
-            app.getUsuarioActual().addProgreso(progresoExistente);
-            app.guardarProgreso();
+            progresoExistente = app.crearNuevoProgreso(curso);
         }
-        
+
         VentanaSeleccionEstrategia ventanaEstrategia = new VentanaSeleccionEstrategia(app, curso, this, progresoExistente);
         ventanaEstrategia.setVisible(true);
     }
@@ -603,11 +542,11 @@ public class VentanaPrincipal extends JFrame {
     }
     
     private void repasarErrores() {
-        if (app.getUsuarioActual().getErroresFrecuentes().isEmpty()) {
+        if (!app.tieneErroresFrecuentes()) {
             JOptionPane.showMessageDialog(this, "No tiene errores para repasar");
             return;
         }
-        
+
         VentanaRepaso ventanaRepaso = new VentanaRepaso(app, this);
         ventanaRepaso.setVisible(true);
     }

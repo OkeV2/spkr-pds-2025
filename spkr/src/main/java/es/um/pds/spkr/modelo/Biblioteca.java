@@ -1,6 +1,7 @@
 package es.um.pds.spkr.modelo;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -29,11 +30,7 @@ public class Biblioteca {
     }
     
     public List<Curso> getCursos() {
-        return cursos;
-    }
-    
-    public void setCursos(List<Curso> cursos) {
-        this.cursos = cursos;
+        return Collections.unmodifiableList(cursos);
     }
     
     public Long getId() {

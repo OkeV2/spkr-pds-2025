@@ -35,20 +35,12 @@ Thumbs.db
 
 # Logs
 *.log
-```
 
-### 0.2 Crear estructura de carpetas
+# Database files (H2, SQLite, etc.)
+*.db
+*.mv.db
+*.trace.db
+*.lock.db
 
-Estructura inicial:
-```
-+ requisitos/
-    + casos-de-uso/
-        + imagenes/
-    + pantallas/
-+ diseño/
-    + modelo/
-+ documentacion/
-    + manual/
-    + dev/
-+ java/  (proyecto Maven)
+# IDE - Metadata
 /.metadata/

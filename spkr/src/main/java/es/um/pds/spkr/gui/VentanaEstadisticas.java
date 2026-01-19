@@ -24,12 +24,10 @@ public class VentanaEstadisticas extends JFrame {
         setResizable(false);
         EstilosApp.aplicarEstiloVentana(this);
         
-        Estadisticas stats = app.getUsuarioActual().getEstadisticas();
-        int erroresPendientes = app.getUsuarioActual().getErroresFrecuentes().size();
-        int aciertos = stats.getEjerciciosCompletados() - erroresPendientes;
-        if (aciertos < 0) aciertos = stats.getEjerciciosCompletados();
-        int total = aciertos + erroresPendientes;
-        int porcentaje = total > 0 ? (aciertos * 100) / total : 0;
+        Estadisticas stats = app.obtenerEstadisticasActuales();
+        int erroresPendientes = app.contarErroresFrecuentes();
+        int aciertos = app.obtenerAciertosEstadisticas();
+        int porcentaje = app.calcularPorcentajeAciertos();
         
         // Panel principal
         JPanel panelPrincipal = new JPanel(new BorderLayout(0, 0));
