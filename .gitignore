@@ -32,6 +32,7 @@ bin/
 # OS generated files
 .DS_Store
 Thumbs.db
+nul
 
 # Logs
 *.log

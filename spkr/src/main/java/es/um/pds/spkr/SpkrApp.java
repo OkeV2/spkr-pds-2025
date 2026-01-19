@@ -182,6 +182,31 @@ public class SpkrApp {
         return total;
     }
 
+    public int obtenerNumeroLecciones(Curso curso) {
+        if (curso == null) {
+            return 0;
+        }
+        return curso.getLecciones().size();
+    }
+
+    public boolean cursoTieneLecciones(Curso curso) {
+        if (curso == null) {
+            return false;
+        }
+        return !curso.getLecciones().isEmpty();
+    }
+
+    public List<Pregunta> obtenerTodasLasPreguntas(Curso curso) {
+        if (curso == null) {
+            return List.of();
+        }
+        List<Pregunta> todasLasPreguntas = new java.util.ArrayList<>();
+        for (Leccion leccion : curso.getLecciones()) {
+            todasLasPreguntas.addAll(leccion.getPreguntas());
+        }
+        return todasLasPreguntas;
+    }
+
     public boolean tieneErroresFrecuentes() {
         return usuarioActual != null && !usuarioActual.getErroresFrecuentes().isEmpty();
     }

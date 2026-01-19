@@ -341,7 +341,7 @@ public class VentanaPrincipal extends JFrame {
         lblIdioma.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         lblIdioma.setForeground(EstilosApp.COLOR_SECUNDARIO);
         
-        int numLecciones = curso.getLecciones().size();
+        int numLecciones = app.obtenerNumeroLecciones(curso);
         int numPreguntas = app.calcularTotalPreguntas(curso);
         
         JLabel lblDetalles = new JLabel(numLecciones + " lecciones • " + numPreguntas + " preguntas");
@@ -486,7 +486,7 @@ public class VentanaPrincipal extends JFrame {
 
         Curso curso = app.getCursoBiblioteca(cursoSeleccionadoIndex);
 
-        if (curso.getLecciones().isEmpty()) {
+        if (!app.cursoTieneLecciones(curso)) {
             JOptionPane.showMessageDialog(this, "Este curso no tiene lecciones");
             return;
         }

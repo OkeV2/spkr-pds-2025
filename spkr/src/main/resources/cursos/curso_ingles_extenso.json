@@ -1,0 +1,85 @@
+{
+  "titulo": "Inglés Básico 10",
+  "descripcion": "Curso de inglés básico con vocabulario y gramática esencial",
+  "idioma": "Inglés",
+  "lecciones": [
+    {
+      "nombre": "Vocabulario y Gramática Básica",
+      "descripcion": "Aprende palabras y estructuras básicas del inglés",
+      "orden": 1,
+      "preguntas": [
+        {
+          "tipo": "test",
+          "enunciado": "¿Cómo se dice 'perro' en inglés?",
+          "orden": 1,
+          "opcionCorrecta": "dog",
+          "opcionIncorrecta1": "cat",
+          "opcionIncorrecta2": "bird"
+        },
+        {
+          "tipo": "test",
+          "enunciado": "¿Cómo se dice 'casa' en inglés?",
+          "orden": 2,
+          "opcionCorrecta": "house",
+          "opcionIncorrecta1": "car",
+          "opcionIncorrecta2": "tree"
+        },
+        {
+          "tipo": "test",
+          "enunciado": "¿Cuál es la forma correcta? 'She ___ a teacher'",
+          "orden": 3,
+          "opcionCorrecta": "is",
+          "opcionIncorrecta1": "am",
+          "opcionIncorrecta2": "are"
+        },
+        {
+          "tipo": "test",
+          "enunciado": "¿Cómo se dice 'rojo' en inglés?",
+          "orden": 4,
+          "opcionCorrecta": "red",
+          "opcionIncorrecta1": "blue",
+          "opcionIncorrecta2": "green"
+        },
+        {
+          "tipo": "traduccion",
+          "enunciado": "Traduce al español: 'cat'",
+          "orden": 5,
+          "respuestaCorrecta": "gato"
+        },
+        {
+          "tipo": "traduccion",
+          "enunciado": "Traduce al español: 'water'",
+          "orden": 6,
+          "respuestaCorrecta": "agua"
+        },
+        {
+          "tipo": "traduccion",
+          "enunciado": "Traduce al español: 'book'",
+          "orden": 7,
+          "respuestaCorrecta": "libro"
+        },
+        {
+          "tipo": "huecos",
+          "enunciado": "I ___ a student (Yo soy estudiante)",
+          "orden": 8,
+          "fraseCompleta": "I am a student",
+          "palabraOculta": "am"
+        },
+        {
+          "tipo": "huecos",
+          "enunciado": "The sky is ___ (El cielo es azul)",
+          "orden": 9,
+          "fraseCompleta": "The sky is blue",
+          "palabraOculta": "blue"
+        },
+        {
+          "tipo": "huecos",
+          "enunciado": "She ___ coffee every morning (Ella bebe café cada mañana)",
+          "orden": 10,
+          "fraseCompleta": "She drinks coffee every morning",
+          "palabraOculta": "drinks"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "titulo": "Inglés Intermedio - Vocabulario y Gramática",
+  "descripcion": "Curso de inglés intermedio con vocabulario variado y estructuras gramaticales",
+  "idioma": "Inglés",
+  "lecciones": [
+    {
+      "nombre": "Lección 1 - Vocabulario Cotidiano",
+      "descripcion": "Palabras y expresiones de uso diario",
+      "orden": 1,
+      "preguntas": [
+        {
+          "tipo": "test",
+          "enunciado": "¿Qué significa 'nevertheless'?",
+          "orden": 1,
+          "opcionCorrecta": "Sin embargo",
+          "opcionIncorrecta1": "Nunca más",
+          "opcionIncorrecta2": "Además"
+        },
+        {
+          "tipo": "traduccion",
+          "enunciado": "Traduce: 'I would have called you if I had known'",
+          "orden": 2,
+          "respuestaCorrecta": "Te habría llamado si lo hubiera sabido"
+        },
+        {
+          "tipo": "huecos",
+          "enunciado": "She ___ been waiting for two hours when he finally arrived",
+          "orden": 3,
+          "fraseCompleta": "She had been waiting for two hours when he finally arrived",
+          "palabraOculta": "had"
+        },
+        {
+          "tipo": "test",
+          "enunciado": "¿Cuál es el past participle de 'to forget'?",
+          "orden": 4,
+          "opcionCorrecta": "Forgotten",
+          "opcionIncorrecta1": "Forgot",
+          "opcionIncorrecta2": "Forgeted"
+        },
+        {
+          "tipo": "traduccion",
+          "enunciado": "Traduce: 'achievement'",
+          "orden": 5,
+          "respuestaCorrecta": "logro"
+        }
+      ]
+    },
+    {
+      "nombre": "Lección 2 - Expresiones y Phrasal Verbs",
+      "descripcion": "Expresiones idiomáticas y verbos compuestos",
+      "orden": 2,
+      "preguntas": [
+        {
+          "tipo": "test",
+          "enunciado": "¿Qué significa 'to put up with'?",
+          "orden": 1,
+          "opcionCorrecta": "Tolerar / Aguantar",
+          "opcionIncorrecta1": "Poner arriba",
+          "opcionIncorrecta2": "Rendirse"
+        },
+        {
+          "tipo": "huecos",
+          "enunciado": "By the time we arrive, they will ___ finished dinner",
+          "orden": 2,
+          "fraseCompleta": "By the time we arrive, they will have finished dinner",
+          "palabraOculta": "have"
+        },
+        {
+          "tipo": "traduccion",
+          "enunciado": "Traduce: 'He ran out of patience'",
+          "orden": 3,
+          "respuestaCorrecta": "Se quedó sin paciencia"
+        },
+        {
+          "tipo": "test",
+          "enunciado": "¿Qué expresión significa 'de vez en cuando'?",
+          "orden": 4,
+          "opcionCorrecta": "Every now and then",
+          "opcionIncorrecta1": "Right now",
+          "opcionIncorrecta2": "From now on"
+        },
+        {
+          "tipo": "huecos",
+          "enunciado": "If I ___ you, I would accept the job offer",
+          "orden": 5,
+          "fraseCompleta": "If I were you, I would accept the job offer",
+          "palabraOculta": "were"
+        }
+      ]
+    }
+  ]
+}

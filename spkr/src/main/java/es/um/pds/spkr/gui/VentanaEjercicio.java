@@ -95,10 +95,7 @@ public class VentanaEjercicio extends JFrame {
     }
     
     private void cargarPreguntas() {
-        todasLasPreguntas = new ArrayList<>();
-        for (Leccion leccion : curso.getLecciones()) {
-            todasLasPreguntas.addAll(leccion.getPreguntas());
-        }
+        todasLasPreguntas = new ArrayList<>(app.obtenerTodasLasPreguntas(curso));
     }
     
     private void iniciarTemporizador() {
