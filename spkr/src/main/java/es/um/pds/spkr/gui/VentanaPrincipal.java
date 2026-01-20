@@ -486,19 +486,19 @@ public class VentanaPrincipal extends JFrame {
 
         Curso curso = app.getCursoBiblioteca(cursoSeleccionadoIndex);
 
-        if (!app.cursoTieneLecciones(curso)) {
-            JOptionPane.showMessageDialog(this, "Este curso no tiene lecciones");
-            return;
-        }
+        // Delegar la decisión al controlador
+        SpkrApp.AccionIniciarCurso accion = app.determinarAccionIniciarCurso(curso);
 
-        Progreso progresoExistente = app.buscarProgresoCurso(curso);
-        int totalPreguntas = app.calcularTotalPreguntas(curso);
+        switch (accion) {
+            case SIN_LECCIONES:
+                JOptionPane.showMessageDialog(this, "Este curso no tiene lecciones");
+                break;
 
-        if (progresoExistente != null && progresoExistente.getPreguntaActual() > 0) {
-            if (progresoExistente.getPreguntaActual() < totalPreguntas) {
-                int opcion = JOptionPane.showOptionDialog(this,
+            case CONTINUAR_PROGRESO:
+                Progreso progresoContinuar = app.buscarProgresoCurso(curso);
+                int opcionContinuar = JOptionPane.showOptionDialog(this,
                     "Tienes un progreso guardado en este curso.\n" +
-                    "Pregunta " + progresoExistente.getPreguntaActual() + " de " + totalPreguntas + "\n\n" +
+                    app.obtenerInfoProgreso(curso) + "\n\n" +
                     "¿Qué deseas hacer?",
                     "Progreso encontrado",
                     JOptionPane.YES_NO_OPTION,
@@ -507,32 +507,39 @@ public class VentanaPrincipal extends JFrame {
                     new String[]{"Continuar", "Empezar de cero"},
                     "Continuar");
 
-                if (opcion == 0) {
-                    VentanaEjercicio ventanaEjercicio = new VentanaEjercicio(app, curso, progresoExistente.getEstrategia(), this, progresoExistente);
+                if (opcionContinuar == 0) {
+                    VentanaEjercicio ventanaEjercicio = new VentanaEjercicio(
+                        app, curso, progresoContinuar.getEstrategia(), this, progresoContinuar);
                     ventanaEjercicio.setVisible(true);
-                    return;
                 } else {
-                    app.reiniciarProgreso(progresoExistente);
+                    app.reiniciarProgreso(progresoContinuar);
+                    mostrarSeleccionEstrategia(curso, progresoContinuar);
                 }
-            } else {
-                int opcion = JOptionPane.showConfirmDialog(this,
+                break;
+
+            case CURSO_COMPLETADO:
+                Progreso progresoCompletado = app.buscarProgresoCurso(curso);
+                int opcionRepetir = JOptionPane.showConfirmDialog(this,
                     "Ya has completado este curso.\n¿Deseas repetirlo desde el principio?",
                     "Curso completado",
                     JOptionPane.YES_NO_OPTION);
 
-                if (opcion == JOptionPane.YES_OPTION) {
-                    app.reiniciarProgreso(progresoExistente);
-                } else {
-                    return;
+                if (opcionRepetir == JOptionPane.YES_OPTION) {
+                    app.reiniciarProgreso(progresoCompletado);
+                    mostrarSeleccionEstrategia(curso, progresoCompletado);
                 }
-            }
-        }
+                break;
 
-        if (progresoExistente == null) {
-            progresoExistente = app.crearNuevoProgreso(curso);
+            case SELECCIONAR_ESTRATEGIA:
+                Progreso progresoNuevo = app.prepararProgresoParaCurso(curso);
+                mostrarSeleccionEstrategia(curso, progresoNuevo);
+                break;
         }
+    }
 
-        VentanaSeleccionEstrategia ventanaEstrategia = new VentanaSeleccionEstrategia(app, curso, this, progresoExistente);
+    private void mostrarSeleccionEstrategia(Curso curso, Progreso progreso) {
+        VentanaSeleccionEstrategia ventanaEstrategia = new VentanaSeleccionEstrategia(
+            app, curso, this, progreso);
         ventanaEstrategia.setVisible(true);
     }
     

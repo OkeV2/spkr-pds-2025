@@ -7,18 +7,18 @@ import java.util.Collections;
 import java.util.List;
 
 import es.um.pds.spkr.SpkrApp;
-import es.um.pds.spkr.modelo.*;
+import es.um.pds.spkr.modelo.ErrorFrecuente;
+import es.um.pds.spkr.modelo.Pregunta;
+import es.um.pds.spkr.modelo.PreguntaHuecos;
+import es.um.pds.spkr.modelo.PreguntaTest;
+import es.um.pds.spkr.modelo.PreguntaTraduccion;
+import es.um.pds.spkr.modelo.ResultadoRespuesta;
 import es.um.pds.spkr.util.EstilosApp;
 
 public class VentanaRepaso extends JFrame {
-    
+
     private SpkrApp app;
     private VentanaPrincipal ventanaPrincipal;
-    
-    private List<ErrorFrecuente> erroresPendientes;
-    private int indiceActual;
-    private int aciertos;
-    private int errores;
     
     private JLabel lblPreguntaNum;
     private JProgressBar barraProgreso;
@@ -42,17 +42,12 @@ public class VentanaRepaso extends JFrame {
     public VentanaRepaso(SpkrApp app, VentanaPrincipal ventanaPrincipal) {
         this.app = app;
         this.ventanaPrincipal = ventanaPrincipal;
-        this.indiceActual = 0;
-        this.aciertos = 0;
-        this.errores = 0;
-        
-        cargarErrores();
+
+        // Delegar la inicialización de la sesión de repaso al controlador
+        app.iniciarSesionRepaso();
+
         inicializarComponentes();
         mostrarPregunta();
-    }
-    
-    private void cargarErrores() {
-        erroresPendientes = new ArrayList<>(app.obtenerErroresFrecuentesActuales());
     }
     
     private void inicializarComponentes() {
@@ -106,7 +101,7 @@ public class VentanaRepaso extends JFrame {
         panelSuperior.add(Box.createRigidArea(new Dimension(0, 15)));
         
         // Barra de progreso
-        barraProgreso = new JProgressBar(0, erroresPendientes.size());
+        barraProgreso = new JProgressBar(0, app.getTotalErroresRepaso());
         barraProgreso.setValue(0);
         barraProgreso.setPreferredSize(new Dimension(0, 8));
         barraProgreso.setMaximumSize(new Dimension(Integer.MAX_VALUE, 8));
@@ -255,16 +250,21 @@ public class VentanaRepaso extends JFrame {
     }
     
     private void mostrarPregunta() {
-        if (indiceActual >= erroresPendientes.size()) {
+        // Verificar si la sesión de repaso ha terminado (delegado al controlador)
+        if (app.sesionRepasoTerminada()) {
             mostrarResultadoFinal();
             return;
         }
-        
-        errorActual = erroresPendientes.get(indiceActual);
+
+        // Obtener el error actual del controlador
+        errorActual = app.obtenerErrorActualRepaso();
         preguntaActualObj = errorActual.getPregunta();
-        
-        lblPreguntaNum.setText((indiceActual + 1) + " / " + erroresPendientes.size());
-        barraProgreso.setValue(indiceActual);
+
+        // Actualizar UI con datos del controlador
+        int indice = app.getIndiceRepasoActual();
+        int total = app.getTotalErroresRepaso();
+        lblPreguntaNum.setText((indice + 1) + " / " + total);
+        barraProgreso.setValue(indice);
         lblEnunciado.setText(preguntaActualObj.getEnunciado());
         
         panelResultado.setVisible(false);
@@ -410,21 +410,20 @@ public class VentanaRepaso extends JFrame {
             return;
         }
 
-        // Delegar la lógica de negocio al controlador
-        ResultadoRespuesta resultado = app.procesarRespuestaRepaso(errorActual, respuesta);
+        // Delegar toda la lógica de negocio al controlador
+        ResultadoRespuesta resultado = app.procesarRespuestaSesionRepaso(respuesta);
 
+        // Actualizar UI según el resultado (solo presentación)
         panelResultado.setVisible(true);
 
         if (resultado.isCorrecta()) {
             lblResultado.setText("¡Correcto! Error dominado.");
             lblResultado.setForeground(EstilosApp.COLOR_EXITO);
             lblRespuestaCorrecta.setText("");
-            aciertos++;
         } else {
             lblResultado.setText("Incorrecto");
             lblResultado.setForeground(EstilosApp.COLOR_ERROR);
             lblRespuestaCorrecta.setText("La respuesta correcta era: " + resultado.getRespuestaCorrecta());
-            errores++;
         }
 
         btnComprobar.setEnabled(false);
@@ -445,18 +444,24 @@ public class VentanaRepaso extends JFrame {
     }
     
     private void siguientePregunta() {
-        indiceActual++;
+        // Delegar el avance al controlador
+        app.avanzarRepasoSesion();
         mostrarPregunta();
     }
     
     private void mostrarResultadoFinal() {
+        // Obtener datos del controlador
+        int aciertos = app.getAciertosRepaso();
+        int errores = app.getErroresRepaso();
+
         String mensaje = "¡Repaso completado!\n\n" +
                         "Aciertos: " + aciertos + "\n" +
                         "Errores: " + errores;
-        
+
         JOptionPane.showMessageDialog(this, mensaje, "Resultado", JOptionPane.INFORMATION_MESSAGE);
-        
-        app.guardarProgreso();
+
+        // Delegar la finalización al controlador
+        app.finalizarSesionRepaso();
         this.dispose();
     }
     
@@ -465,9 +470,10 @@ public class VentanaRepaso extends JFrame {
             "¿Deseas salir del repaso?",
             "Salir",
             JOptionPane.YES_NO_OPTION);
-        
+
         if (opcion == JOptionPane.YES_OPTION) {
-            app.guardarProgreso();
+            // Delegar la finalización al controlador
+            app.finalizarSesionRepaso();
             this.dispose();
         }
     }

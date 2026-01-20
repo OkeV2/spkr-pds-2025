@@ -12,25 +12,23 @@ import java.util.List;
 
 import es.um.pds.spkr.SpkrApp;
 import es.um.pds.spkr.estrategia.EstrategiaAprendizaje;
-import es.um.pds.spkr.modelo.*;
+import es.um.pds.spkr.modelo.Curso;
+import es.um.pds.spkr.modelo.Pregunta;
+import es.um.pds.spkr.modelo.PreguntaHuecos;
+import es.um.pds.spkr.modelo.PreguntaTest;
+import es.um.pds.spkr.modelo.PreguntaTraduccion;
+import es.um.pds.spkr.modelo.Progreso;
+import es.um.pds.spkr.modelo.ResultadoRespuesta;
 import es.um.pds.spkr.util.EstilosApp;
 
 public class VentanaEjercicio extends JFrame {
-    
+
     private SpkrApp app;
     private Curso curso;
-    private EstrategiaAprendizaje estrategia;
     private VentanaPrincipal ventanaPrincipal;
-    private Progreso progreso;
-    
-    private List<Pregunta> todasLasPreguntas;
-    private int preguntaActual;
-    private int aciertos;
-    private int errores;
-    
-    // Temporizador
+
+    // Temporizador (solo UI, el tiempo se guarda en el controlador)
     private Timer temporizador;
-    private int segundosTotales;
     private boolean pausado;
     
     private JLabel lblPreguntaNum;
@@ -58,44 +56,32 @@ public class VentanaEjercicio extends JFrame {
     public VentanaEjercicio(SpkrApp app, Curso curso, EstrategiaAprendizaje estrategia, VentanaPrincipal ventanaPrincipal, Progreso progreso) {
         this.app = app;
         this.curso = curso;
-        this.estrategia = estrategia;
         this.ventanaPrincipal = ventanaPrincipal;
-        this.progreso = progreso;
-        this.preguntaActual = progreso.getPreguntaActual();
-        this.aciertos = progreso.getAciertos();
-        this.errores = progreso.getErrores();
-        this.segundosTotales = progreso.getTiempoSegundos();
         this.pausado = false;
         this.preguntaRespondida = false;
-        
-        cargarPreguntas();
+
+        // Delegar la inicialización de la sesión al controlador
+        app.iniciarSesionEjercicio(curso, progreso, estrategia);
+
         inicializarComponentes();
         iniciarTemporizador();
         mostrarPregunta();
     }
-    
+
     public VentanaEjercicio(SpkrApp app, Curso curso, String nombreEstrategia, VentanaPrincipal ventanaPrincipal, Progreso progreso) {
         this.app = app;
         this.curso = curso;
         this.ventanaPrincipal = ventanaPrincipal;
-        this.progreso = progreso;
-        this.preguntaActual = progreso.getPreguntaActual();
-        this.aciertos = progreso.getAciertos();
-        this.errores = progreso.getErrores();
-        this.segundosTotales = progreso.getTiempoSegundos();
         this.pausado = false;
         this.preguntaRespondida = false;
-        
-        this.estrategia = app.crearEstrategia(nombreEstrategia);
-        
-        cargarPreguntas();
+
+        // Delegar la inicialización de la sesión al controlador
+        EstrategiaAprendizaje estrategia = app.crearEstrategia(nombreEstrategia);
+        app.iniciarSesionEjercicio(curso, progreso, estrategia);
+
         inicializarComponentes();
         iniciarTemporizador();
         mostrarPregunta();
-    }
-    
-    private void cargarPreguntas() {
-        todasLasPreguntas = new ArrayList<>(app.obtenerTodasLasPreguntas(curso));
     }
     
     private void iniciarTemporizador() {
@@ -103,24 +89,16 @@ public class VentanaEjercicio extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (!pausado) {
-                    segundosTotales++;
+                    app.incrementarTiempoSesion();
                     actualizarLabelTemporizador();
                 }
             }
         });
         temporizador.start();
     }
-    
+
     private void actualizarLabelTemporizador() {
-        int horas = segundosTotales / 3600;
-        int minutos = (segundosTotales % 3600) / 60;
-        int segundos = segundosTotales % 60;
-        
-        if (horas > 0) {
-            lblTemporizador.setText(String.format("%d:%02d:%02d", horas, minutos, segundos));
-        } else {
-            lblTemporizador.setText(String.format("%02d:%02d", minutos, segundos));
-        }
+        lblTemporizador.setText(app.formatearTiempo(app.getSegundosSesion()));
     }
     
     private void inicializarComponentes() {
@@ -219,8 +197,8 @@ public class VentanaEjercicio extends JFrame {
         panelSuperior.add(Box.createRigidArea(new Dimension(0, 15)));
         
         // Barra de progreso
-        barraProgreso = new JProgressBar(0, todasLasPreguntas.size());
-        barraProgreso.setValue(preguntaActual);
+        barraProgreso = new JProgressBar(0, app.getTotalPreguntasSesion());
+        barraProgreso.setValue(app.getIndicePreguntaActual());
         barraProgreso.setPreferredSize(new Dimension(0, 8));
         barraProgreso.setMaximumSize(new Dimension(Integer.MAX_VALUE, 8));
         barraProgreso.setBorderPainted(false);
@@ -233,11 +211,11 @@ public class VentanaEjercicio extends JFrame {
         panelStats.setBackground(Color.WHITE);
         panelStats.setMaximumSize(new Dimension(Integer.MAX_VALUE, 30));
         
-        lblAciertosContador = new JLabel("Aciertos: " + aciertos);
+        lblAciertosContador = new JLabel("Aciertos: " + app.getAciertosSesion());
         lblAciertosContador.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblAciertosContador.setForeground(EstilosApp.COLOR_EXITO);
-        
-        lblErroresContador = new JLabel("Errores: " + errores);
+
+        lblErroresContador = new JLabel("Errores: " + app.getErroresSesion());
         lblErroresContador.setFont(new Font("Segoe UI", Font.BOLD, 13));
         lblErroresContador.setForeground(EstilosApp.COLOR_ERROR);
         
@@ -360,17 +338,20 @@ public class VentanaEjercicio extends JFrame {
     }
     
     private void mostrarPregunta() {
-        preguntaActualObj = estrategia.siguientePregunta(todasLasPreguntas, preguntaActual);
+        // Obtener la siguiente pregunta del controlador
+        preguntaActualObj = app.obtenerSiguientePreguntaSesion();
         preguntaRespondida = false;
-        
+
         if (preguntaActualObj == null) {
             mostrarResultadoFinal();
             return;
         }
-        
-        // Actualizar UI
-        lblPreguntaNum.setText("Pregunta " + (preguntaActual + 1) + " de " + todasLasPreguntas.size());
-        barraProgreso.setValue(preguntaActual);
+
+        // Actualizar UI con datos del controlador
+        int indice = app.getIndicePreguntaActual();
+        int total = app.getTotalPreguntasSesion();
+        lblPreguntaNum.setText("Pregunta " + (indice + 1) + " de " + total);
+        barraProgreso.setValue(indice);
         lblEnunciado.setText(preguntaActualObj.getEnunciado());
         
         panelResultado.setVisible(false);
@@ -539,27 +520,17 @@ public class VentanaEjercicio extends JFrame {
             }
         }
 
-        // Delegar la lógica de negocio al controlador
-        ResultadoRespuesta resultado = app.procesarRespuestaEjercicio(
-                preguntaActualObj, respuesta, progreso, estrategia);
+        // Delegar toda la lógica de negocio al controlador
+        ResultadoRespuesta resultado = app.procesarRespuestaSesion(preguntaActualObj, respuesta);
 
-        // Actualizar contadores desde el resultado del controlador
-        if (!resultado.isYaContada()) {
-            if (resultado.isCorrecta()) {
-                aciertos = resultado.getAciertosActuales();
-            } else {
-                errores = resultado.getErroresActuales();
-            }
-        }
-
-        // Actualizar la interfaz según el resultado
+        // Actualizar la interfaz según el resultado (solo UI, sin lógica de negocio)
         panelResultado.setVisible(true);
 
         if (resultado.isCorrecta()) {
             lblResultado.setText("¡Correcto!");
             lblResultado.setForeground(EstilosApp.COLOR_EXITO);
             lblRespuestaCorrecta.setText("");
-            lblAciertosContador.setText("Aciertos: " + aciertos);
+            lblAciertosContador.setText("Aciertos: " + app.getAciertosSesion());
 
             if (preguntaActualObj instanceof PreguntaTest) {
                 marcarOpcionCorrecta();
@@ -568,7 +539,7 @@ public class VentanaEjercicio extends JFrame {
             lblResultado.setText("Incorrecto");
             lblResultado.setForeground(EstilosApp.COLOR_ERROR);
             lblRespuestaCorrecta.setText("La respuesta correcta era: " + resultado.getRespuestaCorrecta());
-            lblErroresContador.setText("Errores: " + errores);
+            lblErroresContador.setText("Errores: " + app.getErroresSesion());
 
             if (preguntaActualObj instanceof PreguntaTest) {
                 marcarOpcionIncorrecta();
@@ -652,22 +623,26 @@ public class VentanaEjercicio extends JFrame {
     }
     
     private void siguientePregunta() {
-        preguntaActual++;
+        // Delegar el avance al controlador
+        app.avanzarPreguntaSesion();
         mostrarPregunta();
     }
     
     private void mostrarResultadoFinal() {
         temporizador.stop();
 
+        // Obtener datos del controlador
+        int aciertos = app.getAciertosSesion();
+        int errores = app.getErroresSesion();
         int porcentaje = 0;
         if (aciertos + errores > 0) {
             porcentaje = (aciertos * 100) / (aciertos + errores);
         }
 
-        // Delegar al controlador la finalización del ejercicio
-        app.finalizarEjercicio(progreso, segundosTotales);
+        String tiempoFormateado = app.formatearTiempo(app.getSegundosSesion());
 
-        String tiempoFormateado = formatearTiempo(segundosTotales);
+        // Delegar al controlador la finalización del ejercicio
+        app.finalizarSesionEjercicio();
 
         String mensaje = "¡Curso completado!\n\n" +
                         "Aciertos: " + aciertos + "\n" +
@@ -681,22 +656,12 @@ public class VentanaEjercicio extends JFrame {
         ventanaPrincipal.setVisible(true);
         this.dispose();
     }
-
-    private String formatearTiempo(int totalSegundos) {
-        int horas = totalSegundos / 3600;
-        int minutos = (totalSegundos % 3600) / 60;
-        int segundos = totalSegundos % 60;
-        if (horas > 0) {
-            return String.format("%d:%02d:%02d", horas, minutos, segundos);
-        }
-        return String.format("%02d:%02d", minutos, segundos);
-    }
     
     private void salir() {
         temporizador.stop();
 
         // Delegar al controlador la finalización del ejercicio
-        app.finalizarEjercicio(progreso, segundosTotales);
+        app.finalizarSesionEjercicio();
 
         ventanaPrincipal.actualizarListaCursos();
         ventanaPrincipal.setVisible(true);

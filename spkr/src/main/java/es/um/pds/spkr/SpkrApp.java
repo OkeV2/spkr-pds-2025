@@ -26,10 +26,25 @@ import es.um.pds.spkr.persistencia.InicializadorDatos;
 import java.util.List;
 
 public class SpkrApp {
-    
+
     private CatalogoUsuarios catalogoUsuarios;
     private CatalogoCursos catalogoCursos;
     private Usuario usuarioActual;
+
+    // Estado de sesión de ejercicio (controlado por el controlador, no por la vista)
+    private List<Pregunta> preguntasSesion;
+    private int indicePreguntaActual;
+    private int aciertosSesion;
+    private int erroresSesion;
+    private Progreso progresoActual;
+    private EstrategiaAprendizaje estrategiaActual;
+    private int segundosSesion;
+
+    // Estado de sesión de repaso
+    private List<ErrorFrecuente> erroresRepasoSesion;
+    private int indiceRepasoActual;
+    private int aciertosRepaso;
+    private int erroresRepaso;
     
     public SpkrApp() {
         this.catalogoUsuarios = new CatalogoUsuarios();
@@ -273,6 +288,67 @@ public class SpkrApp {
         }
     }
 
+    // =====================================================
+    // LÓGICA DE DECISIÓN DE NAVEGACIÓN
+    // =====================================================
+
+    /**
+     * Resultado de la decisión de iniciar un curso.
+     * Encapsula la lógica de negocio sobre qué acción tomar.
+     */
+    public enum AccionIniciarCurso {
+        SIN_LECCIONES,           // El curso no tiene lecciones
+        CONTINUAR_PROGRESO,      // Hay progreso existente, continuar
+        CURSO_COMPLETADO,        // El curso ya fue completado
+        SELECCIONAR_ESTRATEGIA   // Mostrar selección de estrategia
+    }
+
+    /**
+     * Determina qué acción tomar al intentar iniciar un curso.
+     * Centraliza la lógica de decisión que antes estaba en la vista.
+     */
+    public AccionIniciarCurso determinarAccionIniciarCurso(Curso curso) {
+        if (!cursoTieneLecciones(curso)) {
+            return AccionIniciarCurso.SIN_LECCIONES;
+        }
+
+        Progreso progresoExistente = buscarProgresoCurso(curso);
+        int totalPreguntas = calcularTotalPreguntas(curso);
+
+        if (progresoExistente != null && progresoExistente.getPreguntaActual() > 0) {
+            if (progresoExistente.getPreguntaActual() < totalPreguntas) {
+                return AccionIniciarCurso.CONTINUAR_PROGRESO;
+            } else {
+                return AccionIniciarCurso.CURSO_COMPLETADO;
+            }
+        }
+
+        return AccionIniciarCurso.SELECCIONAR_ESTRATEGIA;
+    }
+
+    /**
+     * Prepara el progreso para iniciar un curso (crea uno nuevo si no existe).
+     */
+    public Progreso prepararProgresoParaCurso(Curso curso) {
+        Progreso progreso = buscarProgresoCurso(curso);
+        if (progreso == null) {
+            progreso = crearNuevoProgreso(curso);
+        }
+        return progreso;
+    }
+
+    /**
+     * Obtiene información del progreso para mostrar al usuario.
+     */
+    public String obtenerInfoProgreso(Curso curso) {
+        Progreso progreso = buscarProgresoCurso(curso);
+        if (progreso == null) {
+            return "";
+        }
+        int totalPreguntas = calcularTotalPreguntas(curso);
+        return "Pregunta " + progreso.getPreguntaActual() + " de " + totalPreguntas;
+    }
+
     // Factory de estrategias
 
     public EstrategiaAprendizaje crearEstrategia(String nombreEstrategia) {
@@ -451,6 +527,8 @@ public class SpkrApp {
     public void finalizarEjercicio(Progreso progreso, int segundosTotales) {
         actualizarTiempoProgreso(progreso, segundosTotales);
         incrementarTiempoEstadisticas(segundosTotales);
+        // Guardar el progreso explícitamente para asegurar que se persista
+        GestorPersistencia.getInstancia().actualizar(progreso);
         guardarProgreso();
     }
 
@@ -458,5 +536,237 @@ public class SpkrApp {
 
     public Usuario getUsuarioActual() {
         return usuarioActual;
+    }
+
+    // =====================================================
+    // GESTIÓN DE SESIÓN DE EJERCICIO
+    // =====================================================
+
+    /**
+     * Inicia una nueva sesión de ejercicio con el curso y estrategia dados.
+     */
+    public void iniciarSesionEjercicio(Curso curso, Progreso progreso, EstrategiaAprendizaje estrategia) {
+        this.progresoActual = progreso;
+        this.estrategiaActual = estrategia;
+        this.preguntasSesion = new java.util.ArrayList<>(obtenerTodasLasPreguntas(curso));
+        this.indicePreguntaActual = progreso.getPreguntaActual();
+        this.aciertosSesion = progreso.getAciertos();
+        this.erroresSesion = progreso.getErrores();
+        this.segundosSesion = progreso.getTiempoSegundos();
+    }
+
+    /**
+     * Obtiene la siguiente pregunta de la sesión actual.
+     */
+    public Pregunta obtenerSiguientePreguntaSesion() {
+        if (estrategiaActual == null || preguntasSesion == null) {
+            return null;
+        }
+        return estrategiaActual.siguientePregunta(preguntasSesion, indicePreguntaActual);
+    }
+
+    /**
+     * Procesa la respuesta del ejercicio actual y avanza el estado de la sesión.
+     */
+    public ResultadoRespuesta procesarRespuestaSesion(Pregunta pregunta, String respuesta) {
+        ResultadoRespuesta resultado = procesarRespuestaEjercicio(
+                pregunta, respuesta, progresoActual, estrategiaActual);
+
+        if (!resultado.isYaContada()) {
+            if (resultado.isCorrecta()) {
+                aciertosSesion = resultado.getAciertosActuales();
+            } else {
+                erroresSesion = resultado.getErroresActuales();
+            }
+        }
+
+        return resultado;
+    }
+
+    /**
+     * Avanza a la siguiente pregunta en la sesión.
+     */
+    public void avanzarPreguntaSesion() {
+        indicePreguntaActual++;
+    }
+
+    /**
+     * Verifica si la sesión de ejercicio ha terminado.
+     */
+    public boolean sesionEjercicioTerminada() {
+        return obtenerSiguientePreguntaSesion() == null;
+    }
+
+    /**
+     * Finaliza la sesión de ejercicio actual.
+     * El Progreso ya tiene los valores correctos (actualizados en registrarAcierto/Error),
+     * solo necesitamos guardar el tiempo y persistir.
+     */
+    public void finalizarSesionEjercicio() {
+        if (progresoActual != null) {
+            finalizarEjercicio(progresoActual, segundosSesion);
+        }
+        limpiarSesionEjercicio();
+    }
+
+    /**
+     * Limpia el estado de la sesión de ejercicio.
+     */
+    private void limpiarSesionEjercicio() {
+        preguntasSesion = null;
+        progresoActual = null;
+        estrategiaActual = null;
+        indicePreguntaActual = 0;
+        aciertosSesion = 0;
+        erroresSesion = 0;
+        segundosSesion = 0;
+    }
+
+    /**
+     * Incrementa el tiempo de la sesión actual.
+     */
+    public void incrementarTiempoSesion() {
+        segundosSesion++;
+    }
+
+    // Getters de estado de sesión de ejercicio
+
+    public int getIndicePreguntaActual() {
+        return indicePreguntaActual;
+    }
+
+    public int getAciertosSesion() {
+        return aciertosSesion;
+    }
+
+    public int getErroresSesion() {
+        return erroresSesion;
+    }
+
+    public int getSegundosSesion() {
+        return segundosSesion;
+    }
+
+    public int getTotalPreguntasSesion() {
+        return preguntasSesion != null ? preguntasSesion.size() : 0;
+    }
+
+    public Progreso getProgresoActual() {
+        return progresoActual;
+    }
+
+    public EstrategiaAprendizaje getEstrategiaActual() {
+        return estrategiaActual;
+    }
+
+    // =====================================================
+    // GESTIÓN DE SESIÓN DE REPASO
+    // =====================================================
+
+    /**
+     * Inicia una nueva sesión de repaso de errores.
+     */
+    public void iniciarSesionRepaso() {
+        this.erroresRepasoSesion = new java.util.ArrayList<>(obtenerErroresFrecuentesActuales());
+        this.indiceRepasoActual = 0;
+        this.aciertosRepaso = 0;
+        this.erroresRepaso = 0;
+    }
+
+    /**
+     * Obtiene el error frecuente actual de la sesión de repaso.
+     */
+    public ErrorFrecuente obtenerErrorActualRepaso() {
+        if (erroresRepasoSesion == null || indiceRepasoActual >= erroresRepasoSesion.size()) {
+            return null;
+        }
+        return erroresRepasoSesion.get(indiceRepasoActual);
+    }
+
+    /**
+     * Procesa la respuesta de la sesión de repaso actual.
+     */
+    public ResultadoRespuesta procesarRespuestaSesionRepaso(String respuesta) {
+        ErrorFrecuente errorActual = obtenerErrorActualRepaso();
+        if (errorActual == null) {
+            return null;
+        }
+
+        ResultadoRespuesta resultado = procesarRespuestaRepaso(errorActual, respuesta);
+
+        if (resultado.isCorrecta()) {
+            aciertosRepaso++;
+        } else {
+            erroresRepaso++;
+        }
+
+        return resultado;
+    }
+
+    /**
+     * Avanza al siguiente error en la sesión de repaso.
+     */
+    public void avanzarRepasoSesion() {
+        indiceRepasoActual++;
+    }
+
+    /**
+     * Verifica si la sesión de repaso ha terminado.
+     */
+    public boolean sesionRepasoTerminada() {
+        return erroresRepasoSesion == null || indiceRepasoActual >= erroresRepasoSesion.size();
+    }
+
+    /**
+     * Finaliza la sesión de repaso.
+     */
+    public void finalizarSesionRepaso() {
+        guardarProgreso();
+        limpiarSesionRepaso();
+    }
+
+    /**
+     * Limpia el estado de la sesión de repaso.
+     */
+    private void limpiarSesionRepaso() {
+        erroresRepasoSesion = null;
+        indiceRepasoActual = 0;
+        aciertosRepaso = 0;
+        erroresRepaso = 0;
+    }
+
+    // Getters de estado de sesión de repaso
+
+    public int getIndiceRepasoActual() {
+        return indiceRepasoActual;
+    }
+
+    public int getTotalErroresRepaso() {
+        return erroresRepasoSesion != null ? erroresRepasoSesion.size() : 0;
+    }
+
+    public int getAciertosRepaso() {
+        return aciertosRepaso;
+    }
+
+    public int getErroresRepaso() {
+        return erroresRepaso;
+    }
+
+    // =====================================================
+    // UTILIDADES
+    // =====================================================
+
+    /**
+     * Formatea segundos en formato HH:MM:SS o MM:SS.
+     */
+    public String formatearTiempo(int totalSegundos) {
+        int horas = totalSegundos / 3600;
+        int minutos = (totalSegundos % 3600) / 60;
+        int segundos = totalSegundos % 60;
+        if (horas > 0) {
+            return String.format("%d:%02d:%02d", horas, minutos, segundos);
+        }
+        return String.format("%02d:%02d", minutos, segundos);
     }
 }
