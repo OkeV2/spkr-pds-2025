@@ -304,6 +304,48 @@ public class SpkrApp {
     }
 
     /**
+     * Enum que representa los tipos de pregunta.
+     * Encapsula el tipo de pregunta para que las vistas no usen instanceof.
+     */
+    public enum TipoPregunta {
+        TEST,
+        TRADUCCION,
+        HUECOS
+    }
+
+    /**
+     * Obtiene el tipo de una pregunta sin exponer la jerarquía de clases.
+     * Encapsula el instanceof para respetar la ocultación de información.
+     */
+    public TipoPregunta obtenerTipoPregunta(Pregunta pregunta) {
+        if (pregunta instanceof PreguntaTest) {
+            return TipoPregunta.TEST;
+        } else if (pregunta instanceof PreguntaTraduccion) {
+            return TipoPregunta.TRADUCCION;
+        } else if (pregunta instanceof PreguntaHuecos) {
+            return TipoPregunta.HUECOS;
+        }
+        return null;
+    }
+
+    /**
+     * Obtiene las opciones de una pregunta de tipo test.
+     * Retorna una lista con las opciones mezcladas.
+     */
+    public List<String> obtenerOpcionesTest(Pregunta pregunta) {
+        if (!(pregunta instanceof PreguntaTest)) {
+            return List.of();
+        }
+        PreguntaTest pt = (PreguntaTest) pregunta;
+        List<String> opciones = new java.util.ArrayList<>();
+        opciones.add(pt.getOpcionCorrecta());
+        opciones.add(pt.getOpcionIncorrecta1());
+        opciones.add(pt.getOpcionIncorrecta2());
+        java.util.Collections.shuffle(opciones);
+        return opciones;
+    }
+
+    /**
      * Determina qué acción tomar al intentar iniciar un curso.
      * Centraliza la lógica de decisión que antes estaba en la vista.
      */
@@ -522,6 +564,39 @@ public class SpkrApp {
     }
 
     /**
+     * Verifica si un curso tiene progreso iniciado (sin exponer el objeto Progreso).
+     * Encapsula el acceso al modelo para respetar MVC.
+     */
+    public boolean tieneProgresoIniciado(Curso curso) {
+        Progreso progreso = buscarProgresoCurso(curso);
+        if (progreso == null) {
+            return false;
+        }
+        return progreso.getPreguntaActual() > 0 || progreso.isCompletado();
+    }
+
+    /**
+     * Obtiene el porcentaje de progreso de un curso (sin exponer el objeto Progreso).
+     * Encapsula el acceso al modelo para respetar MVC.
+     */
+    public int obtenerPorcentajeProgresoCurso(Curso curso) {
+        Progreso progreso = buscarProgresoCurso(curso);
+        return calcularPorcentajeProgreso(curso, progreso);
+    }
+
+    /**
+     * Obtiene la estrategia guardada de un progreso de curso.
+     * Encapsula el acceso al modelo para respetar MVC.
+     */
+    public String obtenerEstrategiaProgresoCurso(Curso curso) {
+        Progreso progreso = buscarProgresoCurso(curso);
+        if (progreso == null) {
+            return null;
+        }
+        return progreso.getEstrategia();
+    }
+
+    /**
      * Finaliza un ejercicio guardando el tiempo y las estadísticas.
      */
     public void finalizarEjercicio(Progreso progreso, int segundosTotales) {
@@ -649,6 +724,18 @@ public class SpkrApp {
 
     public int getTotalPreguntasSesion() {
         return preguntasSesion != null ? preguntasSesion.size() : 0;
+    }
+
+    /**
+     * Calcula el porcentaje de aciertos de la sesión actual.
+     * Centraliza el cálculo que antes estaba duplicado en la vista.
+     */
+    public int calcularPorcentajeSesion() {
+        int total = aciertosSesion + erroresSesion;
+        if (total == 0) {
+            return 0;
+        }
+        return (aciertosSesion * 100) / total;
     }
 
     public Progreso getProgresoActual() {

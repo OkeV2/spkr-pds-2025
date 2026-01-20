@@ -355,11 +355,10 @@ public class VentanaPrincipal extends JFrame {
         panelInfo.add(lblDetalles);
         
         tarjeta.add(panelInfo, BorderLayout.CENTER);
-        
-        // Progreso si existe - delegamos el cálculo al controlador
-        Progreso progreso = buscarProgreso(curso);
-        if (progreso != null && (progreso.getPreguntaActual() > 0 || progreso.isCompletado())) {
-            int porcentaje = app.calcularPorcentajeProgreso(curso, progreso);
+
+        // Progreso si existe - delegamos toda la lógica al controlador (sin acceder al Modelo)
+        if (app.tieneProgresoIniciado(curso)) {
+            int porcentaje = app.obtenerPorcentajeProgresoCurso(curso);
             JLabel lblProgreso = new JLabel(porcentaje + "%");
             lblProgreso.setFont(new Font("Segoe UI", Font.BOLD, 14));
             lblProgreso.setForeground(EstilosApp.COLOR_EXITO);
@@ -428,10 +427,6 @@ public class VentanaPrincipal extends JFrame {
                 actualizarFondoHijos((Container) comp, color);
             }
         }
-    }
-    
-    private Progreso buscarProgreso(Curso curso) {
-        return app.buscarProgresoCurso(curso);
     }
     
     private void importarCurso() {
@@ -508,8 +503,10 @@ public class VentanaPrincipal extends JFrame {
                     "Continuar");
 
                 if (opcionContinuar == 0) {
+                    // Usar el controlador para obtener la estrategia (sin acceder directamente al Modelo)
+                    String estrategia = app.obtenerEstrategiaProgresoCurso(curso);
                     VentanaEjercicio ventanaEjercicio = new VentanaEjercicio(
-                        app, curso, progresoContinuar.getEstrategia(), this, progresoContinuar);
+                        app, curso, estrategia, this, progresoContinuar);
                     ventanaEjercicio.setVisible(true);
                 } else {
                     app.reiniciarProgreso(progresoContinuar);

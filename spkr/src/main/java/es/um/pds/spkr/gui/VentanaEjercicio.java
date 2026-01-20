@@ -7,16 +7,13 @@ import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import es.um.pds.spkr.SpkrApp;
+import es.um.pds.spkr.SpkrApp.TipoPregunta;
 import es.um.pds.spkr.estrategia.EstrategiaAprendizaje;
 import es.um.pds.spkr.modelo.Curso;
 import es.um.pds.spkr.modelo.Pregunta;
-import es.um.pds.spkr.modelo.PreguntaHuecos;
-import es.um.pds.spkr.modelo.PreguntaTest;
-import es.um.pds.spkr.modelo.PreguntaTraduccion;
 import es.um.pds.spkr.modelo.Progreso;
 import es.um.pds.spkr.modelo.ResultadoRespuesta;
 import es.um.pds.spkr.util.EstilosApp;
@@ -358,13 +355,15 @@ public class VentanaEjercicio extends JFrame {
         
         panelRespuesta.removeAll();
         panelesOpciones = new ArrayList<>();
-        
-        if (preguntaActualObj instanceof PreguntaTest) {
-            mostrarPreguntaTest((PreguntaTest) preguntaActualObj);
-        } else if (preguntaActualObj instanceof PreguntaTraduccion) {
+
+        // Usar el controlador para determinar el tipo de pregunta (sin instanceof)
+        TipoPregunta tipo = app.obtenerTipoPregunta(preguntaActualObj);
+        if (tipo == TipoPregunta.TEST) {
+            mostrarPreguntaTest();
+        } else if (tipo == TipoPregunta.TRADUCCION) {
             mostrarPreguntaTraduccion();
-        } else if (preguntaActualObj instanceof PreguntaHuecos) {
-            mostrarPreguntaHuecos((PreguntaHuecos) preguntaActualObj);
+        } else if (tipo == TipoPregunta.HUECOS) {
+            mostrarPreguntaHuecos();
         }
         
         panelRespuesta.revalidate();
@@ -374,15 +373,12 @@ public class VentanaEjercicio extends JFrame {
         btnSiguiente.setBackground(new Color(180, 180, 180));
     }
     
-    private void mostrarPreguntaTest(PreguntaTest pregunta) {
+    private void mostrarPreguntaTest() {
         grupoOpciones = new ButtonGroup();
         opcionesTest = new ArrayList<>();
-        
-        List<String> opciones = new ArrayList<>();
-        opciones.add(pregunta.getOpcionCorrecta());
-        opciones.add(pregunta.getOpcionIncorrecta1());
-        opciones.add(pregunta.getOpcionIncorrecta2());
-        Collections.shuffle(opciones);
+
+        // Obtener opciones del controlador (ya vienen mezcladas)
+        List<String> opciones = app.obtenerOpcionesTest(preguntaActualObj);
         
         for (String opcion : opciones) {
             JPanel panelOpcion = new JPanel(new BorderLayout());
@@ -472,7 +468,7 @@ public class VentanaEjercicio extends JFrame {
         txtRespuesta.requestFocusInWindow();
     }
     
-    private void mostrarPreguntaHuecos(PreguntaHuecos pregunta) {
+    private void mostrarPreguntaHuecos() {
         JLabel lblInstruccion = new JLabel("Completa la palabra que falta y pulsa Enter:");
         lblInstruccion.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblInstruccion.setForeground(EstilosApp.COLOR_SECUNDARIO);
@@ -526,13 +522,16 @@ public class VentanaEjercicio extends JFrame {
         // Actualizar la interfaz según el resultado (solo UI, sin lógica de negocio)
         panelResultado.setVisible(true);
 
+        // Usar el controlador para determinar el tipo de pregunta (sin instanceof)
+        TipoPregunta tipo = app.obtenerTipoPregunta(preguntaActualObj);
+
         if (resultado.isCorrecta()) {
             lblResultado.setText("¡Correcto!");
             lblResultado.setForeground(EstilosApp.COLOR_EXITO);
             lblRespuestaCorrecta.setText("");
             lblAciertosContador.setText("Aciertos: " + app.getAciertosSesion());
 
-            if (preguntaActualObj instanceof PreguntaTest) {
+            if (tipo == TipoPregunta.TEST) {
                 marcarOpcionCorrecta();
             }
         } else {
@@ -541,7 +540,7 @@ public class VentanaEjercicio extends JFrame {
             lblRespuestaCorrecta.setText("La respuesta correcta era: " + resultado.getRespuestaCorrecta());
             lblErroresContador.setText("Errores: " + app.getErroresSesion());
 
-            if (preguntaActualObj instanceof PreguntaTest) {
+            if (tipo == TipoPregunta.TEST) {
                 marcarOpcionIncorrecta();
             }
         }
@@ -611,7 +610,9 @@ public class VentanaEjercicio extends JFrame {
     }
     
     private String obtenerRespuesta() {
-        if (preguntaActualObj instanceof PreguntaTest) {
+        // Usar el controlador para determinar el tipo de pregunta (sin instanceof)
+        TipoPregunta tipo = app.obtenerTipoPregunta(preguntaActualObj);
+        if (tipo == TipoPregunta.TEST) {
             ButtonModel seleccion = grupoOpciones.getSelection();
             if (seleccion != null) {
                 return seleccion.getActionCommand();
@@ -631,14 +632,10 @@ public class VentanaEjercicio extends JFrame {
     private void mostrarResultadoFinal() {
         temporizador.stop();
 
-        // Obtener datos del controlador
+        // Obtener datos del controlador 
         int aciertos = app.getAciertosSesion();
         int errores = app.getErroresSesion();
-        int porcentaje = 0;
-        if (aciertos + errores > 0) {
-            porcentaje = (aciertos * 100) / (aciertos + errores);
-        }
-
+        int porcentaje = app.calcularPorcentajeSesion();
         String tiempoFormateado = app.formatearTiempo(app.getSegundosSesion());
 
         // Delegar al controlador la finalización del ejercicio

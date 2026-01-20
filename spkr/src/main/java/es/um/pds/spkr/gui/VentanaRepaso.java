@@ -3,15 +3,12 @@ package es.um.pds.spkr.gui;
 import javax.swing.*;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import es.um.pds.spkr.SpkrApp;
+import es.um.pds.spkr.SpkrApp.TipoPregunta;
 import es.um.pds.spkr.modelo.ErrorFrecuente;
 import es.um.pds.spkr.modelo.Pregunta;
-import es.um.pds.spkr.modelo.PreguntaHuecos;
-import es.um.pds.spkr.modelo.PreguntaTest;
-import es.um.pds.spkr.modelo.PreguntaTraduccion;
 import es.um.pds.spkr.modelo.ResultadoRespuesta;
 import es.um.pds.spkr.util.EstilosApp;
 
@@ -271,12 +268,14 @@ public class VentanaRepaso extends JFrame {
         
         panelRespuesta.removeAll();
         panelesOpciones = new ArrayList<>();
-        
-        if (preguntaActualObj instanceof PreguntaTest) {
-            mostrarPreguntaTest((PreguntaTest) preguntaActualObj);
-        } else if (preguntaActualObj instanceof PreguntaTraduccion) {
+
+        // Usar el controlador para determinar el tipo de pregunta (sin instanceof)
+        TipoPregunta tipo = app.obtenerTipoPregunta(preguntaActualObj);
+        if (tipo == TipoPregunta.TEST) {
+            mostrarPreguntaTest();
+        } else if (tipo == TipoPregunta.TRADUCCION) {
             mostrarPreguntaTraduccion();
-        } else if (preguntaActualObj instanceof PreguntaHuecos) {
+        } else if (tipo == TipoPregunta.HUECOS) {
             mostrarPreguntaHuecos();
         }
         
@@ -288,16 +287,13 @@ public class VentanaRepaso extends JFrame {
         btnSiguiente.setEnabled(false);
     }
     
-    private void mostrarPreguntaTest(PreguntaTest pregunta) {
+    private void mostrarPreguntaTest() {
         grupoOpciones = new ButtonGroup();
         opcionesTest = new ArrayList<>();
-        
-        List<String> opciones = new ArrayList<>();
-        opciones.add(pregunta.getOpcionCorrecta());
-        opciones.add(pregunta.getOpcionIncorrecta1());
-        opciones.add(pregunta.getOpcionIncorrecta2());
-        Collections.shuffle(opciones);
-        
+
+        // Obtener opciones del controlador (ya vienen mezcladas)
+        List<String> opciones = app.obtenerOpcionesTest(preguntaActualObj);
+
         for (String opcion : opciones) {
             JPanel panelOpcion = new JPanel(new BorderLayout());
             panelOpcion.setBackground(Color.WHITE);
@@ -432,7 +428,9 @@ public class VentanaRepaso extends JFrame {
     }
     
     private String obtenerRespuesta() {
-        if (preguntaActualObj instanceof PreguntaTest) {
+        // Usar el controlador para determinar el tipo de pregunta (sin instanceof)
+        TipoPregunta tipo = app.obtenerTipoPregunta(preguntaActualObj);
+        if (tipo == TipoPregunta.TEST) {
             ButtonModel seleccion = grupoOpciones.getSelection();
             if (seleccion != null) {
                 return seleccion.getActionCommand();
