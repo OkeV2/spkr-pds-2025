@@ -1,253 +1,287 @@
 @startuml modelo-dominio
-' Configuración
-skinparam classAttributeIconSize 0
-skinparam classFontStyle bold
-skinparam class {
-    BackgroundColor White
-    BorderColor Black
-    ArrowColor Black
-}
+  ' Configuración
+  skinparam classAttributeIconSize 0
+  skinparam classFontStyle bold
+  skinparam class {
+      BackgroundColor White
+      BorderColor Black
+      ArrowColor Black
+  }
 
-title Modelo de Dominio - SPKR
+  title Modelo de Dominio - SPKR
 
-' ===== CONTROLADOR =====
+  ' ===== ENUMERACIONES =====
 
-class SpkrApp <<Controlador>> {
-    - catalogoUsuarios: CatalogoUsuarios
-    - catalogoCursos: CatalogoCursos
-    - usuarioActual: Usuario
-    + registrarUsuario(nombre: String, email: String, password: String): boolean
-    + login(nombre: String, password: String): boolean
-    + logout()
-    + guardarProgreso()
-    + estaLogueado(): boolean
-    + cerrar()
-    + importarCurso(ruta: String): Curso
-    + exportarCurso(curso: Curso, ruta: String)
-    + crearEstrategia(nombre: String): EstrategiaAprendizaje
-    + procesarRespuestaEjercicio(...): ResultadoRespuesta
-    + procesarRespuestaRepaso(...): ResultadoRespuesta
-    + calcularPorcentajeProgreso(curso: Curso, progreso: Progreso): int
-    + obtenerTodasLasPreguntas(curso: Curso): List<Pregunta>
-}
+  enum AccionIniciarCurso <<Enum>> {
+      SIN_LECCIONES
+      CONTINUAR_PROGRESO
+      CURSO_COMPLETADO
+      SELECCIONAR_ESTRATEGIA
+  }
 
-' ===== CATÁLOGOS =====
+  ' ===== CONTROLADOR =====
 
-class CatalogoUsuarios <<Repositorio>> {
-    + getUsuario(nombre: String): Usuario
-    + addUsuario(usuario: Usuario)
-    + existeUsuario(nombre: String): boolean
-    + existeEmail(email: String): boolean
-    + validarCredenciales(nombre: String, password: String): boolean
-    + actualizarUsuario(usuario: Usuario)
-}
+  class SpkrApp <<Controlador>> {
+      - catalogoUsuarios: CatalogoUsuarios
+      - catalogoCursos: CatalogoCursos
+      - usuarioActual: Usuario
+      - preguntasSesion: List<Pregunta>
+      - indicePreguntaActual: int
+      - aciertosSesion: int
+      - erroresSesion: int
+      - progresoActual: Progreso
+      - estrategiaActual: EstrategiaAprendizaje
+      - segundosSesion: int
+      - erroresRepasoSesion: List<ErrorFrecuente>
+      - indiceRepasoActual: int
+      - aciertosRepaso: int
+      - erroresRepaso: int
+      + registrarUsuario(nombre: String, email: String, password: String): boolean
+      + login(nombre: String, password: String): boolean
+      + logout()
+      + guardarProgreso()
+      + estaLogueado(): boolean
+      + cerrar()
+      + importarCurso(ruta: String): Curso
+      + exportarCurso(curso: Curso, ruta: String)
+      + crearEstrategia(nombre: String): EstrategiaAprendizaje
+      + determinarAccionIniciarCurso(curso: Curso): AccionIniciarCurso
+      + prepararProgresoParaCurso(curso: Curso): Progreso
+      + iniciarSesionEjercicio(curso: Curso, progreso: Progreso, estrategia: EstrategiaAprendizaje)
+      + obtenerSiguientePreguntaSesion(): Pregunta
+      + procesarRespuestaSesion(pregunta: Pregunta, respuesta: String): ResultadoRespuesta
+      + avanzarPreguntaSesion()
+      + finalizarSesionEjercicio()
+      + iniciarSesionRepaso()
+      + obtenerErrorActualRepaso(): ErrorFrecuente
+      + procesarRespuestaSesionRepaso(respuesta: String): ResultadoRespuesta
+      + avanzarRepasoSesion()
+      + finalizarSesionRepaso()
+      + calcularPorcentajeProgreso(curso: Curso, progreso: Progreso): int
+      + obtenerTodasLasPreguntas(curso: Curso): List<Pregunta>
+      + formatearTiempo(segundos: int): String
+  }
 
-class CatalogoCursos <<Repositorio>> {
-    + getCurso(titulo: String): Curso
-    + addCurso(curso: Curso)
-    + removeCurso(curso: Curso)
-    + existeCurso(titulo: String): boolean
-    + getCursos(): List<Curso>
-    + actualizarCurso(curso: Curso)
-}
+  ' ===== CATÁLOGOS =====
 
-' ===== CARGADORES DE CURSOS =====
+  class CatalogoUsuarios <<Repositorio>> {
+      + getUsuario(nombre: String): Usuario
+      + addUsuario(usuario: Usuario)
+      + existeUsuario(nombre: String): boolean
+      + existeEmail(email: String): boolean
+      + validarCredenciales(nombre: String, password: String): boolean
+      + actualizarUsuario(usuario: Usuario)
+  }
 
-interface CargadorCursos <<Interface>> {
-    + cargarCurso(ruta: String): Curso
-    + exportarCurso(curso: Curso, ruta: String)
-}
+  class CatalogoCursos <<Repositorio>> {
+      + getCurso(titulo: String): Curso
+      + addCurso(curso: Curso)
+      + removeCurso(curso: Curso)
+      + existeCurso(titulo: String): boolean
+      + getCursos(): List<Curso>
+      + actualizarCurso(curso: Curso)
+  }
 
-class CargadorCursosJSON {
-    + cargarCurso(ruta: String): Curso
-    + cargarCursoDesdeRecurso(recurso: String): Curso
-    + exportarCurso(curso: Curso, ruta: String)
-}
+  ' ===== CARGADORES DE CURSOS =====
 
-class CargadorCursosYAML {
-    + cargarCurso(ruta: String): Curso
-    + exportarCurso(curso: Curso, ruta: String)
-}
+  interface CargadorCursos <<Interface>> {
+      + cargarCurso(ruta: String): Curso
+      + exportarCurso(curso: Curso, ruta: String)
+  }
 
-' ===== ESTRATEGIAS DE APRENDIZAJE =====
+  class CargadorCursosJSON {
+      + cargarCurso(ruta: String): Curso
+      + cargarCursoDesdeRecurso(recurso: String): Curso
+      + exportarCurso(curso: Curso, ruta: String)
+  }
 
-interface EstrategiaAprendizaje <<Interface>> {
-    + siguientePregunta(preguntas: List<Pregunta>, indice: int): Pregunta
-    + getNombre(): String
-}
+  class CargadorCursosYAML {
+      + cargarCurso(ruta: String): Curso
+      + exportarCurso(curso: Curso, ruta: String)
+  }
 
-class EstrategiaSecuencial {
-    + siguientePregunta(preguntas: List<Pregunta>, indice: int): Pregunta
-    + getNombre(): String
-}
+  ' ===== ESTRATEGIAS DE APRENDIZAJE =====
 
-class EstrategiaAleatoria {
-    + siguientePregunta(preguntas: List<Pregunta>, indice: int): Pregunta
-    + getNombre(): String
-}
+  interface EstrategiaAprendizaje <<Interface>> {
+      + siguientePregunta(preguntas: List<Pregunta>, indice: int): Pregunta
+      + getNombre(): String
+  }
 
-class EstrategiaRepeticionEspaciada {
-    - preguntasFalladas: List<Pregunta>
-    - preguntasYaContadas: List<Pregunta>
-    + siguientePregunta(preguntas: List<Pregunta>, indice: int): Pregunta
-    + registrarFallo(pregunta: Pregunta)
-    + registrarAcierto(pregunta: Pregunta)
-    + esPreguntaYaContada(pregunta: Pregunta): boolean
-    + marcarComoContada(pregunta: Pregunta)
-    + getNombre(): String
-}
+  class EstrategiaSecuencial {
+      + siguientePregunta(preguntas: List<Pregunta>, indice: int): Pregunta
+      + getNombre(): String
+  }
 
-' ===== ENTIDADES DEL MODELO =====
+  class EstrategiaAleatoria {
+      + siguientePregunta(preguntas: List<Pregunta>, indice: int): Pregunta
+      + getNombre(): String
+  }
 
-class Usuario {
-    - id: Long
-    - nombreUsuario: String
-    - email: String
-    - password: String
-    - fechaRegistro: Date
-    + addProgreso(progreso: Progreso)
-    + addErrorFrecuente(error: ErrorFrecuente)
-    + removeErrorFrecuente(error: ErrorFrecuente)
-}
+  class EstrategiaRepeticionEspaciada {
+      - preguntasFalladas: List<Pregunta>
+      - preguntasYaContadas: List<Pregunta>
+      + siguientePregunta(preguntas: List<Pregunta>, indice: int): Pregunta
+      + registrarFallo(pregunta: Pregunta)
+      + registrarAcierto(pregunta: Pregunta)
+      + esPreguntaYaContada(pregunta: Pregunta): boolean
+      + marcarComoContada(pregunta: Pregunta)
+      + getNombre(): String
+  }
 
-class Estadisticas {
-    - id: Long
-    - tiempoTotalUso: int
-    - rachaActual: int
-    - mejorRacha: int
-    - ejerciciosCompletados: int
-    - ultimoAcceso: Date
-    + actualizarRacha()
-    + incrementarTiempo(minutos: int)
-    + incrementarEjercicios()
-}
+  ' ===== ENTIDADES DEL MODELO =====
 
-class Biblioteca {
-    - id: Long
-    + addCurso(curso: Curso)
-    + removeCurso(curso: Curso)
-    + getCursos(): List<Curso>
-}
+  class Usuario {
+      - id: Long
+      - nombreUsuario: String
+      - email: String
+      - password: String
+      - fechaRegistro: Date
+      + addProgreso(progreso: Progreso)
+      + addErrorFrecuente(error: ErrorFrecuente)
+      + removeErrorFrecuente(error: ErrorFrecuente)
+  }
 
-class Curso {
-    - id: Long
-    - titulo: String
-    - descripcion: String
-    - idioma: String
-    - fechaCreacion: Date
-    + addLeccion(leccion: Leccion)
-    + removeLeccion(leccion: Leccion)
-    + getLecciones(): List<Leccion>
-}
+  class Estadisticas {
+      - id: Long
+      - tiempoTotalUso: int
+      - rachaActual: int
+      - mejorRacha: int
+      - ejerciciosCompletados: int
+      - ultimoAcceso: Date
+      + actualizarRacha()
+      + incrementarTiempo(minutos: int)
+      + incrementarEjercicios()
+  }
 
-class Leccion {
-    - id: Long
-    - nombre: String
-    - descripcion: String
-    - orden: int
-    + addPregunta(pregunta: Pregunta)
-    + removePregunta(pregunta: Pregunta)
-    + getPreguntas(): List<Pregunta>
-}
+  class Biblioteca {
+      - id: Long
+      + addCurso(curso: Curso)
+      + removeCurso(curso: Curso)
+      + getCursos(): List<Curso>
+  }
 
-abstract class Pregunta {
-    - id: Long
-    - enunciado: String
-    - orden: int
-    + {abstract} validarRespuesta(respuesta: String): boolean
-}
+  class Curso {
+      - id: Long
+      - titulo: String
+      - descripcion: String
+      - idioma: String
+      - fechaCreacion: Date
+      + addLeccion(leccion: Leccion)
+      + removeLeccion(leccion: Leccion)
+      + getLecciones(): List<Leccion>
+  }
 
-class PreguntaTest {
-    - opcionCorrecta: String
-    - opcionIncorrecta1: String
-    - opcionIncorrecta2: String
-    + validarRespuesta(respuesta: String): boolean
-}
+  class Leccion {
+      - id: Long
+      - nombre: String
+      - descripcion: String
+      - orden: int
+      + addPregunta(pregunta: Pregunta)
+      + removePregunta(pregunta: Pregunta)
+      + getPreguntas(): List<Pregunta>
+  }
 
-class PreguntaTraduccion {
-    - respuestaCorrecta: String
-    + validarRespuesta(respuesta: String): boolean
-}
+  abstract class Pregunta {
+      - id: Long
+      - enunciado: String
+      - orden: int
+      + {abstract} validarRespuesta(respuesta: String): boolean
+  }
 
-class PreguntaHuecos {
-    - fraseCompleta: String
-    - palabraOculta: String
-    + validarRespuesta(respuesta: String): boolean
-}
+  class PreguntaTest {
+      - opcionCorrecta: String
+      - opcionIncorrecta1: String
+      - opcionIncorrecta2: String
+      + validarRespuesta(respuesta: String): boolean
+  }
 
-class Progreso {
-    - id: Long
-    - preguntaActual: int
-    - aciertos: int
-    - errores: int
-    - estrategia: String
-    - tiempoSegundos: int
-    - completado: boolean
-    - fechaUltimoAcceso: Date
-    + registrarAcierto()
-    + registrarError()
-    + reiniciar()
-}
+  class PreguntaTraduccion {
+      - respuestaCorrecta: String
+      + validarRespuesta(respuesta: String): boolean
+  }
 
-class ErrorFrecuente {
-    - id: Long
-    - vecesFallada: int
-    - fechaUltimoError: Date
-    + incrementarErrores()
-    + reducirErrores()
-    + estaDominada(): boolean
-}
+  class PreguntaHuecos {
+      - fraseCompleta: String
+      - palabraOculta: String
+      + validarRespuesta(respuesta: String): boolean
+  }
 
-class ResultadoRespuesta {
-    - correcta: boolean
-    - yaContada: boolean
-    - respuestaCorrecta: String
-    - aciertos: int
-    - errores: int
-}
+  class Progreso {
+      - id: Long
+      - preguntaActual: int
+      - aciertos: int
+      - errores: int
+      - estrategia: String
+      - tiempoSegundos: int
+      - completado: boolean
+      - fechaUltimoAcceso: Date
+      + registrarAcierto()
+      + registrarError()
+      + reiniciar()
+  }
 
-' ===== RELACIONES =====
+  class ErrorFrecuente {
+      - id: Long
+      - vecesFallada: int
+      - fechaUltimoError: Date
+      + incrementarErrores()
+      + reducirErrores()
+      + estaDominada(): boolean
+  }
 
-' Controlador con Catálogos
-SpkrApp "1" -- "1" CatalogoUsuarios : usa >
-SpkrApp "1" -- "1" CatalogoCursos : usa >
+  class ResultadoRespuesta {
+      - correcta: boolean
+      - yaContada: boolean
+      - respuestaCorrecta: String
+      - aciertos: int
+      - errores: int
+  }
 
-' Controlador con Cargadores y Estrategias
-SpkrApp ..> CargadorCursos : usa >
-SpkrApp ..> EstrategiaAprendizaje : crea >
+  ' ===== RELACIONES =====
 
-' Implementaciones de interfaces
-CargadorCursos <|.. CargadorCursosJSON
-CargadorCursos <|.. CargadorCursosYAML
+  ' Controlador con Enum
+  SpkrApp ..> AccionIniciarCurso : usa >
 
-EstrategiaAprendizaje <|.. EstrategiaSecuencial
-EstrategiaAprendizaje <|.. EstrategiaAleatoria
-EstrategiaAprendizaje <|.. EstrategiaRepeticionEspaciada
+  ' Controlador con Catálogos
+  SpkrApp "1" -- "1" CatalogoUsuarios : usa >
+  SpkrApp "1" -- "1" CatalogoCursos : usa >
 
-' Catálogos y entidades
-CatalogoUsuarios "1" -- "*" Usuario : gestiona >
-CatalogoCursos "1" -- "*" Curso : gestiona >
+  ' Controlador con Cargadores y Estrategias
+  SpkrApp ..> CargadorCursos : usa >
+  SpkrApp "1" -- "0..1" EstrategiaAprendizaje : estrategiaActual >
 
-' Usuario y sus componentes
-Usuario "1" *-- "1" Estadisticas : tiene >
-Usuario "1" *-- "1" Biblioteca : tiene >
-Usuario "1" *-- "*" Progreso : tiene >
-Usuario "1" *-- "*" ErrorFrecuente : tiene >
+  ' Implementaciones de interfaces
+  CargadorCursos <|.. CargadorCursosJSON
+  CargadorCursos <|.. CargadorCursosYAML
 
-' Biblioteca y Cursos
-Biblioteca "*" -- "*" Curso : contiene >
+  EstrategiaAprendizaje <|.. EstrategiaSecuencial
+  EstrategiaAprendizaje <|.. EstrategiaAleatoria
+  EstrategiaAprendizaje <|.. EstrategiaRepeticionEspaciada
 
-' Estructura del Curso
-Curso "1" *-- "*" Leccion : contiene >
-Leccion "1" *-- "*" Pregunta : contiene >
+  ' Catálogos y entidades
+  CatalogoUsuarios "1" -- "*" Usuario : gestiona >
+  CatalogoCursos "1" -- "*" Curso : gestiona >
 
-' Referencias
-Progreso "*" -- "1" Curso : referencia >
-ErrorFrecuente "*" -- "1" Pregunta : referencia >
+  ' Usuario y sus componentes
+  Usuario "1" *-- "1" Estadisticas : tiene >
+  Usuario "1" *-- "1" Biblioteca : tiene >
+  Usuario "1" *-- "*" Progreso : tiene >
+  Usuario "1" *-- "*" ErrorFrecuente : tiene >
 
-' Herencia de Preguntas
-Pregunta <|-- PreguntaTest
-Pregunta <|-- PreguntaTraduccion
-Pregunta <|-- PreguntaHuecos
+  ' Biblioteca y Cursos
+  Biblioteca "*" -- "*" Curso : contiene >
 
-@enduml
+  ' Estructura del Curso
+  Curso "1" *-- "*" Leccion : contiene >
+  Leccion "1" *-- "*" Pregunta : contiene >
+
+  ' Referencias
+  Progreso "*" -- "1" Curso : referencia >
+  ErrorFrecuente "*" -- "1" Pregunta : referencia >
+
+  ' Herencia de Preguntas
+  Pregunta <|-- PreguntaTest
+  Pregunta <|-- PreguntaTraduccion
+  Pregunta <|-- PreguntaHuecos
+
+  @enduml
