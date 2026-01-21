@@ -24,9 +24,9 @@ Este manual tiene como objetivo guiar al usuario a través de todas las funciona
 > 
 > | Campo | Valor |
 > |-------|-------|
-> | **Usuario** | admin |
-> | **Email** | admin@spkr.com |
-> | **Contraseña** | 123 |
+> | **Usuario** | demo |
+> | **Email** | demo@spkr.com |
+> | **Contraseña** | demo123 |
 > 
 > Puede utilizar estas credenciales para acceder directamente a la aplicación o crear su propia cuenta mediante el proceso de registro.
 
