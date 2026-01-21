@@ -1,287 +1,171 @@
-@startuml modelo-dominio
-  ' Configuración
-  skinparam classAttributeIconSize 0
-  skinparam classFontStyle bold
-  skinparam class {
-      BackgroundColor White
-      BorderColor Black
-      ArrowColor Black
-  }
+@startuml modelo-dominio-spkr
 
-  title Modelo de Dominio - SPKR
+title Modelo de Dominio - SPKR
 
-  ' ===== ENUMERACIONES =====
+skinparam classAttributeIconSize 0
+skinparam defaultFontName Segoe UI
+skinparam shadowing false
+skinparam class {
+    BackgroundColor<<Controller>> #C8E6C9
+    BackgroundColor<<Entity>> #BBDEFB
+    BackgroundColor<<Catalog>> #FFE0B2
+    BackgroundColor<<DTO>> #FFF9C4
+    BorderColor #546E7A
+    ArrowColor #37474F
+}
 
-  enum AccionIniciarCurso <<Enum>> {
-      SIN_LECCIONES
-      CONTINUAR_PROGRESO
-      CURSO_COMPLETADO
-      SELECCIONAR_ESTRATEGIA
-  }
+' =====================================================
+' CONTROLADOR
+' =====================================================
 
-  ' ===== CONTROLADOR =====
+class SpkrApp <<Controller>> {
+    - catalogoUsuarios: CatalogoUsuarios
+    - catalogoCursos: CatalogoCursos
+    - usuarioActual: Usuario
+    - cursoActivo: Curso
+    - progresoActual: Progreso
+    - estrategiaActual: EstrategiaAprendizaje
+}
 
-  class SpkrApp <<Controlador>> {
-      - catalogoUsuarios: CatalogoUsuarios
-      - catalogoCursos: CatalogoCursos
-      - usuarioActual: Usuario
-      - preguntasSesion: List<Pregunta>
-      - indicePreguntaActual: int
-      - aciertosSesion: int
-      - erroresSesion: int
-      - progresoActual: Progreso
-      - estrategiaActual: EstrategiaAprendizaje
-      - segundosSesion: int
-      - erroresRepasoSesion: List<ErrorFrecuente>
-      - indiceRepasoActual: int
-      - aciertosRepaso: int
-      - erroresRepaso: int
-      + registrarUsuario(nombre: String, email: String, password: String): boolean
-      + login(nombre: String, password: String): boolean
-      + logout()
-      + guardarProgreso()
-      + estaLogueado(): boolean
-      + cerrar()
-      + importarCurso(ruta: String): Curso
-      + exportarCurso(curso: Curso, ruta: String)
-      + crearEstrategia(nombre: String): EstrategiaAprendizaje
-      + determinarAccionIniciarCurso(curso: Curso): AccionIniciarCurso
-      + prepararProgresoParaCurso(curso: Curso): Progreso
-      + iniciarSesionEjercicio(curso: Curso, progreso: Progreso, estrategia: EstrategiaAprendizaje)
-      + obtenerSiguientePreguntaSesion(): Pregunta
-      + procesarRespuestaSesion(pregunta: Pregunta, respuesta: String): ResultadoRespuesta
-      + avanzarPreguntaSesion()
-      + finalizarSesionEjercicio()
-      + iniciarSesionRepaso()
-      + obtenerErrorActualRepaso(): ErrorFrecuente
-      + procesarRespuestaSesionRepaso(respuesta: String): ResultadoRespuesta
-      + avanzarRepasoSesion()
-      + finalizarSesionRepaso()
-      + calcularPorcentajeProgreso(curso: Curso, progreso: Progreso): int
-      + obtenerTodasLasPreguntas(curso: Curso): List<Pregunta>
-      + formatearTiempo(segundos: int): String
-  }
+enum TipoPregunta {
+    TEST
+    TRADUCCION
+    HUECOS
+}
 
-  ' ===== CATÁLOGOS =====
+enum AccionIniciarCurso {
+    SIN_LECCIONES
+    CONTINUAR_PROGRESO
+    CURSO_COMPLETADO
+    SELECCIONAR_ESTRATEGIA
+}
 
-  class CatalogoUsuarios <<Repositorio>> {
-      + getUsuario(nombre: String): Usuario
-      + addUsuario(usuario: Usuario)
-      + existeUsuario(nombre: String): boolean
-      + existeEmail(email: String): boolean
-      + validarCredenciales(nombre: String, password: String): boolean
-      + actualizarUsuario(usuario: Usuario)
-  }
+' =====================================================
+' CATALOGOS (Acceso a Datos)
+' =====================================================
 
-  class CatalogoCursos <<Repositorio>> {
-      + getCurso(titulo: String): Curso
-      + addCurso(curso: Curso)
-      + removeCurso(curso: Curso)
-      + existeCurso(titulo: String): boolean
-      + getCursos(): List<Curso>
-      + actualizarCurso(curso: Curso)
-  }
+class CatalogoUsuarios <<Catalog>> {
+    + addUsuario(usuario): void
+    + getUsuario(nombre): Usuario
+    + existeUsuario(nombre): boolean
+    + validarCredenciales(): boolean
+}
 
-  ' ===== CARGADORES DE CURSOS =====
+class CatalogoCursos <<Catalog>> {
+    + addCurso(curso): void
+    + getCurso(titulo): Curso
+    + existeCurso(titulo): boolean
+}
 
-  interface CargadorCursos <<Interface>> {
-      + cargarCurso(ruta: String): Curso
-      + exportarCurso(curso: Curso, ruta: String)
-  }
+' =====================================================
+' MODELO (Entidades)
+' =====================================================
 
-  class CargadorCursosJSON {
-      + cargarCurso(ruta: String): Curso
-      + cargarCursoDesdeRecurso(recurso: String): Curso
-      + exportarCurso(curso: Curso, ruta: String)
-  }
+class Usuario <<Entity>> {
+    - nombreUsuario: String
+    - email: String
+    - password: String
+    - fechaRegistro: Date
+}
 
-  class CargadorCursosYAML {
-      + cargarCurso(ruta: String): Curso
-      + exportarCurso(curso: Curso, ruta: String)
-  }
+class Estadisticas <<Entity>> {
+    - tiempoTotalUso: int
+    - rachaActual: int
+    - mejorRacha: int
+    - ejerciciosCompletados: int
+}
 
-  ' ===== ESTRATEGIAS DE APRENDIZAJE =====
+class Biblioteca <<Entity>> {
+}
 
-  interface EstrategiaAprendizaje <<Interface>> {
-      + siguientePregunta(preguntas: List<Pregunta>, indice: int): Pregunta
-      + getNombre(): String
-  }
+class Curso <<Entity>> {
+    - titulo: String
+    - descripcion: String
+    - idioma: String
+}
 
-  class EstrategiaSecuencial {
-      + siguientePregunta(preguntas: List<Pregunta>, indice: int): Pregunta
-      + getNombre(): String
-  }
+class Leccion <<Entity>> {
+    - nombre: String
+    - descripcion: String
+    - orden: int
+}
 
-  class EstrategiaAleatoria {
-      + siguientePregunta(preguntas: List<Pregunta>, indice: int): Pregunta
-      + getNombre(): String
-  }
+abstract class Pregunta <<Entity>> {
+    - enunciado: String
+    - orden: int
+    + {abstract} validarRespuesta(): boolean
+}
 
-  class EstrategiaRepeticionEspaciada {
-      - preguntasFalladas: List<Pregunta>
-      - preguntasYaContadas: List<Pregunta>
-      + siguientePregunta(preguntas: List<Pregunta>, indice: int): Pregunta
-      + registrarFallo(pregunta: Pregunta)
-      + registrarAcierto(pregunta: Pregunta)
-      + esPreguntaYaContada(pregunta: Pregunta): boolean
-      + marcarComoContada(pregunta: Pregunta)
-      + getNombre(): String
-  }
+class PreguntaTest <<Entity>> {
+    - opcionCorrecta: String
+    - opcionIncorrecta1: String
+    - opcionIncorrecta2: String
+}
 
-  ' ===== ENTIDADES DEL MODELO =====
+class PreguntaTraduccion <<Entity>> {
+    - respuestaCorrecta: String
+}
 
-  class Usuario {
-      - id: Long
-      - nombreUsuario: String
-      - email: String
-      - password: String
-      - fechaRegistro: Date
-      + addProgreso(progreso: Progreso)
-      + addErrorFrecuente(error: ErrorFrecuente)
-      + removeErrorFrecuente(error: ErrorFrecuente)
-  }
+class PreguntaHuecos <<Entity>> {
+    - fraseCompleta: String
+    - palabraOculta: String
+}
 
-  class Estadisticas {
-      - id: Long
-      - tiempoTotalUso: int
-      - rachaActual: int
-      - mejorRacha: int
-      - ejerciciosCompletados: int
-      - ultimoAcceso: Date
-      + actualizarRacha()
-      + incrementarTiempo(minutos: int)
-      + incrementarEjercicios()
-  }
+class Progreso <<Entity>> {
+    - preguntaActual: int
+    - aciertos: int
+    - errores: int
+    - estrategia: String
+    - tiempoSegundos: int
+    - completado: boolean
+}
 
-  class Biblioteca {
-      - id: Long
-      + addCurso(curso: Curso)
-      + removeCurso(curso: Curso)
-      + getCursos(): List<Curso>
-  }
+class ErrorFrecuente <<Entity>> {
+    - vecesFallada: int
+    - fechaUltimoError: Date
+}
 
-  class Curso {
-      - id: Long
-      - titulo: String
-      - descripcion: String
-      - idioma: String
-      - fechaCreacion: Date
-      + addLeccion(leccion: Leccion)
-      + removeLeccion(leccion: Leccion)
-      + getLecciones(): List<Leccion>
-  }
+class ResultadoRespuesta <<DTO>> {
+    - correcta: boolean
+    - yaContada: boolean
+    - respuestaCorrecta: String
+    - aciertosActuales: int
+    - erroresActuales: int
+}
 
-  class Leccion {
-      - id: Long
-      - nombre: String
-      - descripcion: String
-      - orden: int
-      + addPregunta(pregunta: Pregunta)
-      + removePregunta(pregunta: Pregunta)
-      + getPreguntas(): List<Pregunta>
-  }
+' =====================================================
+' RELACIONES
+' =====================================================
 
-  abstract class Pregunta {
-      - id: Long
-      - enunciado: String
-      - orden: int
-      + {abstract} validarRespuesta(respuesta: String): boolean
-  }
+' Controlador - Catalogos
+SpkrApp *-- CatalogoUsuarios
+SpkrApp *-- CatalogoCursos
+SpkrApp +-- TipoPregunta
+SpkrApp +-- AccionIniciarCurso
+SpkrApp ..> ResultadoRespuesta : crea
 
-  class PreguntaTest {
-      - opcionCorrecta: String
-      - opcionIncorrecta1: String
-      - opcionIncorrecta2: String
-      + validarRespuesta(respuesta: String): boolean
-  }
+' Catalogos - Entidades
+CatalogoUsuarios --> Usuario : gestiona
+CatalogoCursos --> Curso : gestiona
 
-  class PreguntaTraduccion {
-      - respuestaCorrecta: String
-      + validarRespuesta(respuesta: String): boolean
-  }
+' Usuario - Composiciones
+Usuario "1" *-- "1" Estadisticas
+Usuario "1" *-- "1" Biblioteca
+Usuario "1" *-- "*" Progreso
+Usuario "1" *-- "*" ErrorFrecuente
 
-  class PreguntaHuecos {
-      - fraseCompleta: String
-      - palabraOculta: String
-      + validarRespuesta(respuesta: String): boolean
-  }
+' Contenido
+Biblioteca "*" o-- "*" Curso
+Curso "1" *-- "*" Leccion
+Leccion "1" *-- "*" Pregunta
 
-  class Progreso {
-      - id: Long
-      - preguntaActual: int
-      - aciertos: int
-      - errores: int
-      - estrategia: String
-      - tiempoSegundos: int
-      - completado: boolean
-      - fechaUltimoAcceso: Date
-      + registrarAcierto()
-      + registrarError()
-      + reiniciar()
-  }
+' Herencia
+Pregunta <|-- PreguntaTest
+Pregunta <|-- PreguntaTraduccion
+Pregunta <|-- PreguntaHuecos
 
-  class ErrorFrecuente {
-      - id: Long
-      - vecesFallada: int
-      - fechaUltimoError: Date
-      + incrementarErrores()
-      + reducirErrores()
-      + estaDominada(): boolean
-  }
+' Referencias
+Progreso "*" --> "1" Curso
+ErrorFrecuente "*" --> "1" Pregunta
 
-  class ResultadoRespuesta {
-      - correcta: boolean
-      - yaContada: boolean
-      - respuestaCorrecta: String
-      - aciertos: int
-      - errores: int
-  }
-
-  ' ===== RELACIONES =====
-
-  ' Controlador con Enum
-  SpkrApp ..> AccionIniciarCurso : usa >
-
-  ' Controlador con Catálogos
-  SpkrApp "1" -- "1" CatalogoUsuarios : usa >
-  SpkrApp "1" -- "1" CatalogoCursos : usa >
-
-  ' Controlador con Cargadores y Estrategias
-  SpkrApp ..> CargadorCursos : usa >
-  SpkrApp "1" -- "0..1" EstrategiaAprendizaje : estrategiaActual >
-
-  ' Implementaciones de interfaces
-  CargadorCursos <|.. CargadorCursosJSON
-  CargadorCursos <|.. CargadorCursosYAML
-
-  EstrategiaAprendizaje <|.. EstrategiaSecuencial
-  EstrategiaAprendizaje <|.. EstrategiaAleatoria
-  EstrategiaAprendizaje <|.. EstrategiaRepeticionEspaciada
-
-  ' Catálogos y entidades
-  CatalogoUsuarios "1" -- "*" Usuario : gestiona >
-  CatalogoCursos "1" -- "*" Curso : gestiona >
-
-  ' Usuario y sus componentes
-  Usuario "1" *-- "1" Estadisticas : tiene >
-  Usuario "1" *-- "1" Biblioteca : tiene >
-  Usuario "1" *-- "*" Progreso : tiene >
-  Usuario "1" *-- "*" ErrorFrecuente : tiene >
-
-  ' Biblioteca y Cursos
-  Biblioteca "*" -- "*" Curso : contiene >
-
-  ' Estructura del Curso
-  Curso "1" *-- "*" Leccion : contiene >
-  Leccion "1" *-- "*" Pregunta : contiene >
-
-  ' Referencias
-  Progreso "*" -- "1" Curso : referencia >
-  ErrorFrecuente "*" -- "1" Pregunta : referencia >
-
-  ' Herencia de Preguntas
-  Pregunta <|-- PreguntaTest
-  Pregunta <|-- PreguntaTraduccion
-  Pregunta <|-- PreguntaHuecos
-
-  @enduml
+@enduml
