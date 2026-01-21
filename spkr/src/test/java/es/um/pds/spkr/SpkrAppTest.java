@@ -2,93 +2,107 @@ package es.um.pds.spkr;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.util.UUID;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 public class SpkrAppTest {
-    
+
     private SpkrApp app;
-    
+    private String testUserId;
+
     @BeforeEach
     public void setUp() {
         app = new SpkrApp();
+        // Generar ID único para evitar colisiones con datos persistentes
+        testUserId = UUID.randomUUID().toString().substring(0, 8);
     }
     
     @Test
     public void testRegistrarUsuarioExitoso() {
-        boolean resultado = app.registrarUsuario("juan", "juan@email.com", "1234");
+        String usuario = "user_" + testUserId;
+        boolean resultado = app.registrarUsuario(usuario, usuario + "@email.com", "1234");
         assertTrue(resultado);
     }
-    
+
     @Test
     public void testRegistrarUsuarioNombreDuplicado() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        boolean resultado = app.registrarUsuario("juan", "otro@email.com", "5678");
+        String usuario = "dup_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        boolean resultado = app.registrarUsuario(usuario, "otro_" + testUserId + "@email.com", "5678");
         assertFalse(resultado);
     }
-    
+
     @Test
     public void testRegistrarUsuarioEmailDuplicado() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        boolean resultado = app.registrarUsuario("pedro", "juan@email.com", "5678");
+        String email = "email_" + testUserId + "@email.com";
+        app.registrarUsuario("userA_" + testUserId, email, "1234");
+        boolean resultado = app.registrarUsuario("userB_" + testUserId, email, "5678");
         assertFalse(resultado);
     }
-    
+
     @Test
     public void testLoginExitoso() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        boolean resultado = app.login("juan", "1234");
+        String usuario = "login_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        boolean resultado = app.login(usuario, "1234");
         assertTrue(resultado);
         assertTrue(app.estaLogueado());
     }
-    
+
     @Test
     public void testLoginPasswordIncorrecto() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        boolean resultado = app.login("juan", "wrongpass");
+        String usuario = "wrongpw_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        boolean resultado = app.login(usuario, "wrongpass");
         assertFalse(resultado);
         assertFalse(app.estaLogueado());
     }
-    
+
     @Test
     public void testLoginUsuarioNoExiste() {
-        boolean resultado = app.login("noexiste", "1234");
+        boolean resultado = app.login("noexiste_" + testUserId, "1234");
         assertFalse(resultado);
         assertFalse(app.estaLogueado());
     }
-    
+
     @Test
     public void testLogout() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        app.login("juan", "1234");
+        String usuario = "logout_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        app.login(usuario, "1234");
         assertTrue(app.estaLogueado());
-        
+
         app.logout();
         assertFalse(app.estaLogueado());
     }
-    
+
     @Test
     public void testUsuarioTieneEstadisticas() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        app.login("juan", "1234");
+        String usuario = "stats_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        app.login(usuario, "1234");
 
         assertNotNull(app.obtenerEstadisticasActuales());
     }
 
     @Test
     public void testUsuarioTieneBiblioteca() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        app.login("juan", "1234");
+        String usuario = "biblio_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        app.login(usuario, "1234");
 
         assertNotNull(app.getCursosBiblioteca());
     }
 
     @Test
     public void testGetNombreUsuarioActual() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        app.login("juan", "1234");
+        String usuario = "nombre_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        app.login(usuario, "1234");
 
-        assertEquals("juan", app.getNombreUsuarioActual());
+        assertEquals(usuario, app.getNombreUsuarioActual());
     }
 
     @Test
@@ -98,8 +112,9 @@ public class SpkrAppTest {
 
     @Test
     public void testIncrementarEjerciciosCompletados() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        app.login("juan", "1234");
+        String usuario = "ejerc_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        app.login(usuario, "1234");
 
         // Usar métodos encapsulados del controlador (MVC)
         assertEquals(0, app.obtenerEjerciciosCompletadosTotal());
@@ -109,8 +124,9 @@ public class SpkrAppTest {
 
     @Test
     public void testIncrementarTiempoEstadisticas() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        app.login("juan", "1234");
+        String usuario = "tiempo_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        app.login(usuario, "1234");
 
         // Usar métodos encapsulados del controlador (MVC)
         assertEquals(0, app.obtenerTiempoTotalUso());
@@ -120,24 +136,27 @@ public class SpkrAppTest {
 
     @Test
     public void testTieneErroresFrecuentes() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        app.login("juan", "1234");
+        String usuario = "errfrec_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        app.login(usuario, "1234");
 
         assertFalse(app.tieneErroresFrecuentes());
     }
 
     @Test
     public void testContarErroresFrecuentes() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        app.login("juan", "1234");
+        String usuario = "conterr_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        app.login(usuario, "1234");
 
         assertEquals(0, app.contarErroresFrecuentes());
     }
 
     @Test
     public void testObtenerErroresFrecuentesActuales() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        app.login("juan", "1234");
+        String usuario = "obterr_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        app.login(usuario, "1234");
 
         assertNotNull(app.obtenerErroresFrecuentesActuales());
         assertTrue(app.obtenerErroresFrecuentesActuales().isEmpty());
@@ -173,8 +192,9 @@ public class SpkrAppTest {
 
     @Test
     public void testObtenerRachaActual() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        app.login("juan", "1234");
+        String usuario = "racha_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        app.login(usuario, "1234");
 
         // La racha se actualiza al hacer login
         assertTrue(app.obtenerRachaActual() >= 0);
@@ -182,8 +202,9 @@ public class SpkrAppTest {
 
     @Test
     public void testObtenerMejorRacha() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        app.login("juan", "1234");
+        String usuario = "mejor_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        app.login(usuario, "1234");
 
         assertTrue(app.obtenerMejorRacha() >= 0);
     }
@@ -261,8 +282,9 @@ public class SpkrAppTest {
 
     @Test
     public void testCalcularPorcentajeAciertosConLogin() {
-        app.registrarUsuario("juan", "juan@email.com", "1234");
-        app.login("juan", "1234");
+        String usuario = "porcent_" + testUserId;
+        app.registrarUsuario(usuario, usuario + "@email.com", "1234");
+        app.login(usuario, "1234");
 
         // Sin ejercicios completados, el porcentaje es 0
         assertEquals(0, app.calcularPorcentajeAciertos());
