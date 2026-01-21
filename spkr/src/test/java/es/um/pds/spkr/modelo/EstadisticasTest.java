@@ -42,11 +42,30 @@ public class EstadisticasTest {
     }
     
     @Test
-    public void testActualizarRacha() {
-        // Primera llamada - inicializa la racha
-        estadisticas.setUltimoAcceso(null);
+    public void testActualizarRachaMismoDia() {
+        // El constructor ya inicializa ultimoAcceso a la fecha actual
+        // Llamar actualizarRacha el mismo día no debe cambiar la racha
+        int rachaInicial = estadisticas.getRachaActual();
         estadisticas.actualizarRacha();
-        assertEquals(1, estadisticas.getRachaActual());
-        assertEquals(1, estadisticas.getMejorRacha());
+        // El mismo día no incrementa la racha
+        assertEquals(rachaInicial, estadisticas.getRachaActual());
+    }
+
+    @Test
+    public void testGetUltimoAccesoDefensiveCopy() {
+        java.util.Date fecha = estadisticas.getUltimoAcceso();
+        assertNotNull(fecha);
+        long tiempoOriginal = fecha.getTime();
+
+        // Modificar la fecha retornada no debe afectar al objeto interno
+        fecha.setTime(0);
+
+        assertEquals(tiempoOriginal, estadisticas.getUltimoAcceso().getTime());
+    }
+
+    @Test
+    public void testGetId() {
+        // El ID es null hasta que se persiste
+        assertNull(estadisticas.getId());
     }
 }

@@ -4,18 +4,17 @@ import javax.swing.*;
 import java.awt.*;
 
 import es.um.pds.spkr.SpkrApp;
-import es.um.pds.spkr.modelo.Estadisticas;
 import es.um.pds.spkr.util.EstilosApp;
 
 public class VentanaEstadisticas extends JFrame {
-    
+
     private SpkrApp app;
-    
+
     public VentanaEstadisticas(SpkrApp app) {
         this.app = app;
         inicializarComponentes();
     }
-    
+
     private void inicializarComponentes() {
         setTitle("Spkr - Estadísticas");
         setSize(600, 650);
@@ -23,11 +22,15 @@ public class VentanaEstadisticas extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
         EstilosApp.aplicarEstiloVentana(this);
-        
-        Estadisticas stats = app.obtenerEstadisticasActuales();
+
+        // Obtener datos a través del controlador (MVC - no acceder al modelo directamente)
         int erroresPendientes = app.contarErroresFrecuentes();
         int aciertos = app.obtenerAciertosEstadisticas();
         int porcentaje = app.calcularPorcentajeAciertos();
+        int ejerciciosCompletados = app.obtenerEjerciciosCompletadosTotal();
+        int tiempoTotalUso = app.obtenerTiempoTotalUso();
+        int rachaActual = app.obtenerRachaActual();
+        int mejorRacha = app.obtenerMejorRacha();
         
         // Panel principal
         JPanel panelPrincipal = new JPanel(new BorderLayout(0, 0));
@@ -123,10 +126,11 @@ public class VentanaEstadisticas extends JFrame {
         panelTarjetas.setMaximumSize(new Dimension(500, 180));
         panelTarjetas.setAlignmentX(Component.CENTER_ALIGNMENT);
         
-        panelTarjetas.add(crearTarjetaEstadistica("Ejercicios", String.valueOf(stats.getEjerciciosCompletados()), EstilosApp.COLOR_PRIMARIO));
-        panelTarjetas.add(crearTarjetaEstadistica("Tiempo de uso", stats.getTiempoTotalUso() + " min", EstilosApp.COLOR_SECUNDARIO));
-        panelTarjetas.add(crearTarjetaEstadistica("Racha actual", stats.getRachaActual() + " días", EstilosApp.COLOR_EXITO));
-        panelTarjetas.add(crearTarjetaEstadistica("Mejor racha", stats.getMejorRacha() + " días", new Color(255, 152, 0)));
+        // Usar datos obtenidos del controlador (MVC - no acceder al modelo directamente)
+        panelTarjetas.add(crearTarjetaEstadistica("Ejercicios", String.valueOf(ejerciciosCompletados), EstilosApp.COLOR_PRIMARIO));
+        panelTarjetas.add(crearTarjetaEstadistica("Tiempo de uso", tiempoTotalUso + " min", EstilosApp.COLOR_SECUNDARIO));
+        panelTarjetas.add(crearTarjetaEstadistica("Racha actual", rachaActual + " días", EstilosApp.COLOR_EXITO));
+        panelTarjetas.add(crearTarjetaEstadistica("Mejor racha", mejorRacha + " días", new Color(255, 152, 0)));
         
         panelCentral.add(panelTarjetas);
         panelCentral.add(Box.createVerticalGlue());

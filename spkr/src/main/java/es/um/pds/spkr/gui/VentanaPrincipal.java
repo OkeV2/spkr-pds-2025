@@ -11,21 +11,26 @@ import java.util.List;
 
 import es.um.pds.spkr.SpkrApp;
 import es.um.pds.spkr.modelo.Curso;
-import es.um.pds.spkr.modelo.Progreso;
 import es.um.pds.spkr.util.EstilosApp;
 
 public class VentanaPrincipal extends JFrame {
-    
+
     private SpkrApp app;
     private JPanel panelCursos;
     private JScrollPane scrollPane;
     private int cursoSeleccionadoIndex = -1;
     private JPanel panelCursoSeleccionado = null;
-    
+
     public VentanaPrincipal(SpkrApp app) {
         this.app = app;
         inicializarComponentes();
         actualizarListaCursos();
+
+        // Registrar callback para actualización desde otras vistas (MVC - evita referencias circulares)
+        app.setCallbackActualizarVentanaPrincipal(() -> {
+            actualizarListaCursos();
+            setVisible(true);
+        });
     }
     
     private void inicializarComponentes() {
@@ -322,41 +327,44 @@ public class VentanaPrincipal extends JFrame {
         ));
         tarjeta.setMaximumSize(new Dimension(Integer.MAX_VALUE, 90));
         tarjeta.setCursor(new Cursor(Cursor.HAND_CURSOR));
-        
+
         // Icono del idioma
         JLabel lblIcono = new JLabel("📚");
         lblIcono.setFont(new Font("Segoe UI Emoji", Font.PLAIN, 28));
         tarjeta.add(lblIcono, BorderLayout.WEST);
-        
-        // Información del curso
+
+        // Información del curso - usando el controlador (MVC)
         JPanel panelInfo = new JPanel();
         panelInfo.setLayout(new BoxLayout(panelInfo, BoxLayout.Y_AXIS));
         panelInfo.setBackground(Color.WHITE);
-        
-        JLabel lblTitulo = new JLabel(curso.getTitulo());
-        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        lblTitulo.setForeground(EstilosApp.COLOR_TEXTO);
-        
-        JLabel lblIdioma = new JLabel(curso.getIdioma());
-        lblIdioma.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        lblIdioma.setForeground(EstilosApp.COLOR_SECUNDARIO);
-        
+
+        // Obtener datos a través del controlador (MVC - no acceder al modelo directamente)
+        String titulo = app.obtenerTituloCurso(curso);
+        String idioma = app.obtenerIdiomaCurso(curso);
         int numLecciones = app.obtenerNumeroLecciones(curso);
         int numPreguntas = app.calcularTotalPreguntas(curso);
-        
+
+        JLabel lblTitulo = new JLabel(titulo);
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 16));
+        lblTitulo.setForeground(EstilosApp.COLOR_TEXTO);
+
+        JLabel lblIdioma = new JLabel(idioma);
+        lblIdioma.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        lblIdioma.setForeground(EstilosApp.COLOR_SECUNDARIO);
+
         JLabel lblDetalles = new JLabel(numLecciones + " lecciones • " + numPreguntas + " preguntas");
         lblDetalles.setFont(new Font("Segoe UI", Font.PLAIN, 12));
         lblDetalles.setForeground(new Color(150, 150, 150));
-        
+
         panelInfo.add(lblTitulo);
         panelInfo.add(Box.createRigidArea(new Dimension(0, 4)));
         panelInfo.add(lblIdioma);
         panelInfo.add(Box.createRigidArea(new Dimension(0, 4)));
         panelInfo.add(lblDetalles);
-        
+
         tarjeta.add(panelInfo, BorderLayout.CENTER);
 
-        // Progreso si existe - delegamos toda la lógica al controlador (sin acceder al Modelo)
+        // Progreso si existe - delegamos toda la lógica al controlador (MVC)
         if (app.tieneProgresoIniciado(curso)) {
             int porcentaje = app.obtenerPorcentajeProgresoCurso(curso);
             JLabel lblProgreso = new JLabel(porcentaje + "%");
@@ -366,7 +374,7 @@ public class VentanaPrincipal extends JFrame {
 
             tarjeta.add(lblProgreso, BorderLayout.EAST);
         }
-        
+
         // Eventos
         tarjeta.addMouseListener(new MouseAdapter() {
             @Override
@@ -376,7 +384,7 @@ public class VentanaPrincipal extends JFrame {
                     iniciarCurso();
                 }
             }
-            
+
             @Override
             public void mouseEntered(MouseEvent e) {
                 if (cursoSeleccionadoIndex != index) {
@@ -384,7 +392,7 @@ public class VentanaPrincipal extends JFrame {
                     panelInfo.setBackground(new Color(250, 250, 252));
                 }
             }
-            
+
             @Override
             public void mouseExited(MouseEvent e) {
                 if (cursoSeleccionadoIndex != index) {
@@ -393,7 +401,7 @@ public class VentanaPrincipal extends JFrame {
                 }
             }
         });
-        
+
         return tarjeta;
     }
     
@@ -479,10 +487,11 @@ public class VentanaPrincipal extends JFrame {
             return;
         }
 
-        Curso curso = app.getCursoBiblioteca(cursoSeleccionadoIndex);
+        // Establecer el curso activo en el controlador (MVC - no pasar modelos entre vistas)
+        app.establecerCursoActivo(cursoSeleccionadoIndex);
 
         // Delegar la decisión al controlador
-        SpkrApp.AccionIniciarCurso accion = app.determinarAccionIniciarCurso(curso);
+        SpkrApp.AccionIniciarCurso accion = app.determinarAccionIniciarCursoActivo();
 
         switch (accion) {
             case SIN_LECCIONES:
@@ -490,10 +499,9 @@ public class VentanaPrincipal extends JFrame {
                 break;
 
             case CONTINUAR_PROGRESO:
-                Progreso progresoContinuar = app.buscarProgresoCurso(curso);
                 int opcionContinuar = JOptionPane.showOptionDialog(this,
                     "Tienes un progreso guardado en este curso.\n" +
-                    app.obtenerInfoProgreso(curso) + "\n\n" +
+                    app.obtenerInfoProgresoCursoActivo() + "\n\n" +
                     "¿Qué deseas hacer?",
                     "Progreso encontrado",
                     JOptionPane.YES_NO_OPTION,
@@ -503,40 +511,41 @@ public class VentanaPrincipal extends JFrame {
                     "Continuar");
 
                 if (opcionContinuar == 0) {
-                    // Usar el controlador para obtener la estrategia (sin acceder directamente al Modelo)
-                    String estrategia = app.obtenerEstrategiaProgresoCurso(curso);
-                    VentanaEjercicio ventanaEjercicio = new VentanaEjercicio(
-                        app, curso, estrategia, this, progresoContinuar);
+                    // Continuar con la sesión existente a través del controlador (MVC)
+                    app.continuarSesionEjercicioCursoActivo();
+                    VentanaEjercicio ventanaEjercicio = new VentanaEjercicio(app);
                     ventanaEjercicio.setVisible(true);
                 } else {
-                    app.reiniciarProgreso(progresoContinuar);
-                    mostrarSeleccionEstrategia(curso, progresoContinuar);
+                    // Reiniciar y mostrar selección de estrategia a través del controlador (MVC)
+                    app.reiniciarProgresoCursoActivo();
+                    mostrarSeleccionEstrategia();
                 }
                 break;
 
             case CURSO_COMPLETADO:
-                Progreso progresoCompletado = app.buscarProgresoCurso(curso);
                 int opcionRepetir = JOptionPane.showConfirmDialog(this,
                     "Ya has completado este curso.\n¿Deseas repetirlo desde el principio?",
                     "Curso completado",
                     JOptionPane.YES_NO_OPTION);
 
                 if (opcionRepetir == JOptionPane.YES_OPTION) {
-                    app.reiniciarProgreso(progresoCompletado);
-                    mostrarSeleccionEstrategia(curso, progresoCompletado);
+                    // Reiniciar y mostrar selección de estrategia a través del controlador (MVC)
+                    app.reiniciarProgresoCursoActivo();
+                    mostrarSeleccionEstrategia();
                 }
                 break;
 
             case SELECCIONAR_ESTRATEGIA:
-                Progreso progresoNuevo = app.prepararProgresoParaCurso(curso);
-                mostrarSeleccionEstrategia(curso, progresoNuevo);
+                // Preparar progreso y mostrar selección de estrategia a través del controlador (MVC)
+                app.prepararProgresoParaCursoActivo();
+                mostrarSeleccionEstrategia();
                 break;
         }
     }
 
-    private void mostrarSeleccionEstrategia(Curso curso, Progreso progreso) {
-        VentanaSeleccionEstrategia ventanaEstrategia = new VentanaSeleccionEstrategia(
-            app, curso, this, progreso);
+    private void mostrarSeleccionEstrategia() {
+        // Crear ventana de selección de estrategia usando solo el controlador (MVC)
+        VentanaSeleccionEstrategia ventanaEstrategia = new VentanaSeleccionEstrategia(app);
         ventanaEstrategia.setVisible(true);
     }
     
@@ -551,7 +560,8 @@ public class VentanaPrincipal extends JFrame {
             return;
         }
 
-        VentanaRepaso ventanaRepaso = new VentanaRepaso(app, this);
+        // Crear ventana de repaso usando solo el controlador (MVC - evita referencias circulares)
+        VentanaRepaso ventanaRepaso = new VentanaRepaso(app);
         ventanaRepaso.setVisible(true);
     }
     

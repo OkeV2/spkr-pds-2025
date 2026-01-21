@@ -101,9 +101,10 @@ public class SpkrAppTest {
         app.registrarUsuario("juan", "juan@email.com", "1234");
         app.login("juan", "1234");
 
-        assertEquals(0, app.obtenerEstadisticasActuales().getEjerciciosCompletados());
+        // Usar métodos encapsulados del controlador (MVC)
+        assertEquals(0, app.obtenerEjerciciosCompletadosTotal());
         app.incrementarEjerciciosCompletados();
-        assertEquals(1, app.obtenerEstadisticasActuales().getEjerciciosCompletados());
+        assertEquals(1, app.obtenerEjerciciosCompletadosTotal());
     }
 
     @Test
@@ -111,9 +112,10 @@ public class SpkrAppTest {
         app.registrarUsuario("juan", "juan@email.com", "1234");
         app.login("juan", "1234");
 
-        assertEquals(0, app.obtenerEstadisticasActuales().getTiempoTotalUso());
+        // Usar métodos encapsulados del controlador (MVC)
+        assertEquals(0, app.obtenerTiempoTotalUso());
         app.incrementarTiempoEstadisticas(120); // 2 minutos
-        assertEquals(2, app.obtenerEstadisticasActuales().getTiempoTotalUso());
+        assertEquals(2, app.obtenerTiempoTotalUso());
     }
 
     @Test
@@ -163,5 +165,111 @@ public class SpkrAppTest {
     public void testCrearEstrategiaDesconocidaDevuelveSecuencial() {
         assertNotNull(app.crearEstrategia("Desconocida"));
         assertEquals("Secuencial", app.crearEstrategia("Desconocida").getNombre());
+    }
+
+    // =====================================================
+    // Tests para métodos encapsulados de estadísticas (MVC)
+    // =====================================================
+
+    @Test
+    public void testObtenerRachaActual() {
+        app.registrarUsuario("juan", "juan@email.com", "1234");
+        app.login("juan", "1234");
+
+        // La racha se actualiza al hacer login
+        assertTrue(app.obtenerRachaActual() >= 0);
+    }
+
+    @Test
+    public void testObtenerMejorRacha() {
+        app.registrarUsuario("juan", "juan@email.com", "1234");
+        app.login("juan", "1234");
+
+        assertTrue(app.obtenerMejorRacha() >= 0);
+    }
+
+    @Test
+    public void testObtenerRachaActualSinLogin() {
+        assertEquals(0, app.obtenerRachaActual());
+    }
+
+    @Test
+    public void testObtenerMejorRachaSinLogin() {
+        assertEquals(0, app.obtenerMejorRacha());
+    }
+
+    @Test
+    public void testObtenerTiempoTotalUsoSinLogin() {
+        assertEquals(0, app.obtenerTiempoTotalUso());
+    }
+
+    @Test
+    public void testObtenerEjerciciosCompletadosTotalSinLogin() {
+        assertEquals(0, app.obtenerEjerciciosCompletadosTotal());
+    }
+
+    // =====================================================
+    // Tests para callback de ventana principal (MVC)
+    // =====================================================
+
+    @Test
+    public void testSetCallbackActualizarVentanaPrincipal() {
+        final boolean[] callbackEjecutado = {false};
+
+        app.setCallbackActualizarVentanaPrincipal(() -> {
+            callbackEjecutado[0] = true;
+        });
+
+        app.notificarActualizacionVentanaPrincipal();
+
+        assertTrue(callbackEjecutado[0]);
+    }
+
+    @Test
+    public void testNotificarActualizacionVentanaPrincipalSinCallback() {
+        // No debe lanzar excepción si no hay callback registrado
+        assertDoesNotThrow(() -> app.notificarActualizacionVentanaPrincipal());
+    }
+
+    // =====================================================
+    // Tests para formatear tiempo
+    // =====================================================
+
+    @Test
+    public void testFormatearTiempoSegundos() {
+        assertEquals("00:30", app.formatearTiempo(30));
+    }
+
+    @Test
+    public void testFormatearTiempoMinutos() {
+        assertEquals("02:30", app.formatearTiempo(150));
+    }
+
+    @Test
+    public void testFormatearTiempoHoras() {
+        assertEquals("1:30:00", app.formatearTiempo(5400));
+    }
+
+    // =====================================================
+    // Tests para cálculo de porcentajes
+    // =====================================================
+
+    @Test
+    public void testCalcularPorcentajeAciertosSinLogin() {
+        assertEquals(0, app.calcularPorcentajeAciertos());
+    }
+
+    @Test
+    public void testCalcularPorcentajeAciertosConLogin() {
+        app.registrarUsuario("juan", "juan@email.com", "1234");
+        app.login("juan", "1234");
+
+        // Sin ejercicios completados, el porcentaje es 0
+        assertEquals(0, app.calcularPorcentajeAciertos());
+    }
+
+    @Test
+    public void testObtenerAciertosEstadisticasSinLogin() {
+        assertEquals(0, app.obtenerAciertosEstadisticas());
     }
 }

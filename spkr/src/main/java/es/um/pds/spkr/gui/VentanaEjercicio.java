@@ -11,23 +11,17 @@ import java.util.List;
 
 import es.um.pds.spkr.SpkrApp;
 import es.um.pds.spkr.SpkrApp.TipoPregunta;
-import es.um.pds.spkr.estrategia.EstrategiaAprendizaje;
-import es.um.pds.spkr.modelo.Curso;
-import es.um.pds.spkr.modelo.Pregunta;
-import es.um.pds.spkr.modelo.Progreso;
 import es.um.pds.spkr.modelo.ResultadoRespuesta;
 import es.um.pds.spkr.util.EstilosApp;
 
 public class VentanaEjercicio extends JFrame {
 
     private SpkrApp app;
-    private Curso curso;
-    private VentanaPrincipal ventanaPrincipal;
 
     // Temporizador (solo UI, el tiempo se guarda en el controlador)
     private Timer temporizador;
     private boolean pausado;
-    
+
     private JLabel lblPreguntaNum;
     private JLabel lblTemporizador;
     private JProgressBar barraProgreso;
@@ -41,40 +35,24 @@ public class VentanaEjercicio extends JFrame {
     private JLabel lblRespuestaCorrecta;
     private JLabel lblAciertosContador;
     private JLabel lblErroresContador;
-    
+
     private JTextField txtRespuesta;
     private ButtonGroup grupoOpciones;
     private List<JRadioButton> opcionesTest;
     private List<JPanel> panelesOpciones;
-    
-    private Pregunta preguntaActualObj;
+
+    private TipoPregunta tipoPreguntaActual; // Tipo de pregunta actual (MVC - no guardamos referencia al modelo)
     private boolean preguntaRespondida;
-    
-    public VentanaEjercicio(SpkrApp app, Curso curso, EstrategiaAprendizaje estrategia, VentanaPrincipal ventanaPrincipal, Progreso progreso) {
+
+    /**
+     * Constructor que usa el curso activo del controlador.
+     * La sesión ya debe estar inicializada en el controlador.
+     * No recibe objetos del modelo directamente (respeta MVC).
+     */
+    public VentanaEjercicio(SpkrApp app) {
         this.app = app;
-        this.curso = curso;
-        this.ventanaPrincipal = ventanaPrincipal;
         this.pausado = false;
         this.preguntaRespondida = false;
-
-        // Delegar la inicialización de la sesión al controlador
-        app.iniciarSesionEjercicio(curso, progreso, estrategia);
-
-        inicializarComponentes();
-        iniciarTemporizador();
-        mostrarPregunta();
-    }
-
-    public VentanaEjercicio(SpkrApp app, Curso curso, String nombreEstrategia, VentanaPrincipal ventanaPrincipal, Progreso progreso) {
-        this.app = app;
-        this.curso = curso;
-        this.ventanaPrincipal = ventanaPrincipal;
-        this.pausado = false;
-        this.preguntaRespondida = false;
-
-        // Delegar la inicialización de la sesión al controlador
-        EstrategiaAprendizaje estrategia = app.crearEstrategia(nombreEstrategia);
-        app.iniciarSesionEjercicio(curso, progreso, estrategia);
 
         inicializarComponentes();
         iniciarTemporizador();
@@ -99,7 +77,7 @@ public class VentanaEjercicio extends JFrame {
     }
     
     private void inicializarComponentes() {
-        setTitle("Spkr - " + curso.getTitulo());
+        setTitle("Spkr - " + app.obtenerTituloCursoActivo());
         setSize(650, 620);
         setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
         setLocationRelativeTo(null);
@@ -335,40 +313,40 @@ public class VentanaEjercicio extends JFrame {
     }
     
     private void mostrarPregunta() {
-        // Obtener la siguiente pregunta del controlador
-        preguntaActualObj = app.obtenerSiguientePreguntaSesion();
+        // Cargar la siguiente pregunta a través del controlador (MVC - no guardamos referencia al modelo)
+        boolean hayPregunta = app.cargarSiguientePreguntaSesion();
         preguntaRespondida = false;
 
-        if (preguntaActualObj == null) {
+        if (!hayPregunta) {
             mostrarResultadoFinal();
             return;
         }
 
-        // Actualizar UI con datos del controlador
+        // Actualizar UI con datos del controlador (MVC)
         int indice = app.getIndicePreguntaActual();
         int total = app.getTotalPreguntasSesion();
         lblPreguntaNum.setText("Pregunta " + (indice + 1) + " de " + total);
         barraProgreso.setValue(indice);
-        lblEnunciado.setText(preguntaActualObj.getEnunciado());
-        
+        lblEnunciado.setText(app.obtenerEnunciadoPreguntaSesionActual());
+
         panelResultado.setVisible(false);
-        
+
         panelRespuesta.removeAll();
         panelesOpciones = new ArrayList<>();
 
-        // Usar el controlador para determinar el tipo de pregunta (sin instanceof)
-        TipoPregunta tipo = app.obtenerTipoPregunta(preguntaActualObj);
-        if (tipo == TipoPregunta.TEST) {
+        // Usar el controlador para determinar el tipo de pregunta (MVC - sin instanceof)
+        tipoPreguntaActual = app.obtenerTipoPreguntaSesionActual();
+        if (tipoPreguntaActual == TipoPregunta.TEST) {
             mostrarPreguntaTest();
-        } else if (tipo == TipoPregunta.TRADUCCION) {
+        } else if (tipoPreguntaActual == TipoPregunta.TRADUCCION) {
             mostrarPreguntaTraduccion();
-        } else if (tipo == TipoPregunta.HUECOS) {
+        } else if (tipoPreguntaActual == TipoPregunta.HUECOS) {
             mostrarPreguntaHuecos();
         }
-        
+
         panelRespuesta.revalidate();
         panelRespuesta.repaint();
-        
+
         btnSiguiente.setEnabled(false);
         btnSiguiente.setBackground(new Color(180, 180, 180));
     }
@@ -377,8 +355,8 @@ public class VentanaEjercicio extends JFrame {
         grupoOpciones = new ButtonGroup();
         opcionesTest = new ArrayList<>();
 
-        // Obtener opciones del controlador (ya vienen mezcladas)
-        List<String> opciones = app.obtenerOpcionesTest(preguntaActualObj);
+        // Obtener opciones del controlador (MVC - ya vienen mezcladas)
+        List<String> opciones = app.obtenerOpcionesTestSesionActual();
         
         for (String opcion : opciones) {
             JPanel panelOpcion = new JPanel(new BorderLayout());
@@ -516,14 +494,11 @@ public class VentanaEjercicio extends JFrame {
             }
         }
 
-        // Delegar toda la lógica de negocio al controlador
-        ResultadoRespuesta resultado = app.procesarRespuestaSesion(preguntaActualObj, respuesta);
+        // Delegar toda la lógica de negocio al controlador (MVC - usar método encapsulado)
+        ResultadoRespuesta resultado = app.procesarRespuestaSesionActual(respuesta);
 
         // Actualizar la interfaz según el resultado (solo UI, sin lógica de negocio)
         panelResultado.setVisible(true);
-
-        // Usar el controlador para determinar el tipo de pregunta (sin instanceof)
-        TipoPregunta tipo = app.obtenerTipoPregunta(preguntaActualObj);
 
         if (resultado.isCorrecta()) {
             lblResultado.setText("¡Correcto!");
@@ -531,7 +506,7 @@ public class VentanaEjercicio extends JFrame {
             lblRespuestaCorrecta.setText("");
             lblAciertosContador.setText("Aciertos: " + app.getAciertosSesion());
 
-            if (tipo == TipoPregunta.TEST) {
+            if (tipoPreguntaActual == TipoPregunta.TEST) {
                 marcarOpcionCorrecta();
             }
         } else {
@@ -540,7 +515,7 @@ public class VentanaEjercicio extends JFrame {
             lblRespuestaCorrecta.setText("La respuesta correcta era: " + resultado.getRespuestaCorrecta());
             lblErroresContador.setText("Errores: " + app.getErroresSesion());
 
-            if (tipo == TipoPregunta.TEST) {
+            if (tipoPreguntaActual == TipoPregunta.TEST) {
                 marcarOpcionIncorrecta();
             }
         }
@@ -577,12 +552,13 @@ public class VentanaEjercicio extends JFrame {
     }
     
     private void marcarOpcionIncorrecta() {
-        String correcta = app.obtenerRespuestaCorrecta(preguntaActualObj);
-        
+        // Obtener respuesta correcta del controlador (MVC - no acceder al modelo)
+        String correcta = app.obtenerRespuestaCorrectaSesionActual();
+
         for (int i = 0; i < opcionesTest.size(); i++) {
             JRadioButton rb = opcionesTest.get(i);
             JPanel panel = panelesOpciones.get(i);
-            
+
             if (rb.isSelected()) {
                 panel.setBackground(new Color(255, 235, 238));
                 panel.setBorder(BorderFactory.createCompoundBorder(
@@ -591,7 +567,7 @@ public class VentanaEjercicio extends JFrame {
                 ));
                 rb.setBackground(new Color(255, 235, 238));
             }
-            
+
             if (rb.getActionCommand().equals(correcta)) {
                 panel.setBackground(new Color(232, 245, 233));
                 panel.setBorder(BorderFactory.createCompoundBorder(
@@ -608,11 +584,10 @@ public class VentanaEjercicio extends JFrame {
             }
         }
     }
-    
+
     private String obtenerRespuesta() {
-        // Usar el controlador para determinar el tipo de pregunta (sin instanceof)
-        TipoPregunta tipo = app.obtenerTipoPregunta(preguntaActualObj);
-        if (tipo == TipoPregunta.TEST) {
+        // Usar el tipo de pregunta guardado (MVC - no acceder al modelo)
+        if (tipoPreguntaActual == TipoPregunta.TEST) {
             ButtonModel seleccion = grupoOpciones.getSelection();
             if (seleccion != null) {
                 return seleccion.getActionCommand();
@@ -632,7 +607,7 @@ public class VentanaEjercicio extends JFrame {
     private void mostrarResultadoFinal() {
         temporizador.stop();
 
-        // Obtener datos del controlador 
+        // Obtener datos del controlador
         int aciertos = app.getAciertosSesion();
         int errores = app.getErroresSesion();
         int porcentaje = app.calcularPorcentajeSesion();
@@ -649,19 +624,19 @@ public class VentanaEjercicio extends JFrame {
 
         JOptionPane.showMessageDialog(this, mensaje, "Resultado", JOptionPane.INFORMATION_MESSAGE);
 
-        ventanaPrincipal.actualizarListaCursos();
-        ventanaPrincipal.setVisible(true);
+        // Usar callback del controlador en lugar de referencia directa a la vista (MVC)
+        app.notificarActualizacionVentanaPrincipal();
         this.dispose();
     }
-    
+
     private void salir() {
         temporizador.stop();
 
         // Delegar al controlador la finalización del ejercicio
         app.finalizarSesionEjercicio();
 
-        ventanaPrincipal.actualizarListaCursos();
-        ventanaPrincipal.setVisible(true);
+        // Usar callback del controlador en lugar de referencia directa a la vista (MVC)
+        app.notificarActualizacionVentanaPrincipal();
         this.dispose();
     }
 }

@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(cmd.exe /c \"cd /d C:\\\\Users\\\\aleoq\\\\Documents\\\\GitHub\\\\spkr-pds-2025\\\\spkr && mvn compile\")",
+      "Bash(cmd.exe /c \"dir C:\\\\Users\\\\aleoq\\\\Documents\\\\GitHub\\\\spkr-pds-2025\\\\spkr\\\\target\\\\classes\")",
+      "Bash(mvn clean compile:*)",
+      "Bash(tree:*)",
+      "Bash(mvn test:*)"
+    ]
+  }
+}

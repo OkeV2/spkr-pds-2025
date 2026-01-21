@@ -7,16 +7,13 @@ import java.util.List;
 
 import es.um.pds.spkr.SpkrApp;
 import es.um.pds.spkr.SpkrApp.TipoPregunta;
-import es.um.pds.spkr.modelo.ErrorFrecuente;
-import es.um.pds.spkr.modelo.Pregunta;
 import es.um.pds.spkr.modelo.ResultadoRespuesta;
 import es.um.pds.spkr.util.EstilosApp;
 
 public class VentanaRepaso extends JFrame {
 
     private SpkrApp app;
-    private VentanaPrincipal ventanaPrincipal;
-    
+
     private JLabel lblPreguntaNum;
     private JProgressBar barraProgreso;
     private JLabel lblEnunciado;
@@ -27,18 +24,20 @@ public class VentanaRepaso extends JFrame {
     private JPanel panelResultado;
     private JLabel lblResultado;
     private JLabel lblRespuestaCorrecta;
-    
+
     private JTextField txtRespuesta;
     private ButtonGroup grupoOpciones;
     private List<JRadioButton> opcionesTest;
     private List<JPanel> panelesOpciones;
-    
-    private Pregunta preguntaActualObj;
-    private ErrorFrecuente errorActual;
-    
-    public VentanaRepaso(SpkrApp app, VentanaPrincipal ventanaPrincipal) {
+
+    private TipoPregunta tipoPreguntaActual;
+
+    /**
+     * Constructor que usa el controlador para la sesión de repaso.
+     * No recibe referencias a otras vistas (respeta MVC - evita referencias circulares).
+     */
+    public VentanaRepaso(SpkrApp app) {
         this.app = app;
-        this.ventanaPrincipal = ventanaPrincipal;
 
         // Delegar la inicialización de la sesión de repaso al controlador
         app.iniciarSesionRepaso();
@@ -253,35 +252,33 @@ public class VentanaRepaso extends JFrame {
             return;
         }
 
-        // Obtener el error actual del controlador
-        errorActual = app.obtenerErrorActualRepaso();
-        preguntaActualObj = errorActual.getPregunta();
-
-        // Actualizar UI con datos del controlador
+        // Actualizar UI con datos del controlador (MVC - no acceder a modelos directamente)
         int indice = app.getIndiceRepasoActual();
         int total = app.getTotalErroresRepaso();
         lblPreguntaNum.setText((indice + 1) + " / " + total);
         barraProgreso.setValue(indice);
-        lblEnunciado.setText(preguntaActualObj.getEnunciado());
-        
+
+        // Obtener enunciado a través del controlador (MVC)
+        lblEnunciado.setText(app.obtenerEnunciadoErrorActualRepaso());
+
         panelResultado.setVisible(false);
-        
+
         panelRespuesta.removeAll();
         panelesOpciones = new ArrayList<>();
 
-        // Usar el controlador para determinar el tipo de pregunta (sin instanceof)
-        TipoPregunta tipo = app.obtenerTipoPregunta(preguntaActualObj);
-        if (tipo == TipoPregunta.TEST) {
+        // Usar el controlador para determinar el tipo de pregunta (MVC - sin instanceof)
+        tipoPreguntaActual = app.obtenerTipoPreguntaErrorActualRepaso();
+        if (tipoPreguntaActual == TipoPregunta.TEST) {
             mostrarPreguntaTest();
-        } else if (tipo == TipoPregunta.TRADUCCION) {
+        } else if (tipoPreguntaActual == TipoPregunta.TRADUCCION) {
             mostrarPreguntaTraduccion();
-        } else if (tipo == TipoPregunta.HUECOS) {
+        } else if (tipoPreguntaActual == TipoPregunta.HUECOS) {
             mostrarPreguntaHuecos();
         }
-        
+
         panelRespuesta.revalidate();
         panelRespuesta.repaint();
-        
+
         btnComprobar.setEnabled(true);
         btnComprobar.setBackground(EstilosApp.COLOR_PRIMARIO);
         btnSiguiente.setEnabled(false);
@@ -291,8 +288,8 @@ public class VentanaRepaso extends JFrame {
         grupoOpciones = new ButtonGroup();
         opcionesTest = new ArrayList<>();
 
-        // Obtener opciones del controlador (ya vienen mezcladas)
-        List<String> opciones = app.obtenerOpcionesTest(preguntaActualObj);
+        // Obtener opciones del controlador (MVC - ya vienen mezcladas)
+        List<String> opciones = app.obtenerOpcionesTestErrorActualRepaso();
 
         for (String opcion : opciones) {
             JPanel panelOpcion = new JPanel(new BorderLayout());
@@ -428,9 +425,8 @@ public class VentanaRepaso extends JFrame {
     }
     
     private String obtenerRespuesta() {
-        // Usar el controlador para determinar el tipo de pregunta (sin instanceof)
-        TipoPregunta tipo = app.obtenerTipoPregunta(preguntaActualObj);
-        if (tipo == TipoPregunta.TEST) {
+        // Usar el tipo de pregunta guardado (MVC - no acceder al modelo)
+        if (tipoPreguntaActual == TipoPregunta.TEST) {
             ButtonModel seleccion = grupoOpciones.getSelection();
             if (seleccion != null) {
                 return seleccion.getActionCommand();

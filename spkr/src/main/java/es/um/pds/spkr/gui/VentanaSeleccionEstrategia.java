@@ -8,33 +8,28 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
 import es.um.pds.spkr.SpkrApp;
-import es.um.pds.spkr.estrategia.EstrategiaAprendizaje;
-import es.um.pds.spkr.modelo.Curso;
-import es.um.pds.spkr.modelo.Progreso;
 import es.um.pds.spkr.util.EstilosApp;
 
 public class VentanaSeleccionEstrategia extends JFrame {
-    
+
     private SpkrApp app;
-    private Curso curso;
-    private VentanaPrincipal ventanaPrincipal;
-    private Progreso progreso;
-    
+
     private JPanel panelSecuencial;
     private JPanel panelAleatoria;
     private JPanel panelRepeticion;
     private JPanel panelSeleccionado;
-    
+
     private JButton btnIniciar;
     private JButton btnCancelar;
-    
+
     private String estrategiaSeleccionada = "Secuencial";
-    
-    public VentanaSeleccionEstrategia(SpkrApp app, Curso curso, VentanaPrincipal ventanaPrincipal, Progreso progreso) {
+
+    /**
+     * Constructor que usa el curso activo del controlador.
+     * No recibe objetos del modelo directamente (respeta MVC).
+     */
+    public VentanaSeleccionEstrategia(SpkrApp app) {
         this.app = app;
-        this.curso = curso;
-        this.ventanaPrincipal = ventanaPrincipal;
-        this.progreso = progreso;
         inicializarComponentes();
     }
     
@@ -235,28 +230,28 @@ public class VentanaSeleccionEstrategia extends JFrame {
             nombreEstrategia = "Repetición Espaciada";
         }
 
-        app.asignarEstrategiaProgreso(progreso, nombreEstrategia);
-        EstrategiaAprendizaje estrategia = app.crearEstrategia(nombreEstrategia);
+        // Delegar toda la lógica al controlador (MVC)
+        app.asignarEstrategiaCursoActivo(nombreEstrategia);
 
         // Mostrar ventana de preparación
-        mostrarVentanaPreparacion(estrategia);
+        mostrarVentanaPreparacion(nombreEstrategia);
     }
-    
-    private void mostrarVentanaPreparacion(EstrategiaAprendizaje estrategia) {
+
+    private void mostrarVentanaPreparacion(String nombreEstrategia) {
         this.dispose();
-        
+
         JFrame ventanaPreparacion = new JFrame("Spkr - Preparado");
         ventanaPreparacion.setSize(400, 400);
         ventanaPreparacion.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         ventanaPreparacion.setLocationRelativeTo(null);
         ventanaPreparacion.setResizable(false);
         EstilosApp.aplicarEstiloVentana(ventanaPreparacion);
-        
+
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         panel.setBackground(EstilosApp.COLOR_FONDO);
         panel.setBorder(BorderFactory.createEmptyBorder(40, 40, 40, 40));
-        
+
         JLabel lblIcono = new JLabel();
         ImageIcon icono = EstilosApp.getIcono(60, 60);
         if (icono != null) {
@@ -265,21 +260,22 @@ public class VentanaSeleccionEstrategia extends JFrame {
         lblIcono.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(lblIcono);
         panel.add(Box.createRigidArea(new Dimension(0, 25)));
-        
-        JLabel lblTitulo = new JLabel(curso.getTitulo());
+
+        // Obtener título del controlador (MVC - no acceder al modelo)
+        JLabel lblTitulo = new JLabel(app.obtenerTituloCursoActivo());
         lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 20));
         lblTitulo.setForeground(EstilosApp.COLOR_TEXTO);
         lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(lblTitulo);
         panel.add(Box.createRigidArea(new Dimension(0, 10)));
-        
+
         JLabel lblEstrategia = new JLabel("Estrategia: " + estrategiaSeleccionada);
         lblEstrategia.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         lblEstrategia.setForeground(EstilosApp.COLOR_SECUNDARIO);
         lblEstrategia.setAlignmentX(Component.CENTER_ALIGNMENT);
         panel.add(lblEstrategia);
         panel.add(Box.createRigidArea(new Dimension(0, 35)));
-        
+
         JButton btnEmpezar = new JButton("Empezar");
         btnEmpezar.setFont(new Font("Segoe UI", Font.BOLD, 16));
         btnEmpezar.setBackground(EstilosApp.COLOR_PRIMARIO);
@@ -290,7 +286,7 @@ public class VentanaSeleccionEstrategia extends JFrame {
         btnEmpezar.setContentAreaFilled(false);
         btnEmpezar.setOpaque(true);
         btnEmpezar.setAlignmentX(Component.CENTER_ALIGNMENT);
-        
+
         btnEmpezar.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent e) {
                 btnEmpezar.setBackground(EstilosApp.COLOR_SECUNDARIO);
@@ -299,15 +295,17 @@ public class VentanaSeleccionEstrategia extends JFrame {
                 btnEmpezar.setBackground(EstilosApp.COLOR_PRIMARIO);
             }
         });
-        
+
         btnEmpezar.addActionListener(e -> {
             ventanaPreparacion.dispose();
-            VentanaEjercicio ventanaEjercicio = new VentanaEjercicio(app, curso, estrategia, ventanaPrincipal, progreso);
+            // Iniciar sesión de ejercicio a través del controlador (MVC)
+            app.iniciarSesionEjercicioCursoActivo(nombreEstrategia);
+            VentanaEjercicio ventanaEjercicio = new VentanaEjercicio(app);
             ventanaEjercicio.setVisible(true);
         });
-        
+
         panel.add(btnEmpezar);
-        
+
         ventanaPreparacion.add(panel);
         ventanaPreparacion.setVisible(true);
     }

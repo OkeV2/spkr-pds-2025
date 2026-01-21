@@ -39,6 +39,8 @@ public class SpkrApp {
     private Progreso progresoActual;
     private EstrategiaAprendizaje estrategiaActual;
     private int segundosSesion;
+    private Pregunta preguntaActualSesion; // Pregunta actual para encapsular acceso (MVC)
+    private TipoPregunta tipoPreguntaActualSesion; // Tipo de pregunta actual (MVC)
 
     // Estado de sesión de repaso
     private List<ErrorFrecuente> erroresRepasoSesion;
@@ -632,6 +634,7 @@ public class SpkrApp {
 
     /**
      * Obtiene la siguiente pregunta de la sesión actual.
+     * @deprecated Usar cargarSiguientePreguntaSesion() y los métodos de acceso encapsulados
      */
     public Pregunta obtenerSiguientePreguntaSesion() {
         if (estrategiaActual == null || preguntasSesion == null) {
@@ -641,7 +644,82 @@ public class SpkrApp {
     }
 
     /**
+     * Carga la siguiente pregunta de la sesión y la almacena internamente.
+     * Retorna true si hay una pregunta disponible, false si la sesión terminó.
+     * Las vistas deben usar este método y luego los métodos de acceso encapsulados.
+     */
+    public boolean cargarSiguientePreguntaSesion() {
+        if (estrategiaActual == null || preguntasSesion == null) {
+            preguntaActualSesion = null;
+            tipoPreguntaActualSesion = null;
+            return false;
+        }
+        preguntaActualSesion = estrategiaActual.siguientePregunta(preguntasSesion, indicePreguntaActual);
+        if (preguntaActualSesion != null) {
+            tipoPreguntaActualSesion = obtenerTipoPregunta(preguntaActualSesion);
+        } else {
+            tipoPreguntaActualSesion = null;
+        }
+        return preguntaActualSesion != null;
+    }
+
+    /**
+     * Obtiene el enunciado de la pregunta actual de la sesión.
+     * Encapsula el acceso al modelo para respetar MVC.
+     */
+    public String obtenerEnunciadoPreguntaSesionActual() {
+        return preguntaActualSesion != null ? preguntaActualSesion.getEnunciado() : "";
+    }
+
+    /**
+     * Obtiene el tipo de la pregunta actual de la sesión.
+     * Encapsula el acceso al modelo para respetar MVC.
+     */
+    public TipoPregunta obtenerTipoPreguntaSesionActual() {
+        return tipoPreguntaActualSesion;
+    }
+
+    /**
+     * Obtiene las opciones de test de la pregunta actual de la sesión.
+     * Encapsula el acceso al modelo para respetar MVC.
+     */
+    public List<String> obtenerOpcionesTestSesionActual() {
+        return obtenerOpcionesTest(preguntaActualSesion);
+    }
+
+    /**
+     * Obtiene la respuesta correcta de la pregunta actual de la sesión.
+     * Encapsula el acceso al modelo para respetar MVC.
+     */
+    public String obtenerRespuestaCorrectaSesionActual() {
+        return obtenerRespuestaCorrecta(preguntaActualSesion);
+    }
+
+    /**
+     * Procesa la respuesta del ejercicio actual usando la pregunta almacenada internamente.
+     * Encapsula el acceso al modelo para respetar MVC.
+     */
+    public ResultadoRespuesta procesarRespuestaSesionActual(String respuesta) {
+        if (preguntaActualSesion == null) {
+            return null;
+        }
+        ResultadoRespuesta resultado = procesarRespuestaEjercicio(
+                preguntaActualSesion, respuesta, progresoActual, estrategiaActual);
+
+        if (!resultado.isYaContada()) {
+            if (resultado.isCorrecta()) {
+                aciertosSesion = resultado.getAciertosActuales();
+            } else {
+                erroresSesion = resultado.getErroresActuales();
+            }
+        }
+
+        return resultado;
+    }
+
+    /**
      * Procesa la respuesta del ejercicio actual y avanza el estado de la sesión.
+     * @deprecated Usar procesarRespuestaSesionActual(String respuesta) para mejor encapsulación
      */
     public ResultadoRespuesta procesarRespuestaSesion(Pregunta pregunta, String respuesta) {
         ResultadoRespuesta resultado = procesarRespuestaEjercicio(
@@ -855,5 +933,302 @@ public class SpkrApp {
             return String.format("%d:%02d:%02d", horas, minutos, segundos);
         }
         return String.format("%02d:%02d", minutos, segundos);
+    }
+
+    // =====================================================
+    // MÉTODOS ENCAPSULADOS PARA ESTADÍSTICAS (MVC)
+    // Las vistas no deben acceder directamente al modelo Estadisticas
+    // =====================================================
+
+    /**
+     * Obtiene el tiempo total de uso en minutos.
+     */
+    public int obtenerTiempoTotalUso() {
+        if (usuarioActual == null || usuarioActual.getEstadisticas() == null) {
+            return 0;
+        }
+        return usuarioActual.getEstadisticas().getTiempoTotalUso();
+    }
+
+    /**
+     * Obtiene la racha actual en días.
+     */
+    public int obtenerRachaActual() {
+        if (usuarioActual == null || usuarioActual.getEstadisticas() == null) {
+            return 0;
+        }
+        return usuarioActual.getEstadisticas().getRachaActual();
+    }
+
+    /**
+     * Obtiene la mejor racha en días.
+     */
+    public int obtenerMejorRacha() {
+        if (usuarioActual == null || usuarioActual.getEstadisticas() == null) {
+            return 0;
+        }
+        return usuarioActual.getEstadisticas().getMejorRacha();
+    }
+
+    /**
+     * Obtiene el número de ejercicios completados.
+     */
+    public int obtenerEjerciciosCompletadosTotal() {
+        if (usuarioActual == null || usuarioActual.getEstadisticas() == null) {
+            return 0;
+        }
+        return usuarioActual.getEstadisticas().getEjerciciosCompletados();
+    }
+
+    // =====================================================
+    // MÉTODOS ENCAPSULADOS PARA CURSOS (MVC)
+    // Las vistas no deben acceder directamente al modelo Curso
+    // =====================================================
+
+    /**
+     * Obtiene el título de un curso por su índice en la biblioteca.
+     */
+    public String obtenerTituloCurso(int index) {
+        Curso curso = getCursoBiblioteca(index);
+        return curso != null ? curso.getTitulo() : "";
+    }
+
+    /**
+     * Obtiene el idioma de un curso por su índice en la biblioteca.
+     */
+    public String obtenerIdiomaCurso(int index) {
+        Curso curso = getCursoBiblioteca(index);
+        return curso != null ? curso.getIdioma() : "";
+    }
+
+    /**
+     * Obtiene el título de un curso dado.
+     */
+    public String obtenerTituloCurso(Curso curso) {
+        return curso != null ? curso.getTitulo() : "";
+    }
+
+    /**
+     * Obtiene el idioma de un curso dado.
+     */
+    public String obtenerIdiomaCurso(Curso curso) {
+        return curso != null ? curso.getIdioma() : "";
+    }
+
+    // =====================================================
+    // GESTIÓN DE CURSO ACTIVO PARA EJERCICIOS (MVC)
+    // Las vistas no deben pasar objetos del modelo entre ellas
+    // =====================================================
+
+    private Curso cursoActivo;
+    private int indiceCursoActivo = -1;
+
+    /**
+     * Establece el curso activo por su índice en la biblioteca.
+     * Esto permite que las vistas trabajen con índices en lugar de objetos del modelo.
+     */
+    public void establecerCursoActivo(int index) {
+        this.indiceCursoActivo = index;
+        this.cursoActivo = getCursoBiblioteca(index);
+    }
+
+    /**
+     * Obtiene el curso activo actual.
+     */
+    public Curso getCursoActivo() {
+        return cursoActivo;
+    }
+
+    /**
+     * Obtiene el título del curso activo.
+     */
+    public String obtenerTituloCursoActivo() {
+        return cursoActivo != null ? cursoActivo.getTitulo() : "";
+    }
+
+    /**
+     * Obtiene el idioma del curso activo.
+     */
+    public String obtenerIdiomaCursoActivo() {
+        return cursoActivo != null ? cursoActivo.getIdioma() : "";
+    }
+
+    /**
+     * Obtiene el número de lecciones del curso activo.
+     */
+    public int obtenerNumeroLeccionesCursoActivo() {
+        return obtenerNumeroLecciones(cursoActivo);
+    }
+
+    /**
+     * Obtiene el total de preguntas del curso activo.
+     */
+    public int obtenerTotalPreguntasCursoActivo() {
+        return calcularTotalPreguntas(cursoActivo);
+    }
+
+    /**
+     * Determina la acción a tomar al iniciar el curso activo.
+     */
+    public AccionIniciarCurso determinarAccionIniciarCursoActivo() {
+        return determinarAccionIniciarCurso(cursoActivo);
+    }
+
+    /**
+     * Prepara el progreso para el curso activo.
+     */
+    public void prepararProgresoParaCursoActivo() {
+        if (cursoActivo != null) {
+            Progreso progreso = buscarProgresoCurso(cursoActivo);
+            if (progreso == null) {
+                progreso = crearNuevoProgreso(cursoActivo);
+            }
+            this.progresoActual = progreso;
+        }
+    }
+
+    /**
+     * Reinicia el progreso del curso activo.
+     */
+    public void reiniciarProgresoCursoActivo() {
+        if (cursoActivo != null) {
+            Progreso progreso = buscarProgresoCurso(cursoActivo);
+            if (progreso != null) {
+                reiniciarProgreso(progreso);
+                this.progresoActual = progreso;
+            }
+        }
+    }
+
+    /**
+     * Obtiene información del progreso del curso activo.
+     */
+    public String obtenerInfoProgresoCursoActivo() {
+        return obtenerInfoProgreso(cursoActivo);
+    }
+
+    /**
+     * Obtiene la estrategia guardada del progreso del curso activo.
+     */
+    public String obtenerEstrategiaProgresoCursoActivo() {
+        return obtenerEstrategiaProgresoCurso(cursoActivo);
+    }
+
+    /**
+     * Verifica si el curso activo tiene progreso iniciado.
+     */
+    public boolean cursoActivoTieneProgresoIniciado() {
+        return tieneProgresoIniciado(cursoActivo);
+    }
+
+    /**
+     * Obtiene el porcentaje de progreso del curso activo.
+     */
+    public int obtenerPorcentajeProgresoCursoActivo() {
+        return obtenerPorcentajeProgresoCurso(cursoActivo);
+    }
+
+    /**
+     * Asigna una estrategia al progreso del curso activo.
+     */
+    public void asignarEstrategiaCursoActivo(String nombreEstrategia) {
+        if (progresoActual != null) {
+            asignarEstrategiaProgreso(progresoActual, nombreEstrategia);
+        }
+    }
+
+    /**
+     * Inicia la sesión de ejercicio con el curso activo y una estrategia dada.
+     */
+    public void iniciarSesionEjercicioCursoActivo(String nombreEstrategia) {
+        if (cursoActivo != null && progresoActual != null) {
+            EstrategiaAprendizaje estrategia = crearEstrategia(nombreEstrategia);
+            iniciarSesionEjercicio(cursoActivo, progresoActual, estrategia);
+        }
+    }
+
+    /**
+     * Continúa la sesión de ejercicio con el curso activo usando la estrategia guardada.
+     */
+    public void continuarSesionEjercicioCursoActivo() {
+        if (cursoActivo != null) {
+            Progreso progreso = buscarProgresoCurso(cursoActivo);
+            if (progreso != null) {
+                this.progresoActual = progreso;
+                String nombreEstrategia = progreso.getEstrategia();
+                EstrategiaAprendizaje estrategia = crearEstrategia(nombreEstrategia);
+                iniciarSesionEjercicio(cursoActivo, progreso, estrategia);
+            }
+        }
+    }
+
+    // =====================================================
+    // MÉTODOS ENCAPSULADOS PARA PREGUNTAS (MVC)
+    // Las vistas no deben acceder directamente al modelo Pregunta
+    // =====================================================
+
+    /**
+     * Obtiene el enunciado de la pregunta actual de la sesión.
+     */
+    public String obtenerEnunciadoPreguntaActual() {
+        Pregunta pregunta = obtenerSiguientePreguntaSesion();
+        return pregunta != null ? pregunta.getEnunciado() : "";
+    }
+
+    /**
+     * Obtiene el enunciado del error actual en la sesión de repaso.
+     */
+    public String obtenerEnunciadoErrorActualRepaso() {
+        ErrorFrecuente error = obtenerErrorActualRepaso();
+        if (error != null && error.getPregunta() != null) {
+            return error.getPregunta().getEnunciado();
+        }
+        return "";
+    }
+
+    /**
+     * Obtiene el tipo de pregunta del error actual en la sesión de repaso.
+     */
+    public TipoPregunta obtenerTipoPreguntaErrorActualRepaso() {
+        ErrorFrecuente error = obtenerErrorActualRepaso();
+        if (error != null && error.getPregunta() != null) {
+            return obtenerTipoPregunta(error.getPregunta());
+        }
+        return null;
+    }
+
+    /**
+     * Obtiene las opciones de test del error actual en la sesión de repaso.
+     */
+    public List<String> obtenerOpcionesTestErrorActualRepaso() {
+        ErrorFrecuente error = obtenerErrorActualRepaso();
+        if (error != null && error.getPregunta() != null) {
+            return obtenerOpcionesTest(error.getPregunta());
+        }
+        return List.of();
+    }
+
+    // =====================================================
+    // CALLBACK PARA NAVEGACIÓN (MVC)
+    // Evita referencias circulares entre vistas
+    // =====================================================
+
+    private Runnable callbackActualizarVentanaPrincipal;
+
+    /**
+     * Registra un callback para actualizar la ventana principal.
+     * Esto evita que las vistas se referencien directamente entre sí.
+     */
+    public void setCallbackActualizarVentanaPrincipal(Runnable callback) {
+        this.callbackActualizarVentanaPrincipal = callback;
+    }
+
+    /**
+     * Ejecuta el callback para actualizar la ventana principal.
+     */
+    public void notificarActualizacionVentanaPrincipal() {
+        if (callbackActualizarVentanaPrincipal != null) {
+            callbackActualizarVentanaPrincipal.run();
+        }
     }
 }

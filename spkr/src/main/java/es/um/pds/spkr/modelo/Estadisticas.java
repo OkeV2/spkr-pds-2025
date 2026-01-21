@@ -82,39 +82,19 @@ public class Estadisticas {
         return tiempoTotalUso;
     }
     
-    public void setTiempoTotalUso(int tiempoTotalUso) {
-        this.tiempoTotalUso = tiempoTotalUso;
-    }
-    
     public int getRachaActual() {
         return rachaActual;
     }
-    
-    public void setRachaActual(int rachaActual) {
-        this.rachaActual = rachaActual;
-    }
-    
+
     public int getMejorRacha() {
         return mejorRacha;
     }
-    
-    public void setMejorRacha(int mejorRacha) {
-        this.mejorRacha = mejorRacha;
-    }
-    
+
     public int getEjerciciosCompletados() {
         return ejerciciosCompletados;
     }
-    
-    public void setEjerciciosCompletados(int ejerciciosCompletados) {
-        this.ejerciciosCompletados = ejerciciosCompletados;
-    }
-    
+
     public Date getUltimoAcceso() {
         return ultimoAcceso != null ? new Date(ultimoAcceso.getTime()) : null;
-    }
-
-    public void setUltimoAcceso(Date ultimoAcceso) {
-        this.ultimoAcceso = ultimoAcceso;
     }
 }
