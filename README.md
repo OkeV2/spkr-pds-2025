@@ -31,6 +31,28 @@
 - **Repaso de errores frecuentes:** Sistema inteligente que registra automáticamente todas las preguntas falladas durante la realización de cualquier curso. Los errores se acumulan en una lista global que recopila fallos de todos los cursos del usuario. Al acceder a la función "Repasar Errores", el usuario puede practicar específicamente aquellas preguntas que más le cuestan. Cada vez que se acierta una pregunta durante el repaso, su contador de errores se reduce. Cuando el usuario demuestra dominio de una pregunta (contador llega a cero), esta se elimina automáticamente de la lista de errores frecuentes. Este sistema permite un aprendizaje más eficiente al focalizar el estudio en las áreas de mayor dificultad.
 ---
 
+ ## Arquitectura
+
+  El proyecto implementa el patrón arquitectónico **MVC (Modelo-Vista-Controlador)** con estricta separación de
+  responsabilidades:
+
+  | Capa | Descripción |
+  |------|-------------|
+  | **Modelo** | Entidades de dominio persistidas con JPA (Usuario, Curso, Lección, Pregunta, Progreso, Estadísticas) |
+  | **Vista** | Interfaces gráficas Swing que delegan toda la lógica al controlador |
+  | **Controlador** | Clase centralizada `SpkrApp` que encapsula el acceso al modelo y gestiona la lógica de negocio |
+
+  ### Patrones de Diseño Aplicados
+
+  | Patrón | Aplicación |
+  |--------|------------|
+  | **MVC** | Arquitectura general de la aplicación |
+  | **Strategy** | Estrategias de aprendizaje intercambiables (Secuencial, Aleatoria, Repetición Espaciada) |
+  | **Singleton** | Gestor de persistencia (`GestorPersistencia`) |
+  | **DTO** | Comunicación de resultados entre capas (`ResultadoRespuesta`) |
+  | **Repository** | Catálogos para acceso a datos (`CatalogoUsuarios`, `CatalogoCursos`) |
+
+
 ## Equipo de Desarrollo
 
 <table>
@@ -106,29 +128,36 @@ La base de datos viene inicializada con un usuario de prueba:
 
 | Campo | Valor |
 |-------|-------|
-| Usuario | admin |
-| Email | admin@spkr.com |
-| Contraseña | 123 |
+| Usuario | demo |
+| Email | demo@spkr.com |
+| Contraseña | demo123 |
 
 ---
 
 ## Estructura del Proyecto
 ```
-spkr/
-├── diseño/
-│   └── modelo/              # Diagramas UML y modelo de dominio
-├── documentacion/
-│   ├── imagenes/            # Capturas de pantalla
-│   └── manual/              # Manual de usuario
-│   
-├── spkr/                    # Proyecto Maven
-│   ├── src/
-│   │   ├── main/
-│   │   │   ├── java/        # Código fuente
-│   │   │   └── resources/   # Recursos (imágenes, cursos de ejemplo)
-│   │   └── test/            # Tests unitarios
-│   └── pom.xml
-└── README.md
+  spkr-pds-2025/
+  ├── diseño/
+  │   └── modelo/                 # Diagramas UML y modelo de dominio
+  ├── documentacion/
+  │   ├── imagenes/               # Capturas de pantalla
+  │   └── manual/                 # Manual de usuario
+  ├── spkr/                       # Proyecto Maven
+  │   ├── src/
+  │   │   ├── main/java/es/um/pds/spkr/
+  │   │   │   ├── catalogo/       # Repositorios de datos
+  │   │   │   ├── cargador/       # Importación/Exportación de cursos
+  │   │   │   ├── estrategia/     # Estrategias de aprendizaje
+  │   │   │   ├── gui/            # Vistas (interfaces gráficas)
+  │   │   │   ├── modelo/         # Entidades del dominio
+  │   │   │   ├── persistencia/   # Gestión de base de datos
+  │   │   │   ├── util/           # Utilidades y estilos
+  │   │   │   ├── Main.java       # Punto de entrada
+  │   │   │   └── SpkrApp.java    # Controlador principal
+  │   │   └── test/               # Tests unitarios
+  │   └── pom.xml
+  └── README.md
+
 ```
 
 ---
@@ -158,7 +187,8 @@ mvn test
 
 ## Asignatura
 
-Proceso de Desarrollo de Software 2024/25  
+Proceso de Desarrollo de Software - Curso 2024/25  
+Grado en Ingeniería Informática
 Universidad de Murcia
 
 ---
