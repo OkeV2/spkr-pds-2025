@@ -14,7 +14,9 @@
 
 ## Acerca del Proyecto
 
-**Spkr** es una aplicación de escritorio desarrollada en Java para el aprendizaje de idiomas. Inspirada en aplicaciones como Duolingo, permite a los usuarios practicar vocabulario y gramática mediante diferentes tipos de ejercicios interactivos.
+**Spkr** es una aplicación de escritorio para el aprendizaje de idiomas desarrollada en Java como proyecto de la
+  asignatura Procesos de Desarrollo del Software. La aplicación permite practicar vocabulario y gramática mediante
+  ejercicios interactivos, inspirándose en plataformas como Duolingo.
 
 ### Características Principales
 
